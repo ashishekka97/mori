@@ -1,0 +1,29 @@
+# Architecture & Data Flow
+
+This project relies on a strict unidirectional data flow to protect the rendering thread from Android framework overhead.
+
+## The 4 Layers
+
+1. **UI Layer (`me.ashishekka.mori.ui`)**
+   - Pure Jetpack Compose.
+   - Handles progressive disclosure of permissions.
+   - Communicates with ViewModels via Jetpack Compose state.
+
+2. **Persona Layer (`me.ashishekka.mori.persona`)**
+   - The "Brain" of the app.
+   - Uses `BroadcastReceivers` for real-time data.
+   - Uses `WorkManager` for periodic data.
+   - Flattens all data into a single `StateFlow<WorldState>`.
+
+3. **Biome Layer (`me.ashishekka.mori.biome`)**
+   - Reads `config.json` files that define how the environment reacts to the `WorldState`.
+   - Pre-decodes all `Bitmaps` into memory during initialization.
+   - Maps JSON string triggers to specific `EffectRenderer` classes.
+
+4. **Engine Layer (`me.ashishekka.mori.engine`)**
+   - The "Muscle".
+   - Collects the `StateFlow<WorldState>` directly (No ViewModels).
+   - Iterates through the active `EffectRenderer` list and calls `.updateAndDraw(canvas)` 30 times a second.
+
+## The Handshake (Example Flow)
+`BatteryReceiver` triggers -> Updates `WorldStateManager` -> Emits new `WorldState(isCharging = true)` -> `MoriWallpaperService` receives state -> Checks current `BiomeConfig` -> Sees "charging" triggers `ProceduralAurora` -> Engine calls `aurora.updateAndDraw()` on the next frame.
