@@ -1,33 +1,49 @@
-# Mori
+# Mori (森)
+
 [![Android CI](https://github.com/ashishekka/mori/actions/workflows/android.yml/badge.svg)](https://github.com/ashishekka/mori/actions)
 
-A zero-allocation, privacy-first Live Wallpaper engine for Android.
-
-Mori turns the device's home screen into a "living dashboard." Instead of static images or generic loops, it uses passive OS-level data (time, battery, health metrics) to dynamically render a time-shifting, handcrafted biome.
+Mori turns the device's home screen into a "living dashboard." Instead of static images or generic loops, it uses passive OS-level data (time, battery, health metrics) to dynamically render a time-shifting, handcrafted biome via a **declarative DSL**.
 
 ## Core Philosophy
-1. **Zero Battery Drain:** The rendering engine (`WallpaperService`) strictly adheres to zero-allocation principles. No objects are instantiated inside the `drawFrame` loop. The thread kills itself immediately when the screen is locked or an app is opened.
-2. **Absolute Privacy:** All "Persona" data (steps, screen time, battery) is processed entirely on-device. There are no backend tracking servers.
-3. **Data as Art:** Raw metrics are obfuscated into atmospheric visual cues (e.g., a murky lake for high screen time, fireflies for low notifications).
+1. **Zero-Allocation Core:** The rendering loop (`:engine`) is built on zero-allocation principles to ensure 60FPS without GC jank.
+2. **Absolute Privacy:** All data (steps, usage, health) is gathered and processed 100% on-device. No telemetry.
+3. **Data as Art:** We map digital noise to atmospheric visual cues (e.g., murky water for high screen time).
+4. **Pulse Design System:** An atmospheric, context-aware UI system that bridges the gap between the wallpaper and the app.
+
+---
 
 ## Tech Stack
 * **Language:** Kotlin
-* **Rendering:** Native Android `Canvas` API
+* **Rendering:** Native Android `Canvas` (Hardware Accelerated)
 * **Concurrency:** Kotlin Coroutines & `StateFlow`
 * **Dependency Injection:** Koin
 * **Background Sync:** Jetpack WorkManager
 * **Local Caching:** Room Database
-* **UI:** Jetpack Compose (for Settings/Onboarding)
+* **UI:** Jetpack Compose (The Pulse Design System)
 
-## Project Structure
-The project uses a strict multi-module architecture to enforce separation of concerns and optimize build speeds:
-* `:app` - The entry point. Glues the dependency graph together via Koin.
-* `:ui` - Standard Android screens (Settings, Onboarding). The *only* module with Jetpack Compose enabled.
-* `:persona` - Data aggregation (BroadcastReceivers, WorkManager, Room).
-* `:biome` - Asset parsing (Decoding JSON configs and Bitmaps).
-* `:engine` - The zero-allocation Canvas rendering loop. Strictly isolated from all UI components.
+---
 
-## Development & CI/CD
-* **Formatting:** Ktlint is strictly enforced. The styling rules are defined in the root `.editorconfig` file. Run `./gradlew ktlintFormat` before pushing.
-* **CI Pipeline:** GitHub Actions automatically verifies the Koin dependency graph, runs tests, and builds the Debug APK on every push to `main`.
-* **Testing:** We prioritize local JVM tests for business logic (`:persona`, `:biome`) using `app.cash.turbine`, `MockK`, and `koin-test`. We do not write automated UI tests for the Canvas rendering loop.
+## The "Smart Handover" Architecture
+Mori uses a strict multi-module architecture to enforce separation of concerns and optimize build speeds:
+
+*   **`:app`** - **The Orchestrator.** Manages the `WallpaperService` and `Koin` graph.
+*   **`:ui`** - **The Face.** Built with the **Pulse Design System**. Handles onboarding and the dashboard.
+*   **`:persona`** - **The Brain.** Normalizes raw OS data into a flat, primitive `WorldState`.
+*   **`:biome`** - **The Assets.** Interprets declarative JSON configurations (The Rule Engine).
+*   **`:engine`** - **The Muscle.** A "dumb" rendering VM. Zero-allocation Canvas rendering loop.
+
+For a deeper dive, see the **[Architecture Guide](ARCHITECTURE.md)**.
+
+---
+
+## Development & Roadmap
+To maintain "Internal Excellence," this project follows a strict branching and commit strategy. 
+
+*   **[Engineering Roadmap](ROADMAP.md):** The high-resolution plan for all tasks.
+*   **[Contribution & Workflow](CONTRIBUTING.md):** The "Pair Programming" loop and Git strategy.
+*   **[AI Agent Directives](AGENT.md):** The architectural boundaries for the AI pair-programmer.
+
+---
+
+## License
+Copyright © 2026 Ashish Ekka. All rights reserved.
