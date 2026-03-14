@@ -7,6 +7,7 @@ plugins {
 
 android {
     namespace = "me.ashishekka.mori"
+
     compileSdk {
         version =
             release(36) {
@@ -17,7 +18,7 @@ android {
     defaultConfig {
         applicationId = "me.ashishekka.mori"
         minSdk = 28
-        targetSdk = 36
+        targetSdk = 35 // SDK 36 is still in preview; 35 is stable for targeting
         versionCode = 1
         versionName = "1.0"
 
@@ -33,18 +34,23 @@ android {
             )
         }
     }
+
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
+
     buildFeatures {
         compose = true
     }
 }
 
 dependencies {
+    // Android Core & Lifecycle
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+
+    // Jetpack Compose
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
@@ -52,12 +58,22 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
 
-    // Mori Modules
+    // Dependency Injection (Koin)
+    implementation(libs.koin.android)
+    implementation(libs.koin.androidx.compose)
+
+    // Database (Room Runtime for final assembly)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
+
+    // Mori Library Modules
     implementation(project(":engine"))
     implementation(project(":ui"))
     implementation(project(":persona"))
     implementation(project(":biome"))
 
+    // Testing & Debug
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

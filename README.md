@@ -20,11 +20,12 @@ Mori turns the device's home screen into a "living dashboard." Instead of static
 * **UI:** Jetpack Compose (for Settings/Onboarding)
 
 ## Project Structure
-The app is packaged by feature into four distinct domains:
-* `:ui` - Standard Android screens (Settings, Onboarding).
+The project uses a strict multi-module architecture to enforce separation of concerns and optimize build speeds:
+* `:app` - The entry point. Glues the dependency graph together via Koin.
+* `:ui` - Standard Android screens (Settings, Onboarding). The *only* module with Jetpack Compose enabled.
 * `:persona` - Data aggregation (BroadcastReceivers, WorkManager, Room).
 * `:biome` - Asset parsing (Decoding JSON configs and Bitmaps).
-* `:engine` - The zero-allocation Canvas rendering loop.
+* `:engine` - The zero-allocation Canvas rendering loop. Strictly isolated from all UI components.
 
 ## Development & CI/CD
 * **Formatting:** Ktlint is strictly enforced. The styling rules are defined in the root `.editorconfig` file. Run `./gradlew ktlintFormat` before pushing.
