@@ -24,4 +24,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "Mori"
 include(":app")
- 
+include(":engine")
+include(":biome")
+include(":ui")
+include(":persona")

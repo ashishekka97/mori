@@ -51,6 +51,13 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+
+    // Mori Modules
+    implementation(project(":engine"))
+    implementation(project(":ui"))
+    implementation(project(":persona"))
+    implementation(project(":biome"))
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
