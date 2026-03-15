@@ -36,4 +36,5 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.koin.test)
     testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
 }
