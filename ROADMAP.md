@@ -22,6 +22,9 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 - [ ] **1.3.2 Persona DI:** Setup the Koin module for Phase 1 components.
 - [ ] **1.3.3 Module Validation:** Add a `KoinTest` to ensure the Phase 1 graph is sound.
 
+### 1.4 Phase 1 Finalization
+- [ ] **1.4.1 Phase 1 Finalization:** Documentation, Retrospective, and Tagging.
+
 ---
 
 ## Phase 2: The Pulse Engine (The Heart)
@@ -37,6 +40,9 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 - [ ] **2.2.2 Layer Manager:** Implement the Z-Order system for rendering layers.
 - [ ] **2.2.3 Engine DI:** Setup the Koin module for the rendering core.
 
+### 2.3 Phase 2 Finalization
+- [ ] **2.3.1 Phase 2 Finalization:** Documentation, Retrospective, and Tagging.
+
 ---
 
 ## Phase 3: The Engine Bridge (The Handover)
@@ -49,6 +55,9 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 ### 3.2 Geometry & Scaling (Smart Bridge)
 - [ ] **3.2.1 Surface Metrics:** Track width/height and pre-calculate DP-to-Pixel offsets.
 - [ ] **3.2.2 Handover Logic:** Ensure the Engine only receives raw Pixel coordinates, keeping it "dumb" and fast.
+
+### 3.3 Phase 3 Finalization
+- [ ] **3.3.1 Phase 3 Finalization:** Documentation, Retrospective, and Tagging.
 
 ---
 
@@ -71,6 +80,9 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 - [ ] **4.3.2 Usage Provider (Optional):** Implement `UsageStatsManager` with graceful fallback if permission is missing.
 - [ ] **4.3.3 Health Skeleton:** Create the `HealthConnect` bridge.
 
+### 4.4 Phase 4 Finalization
+- [ ] **4.4.1 Phase 4 Finalization:** Documentation, Retrospective, and Tagging.
+
 ---
 
 ## Phase 5: Pulse Design System (UI Foundations)
@@ -86,6 +98,9 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 - [ ] **5.2.2 Pulse Controls:** Build atmospheric switches, sliders, and buttons.
 - [ ] **5.2.3 Metric Visualizer:** A Canvas-based graph component for the dashboard.
 
+### 5.3 Phase 5 Finalization
+- [ ] **5.3.1 Phase 5 Finalization:** Documentation, Retrospective, and Tagging.
+
 ---
 
 ## Phase 6: Biome DSL & Rule Engine (The Orchestrator)
@@ -100,6 +115,9 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 - [ ] **6.2.2 Rule Evaluator:** Build the logic engine that calculates per-frame effect properties.
 - [ ] **6.2.3 Parser:** Implement the JSON-to-Domain-Model deserializer.
 
+### 6.3 Phase 6 Finalization
+- [ ] **6.3.1 Phase 6 Finalization:** Documentation, Retrospective, and Tagging.
+
 ---
 
 ## Phase 7: The Island Biome (Art Implementation)
@@ -108,6 +126,7 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 - [ ] **7.1 Atmosphere:** Dynamic Skybox and Celestial layers.
 - [ ] **7.2 Landscape:** Procedural swaying grass and growth-aware trees.
 - [ ] **7.3 Details:** Water reflections and night-time fireflies.
+- [ ] **7.4 Phase 7 Finalization:** Documentation, Retrospective, and Tagging.
 
 ---
 
@@ -117,6 +136,7 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 - [ ] **8.1 Onboarding Flow:** Multi-step atmospheric intro and permission gateway.
 - [ ] **8.2 Status Dashboard:** The summary screen decoding visuals into data.
 - [ ] **8.3 Preview & Simulation:** Compose surface for Engine preview and state scrubbing.
+- [ ] **8.4 Phase 8 Finalization:** Documentation, Retrospective, and Tagging.
 
 ---
 
@@ -124,3 +144,4 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 - [ ] **9.1 Custom Linting:** Detekt rule for zero-allocation enforcement.
 - [ ] **9.2 Snapshot Testing:** Visual regression suite.
 - [ ] **9.3 Performance Audit:** Frame-time and battery profiling.
+- [ ] **9.4 Phase 9 Finalization:** Documentation, Retrospective, and Tagging.
