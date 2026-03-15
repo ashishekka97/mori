@@ -4,9 +4,10 @@ import kotlinx.coroutines.flow.StateFlow
 
 /**
  * The StateManager is the single source of truth for the Mori WorldState.
- * It provides a reactive, unidirectional flow of data to all consumers (UI, Engine Bridge).
+ * It provides a reactive, read-only stream of data to all consumers (UI, Engine Bridge).
  *
- * Implementations should ensure that state transitions are atomic and thread-safe.
+ * This interface follows the Unidirectional Data Flow (UDF) principle by only
+ * exposing the current state without allowing external mutations.
  */
 interface StateManager {
 
@@ -15,6 +16,14 @@ interface StateManager {
      * Observers should always receive the latest state upon collection.
      */
     val state: StateFlow<WorldState>
+}
+
+/**
+ * An extension of [StateManager] that allows for atomic state mutations.
+ * This interface should be used exclusively by StateProviders and Collectors
+ * within the Persona layer.
+ */
+interface MutableStateManager : StateManager {
 
     /**
      * Performs an atomic update to the current state.
