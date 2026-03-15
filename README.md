@@ -41,7 +41,7 @@ To maintain "Internal Excellence," this project follows a strict branching and c
 
 *   **[Engineering Roadmap](ROADMAP.md):** The high-resolution plan for all tasks.
 *   **[Contribution & Workflow](CONTRIBUTING.md):** The "Pair Programming" loop and Git strategy.
-*   **[AI Agent Directives](AGENT.md):** The architectural boundaries for the AI pair-programmer.
+*   **[AI Agent Directives](AGENTS.md):** The architectural boundaries for the AI pair-programmer.
 
 ---
 
