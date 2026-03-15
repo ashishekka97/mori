@@ -58,6 +58,7 @@ androidx-room-compiler = { group = "androidx.room", name = "room-compiler", vers
 
 # Concurrency
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
 
 # Mori Testing
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
