@@ -20,10 +20,12 @@ interface StateManager {
 
 /**
  * An extension of [StateManager] that allows for atomic state mutations.
- * This interface should be used exclusively by StateProviders and Collectors
- * within the Persona layer.
+ *
+ * Marked as [internal] to ensure that mutation capability is strictly
+ * encapsulated within the :persona module. No external module (UI, Engine)
+ * can trigger state updates.
  */
-interface MutableStateManager : StateManager {
+internal interface MutableStateManager : StateManager {
 
     /**
      * Performs an atomic update to the current state.
