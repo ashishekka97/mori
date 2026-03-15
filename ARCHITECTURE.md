@@ -60,7 +60,7 @@ graph TD
 
 ---
 
-### 3. The Smart Handover (Sync Strategy)
+## 3. The Smart Handover (Sync Strategy)
 
 To achieve **Zero-Allocation** in the rendering loop, we use a **Mirror Sync** protocol:
 
@@ -73,13 +73,7 @@ This ensures that the rendering thread never touches the Android Framework, neve
 
 ---
 
-## 4. Architectural Debt & Evolution (Phase 1 Status)
-
-> **Note (Phase 1):** Current Engine implementation (`MoriEngine`) has temporary direct dependencies on `android.view.SurfaceHolder` and `android.graphics.Canvas`. These will be decoupled in **Phase 3 (The Bridge)** to achieve pure rendering isolation and platform-agnostic logic.
-
----
-
-## 5. Phase 1 Retrospective: The Agnostic Platform
+## 4. Phase 1 Retrospective: The Agnostic Platform
 
 **Status:** Completed (March 2026)
 
@@ -93,3 +87,5 @@ This ensures that the rendering thread never touches the Android Framework, neve
 *   **The Muscle (:engine):** Skeleton Ready. Extracted from the Android framework and capable of receiving lifecycle signals.
 *   **The Orchestrator (:app):** Ready. Correctfully binds visibility events to sensor lifecycles and initializes the global DI graph.
 
+### Technical Debt (Phase 1)
+*   **Engine Coupling:** The `MoriEngine` implementation has temporary direct dependencies on `android.view.SurfaceHolder` and `android.graphics.Canvas`. These will be decoupled in **Phase 3 (The Bridge)** to achieve pure rendering isolation and platform-agnostic logic.
