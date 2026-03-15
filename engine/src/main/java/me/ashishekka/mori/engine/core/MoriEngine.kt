@@ -1,4 +1,4 @@
-package me.ashishekka.mori.engine
+package me.ashishekka.mori.engine.core
 
 import android.service.wallpaper.WallpaperService
 import android.view.SurfaceHolder

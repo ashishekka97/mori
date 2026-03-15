@@ -1,4 +1,4 @@
-package me.ashishekka.mori.persona
+package me.ashishekka.mori.persona.sensor
 
 /**
  * The StateProviderRegistry is a central hub that manages a collection of [StateProvider]s.

@@ -1,4 +1,4 @@
-package me.ashishekka.mori.persona
+package me.ashishekka.mori.persona.sensor
 
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue

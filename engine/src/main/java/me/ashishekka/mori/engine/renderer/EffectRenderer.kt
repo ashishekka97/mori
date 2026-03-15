@@ -1,4 +1,4 @@
-package me.ashishekka.mori.engine
+package me.ashishekka.mori.engine.renderer
 
 import android.graphics.Canvas
 

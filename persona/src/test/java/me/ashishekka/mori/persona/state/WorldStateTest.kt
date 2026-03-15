@@ -1,4 +1,6 @@
-package me.ashishekka.mori.persona
+package me.ashishekka.mori.persona.state
+
+import kotlin.reflect.full.memberProperties
 
 import org.junit.Assert.assertTrue
 import org.junit.Test

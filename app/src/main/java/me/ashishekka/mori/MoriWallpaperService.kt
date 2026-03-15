@@ -2,8 +2,8 @@ package me.ashishekka.mori
 
 import android.service.wallpaper.WallpaperService
 import android.view.SurfaceHolder
-import me.ashishekka.mori.engine.MoriEngine
-import me.ashishekka.mori.persona.MoriLifecycleManager
+import me.ashishekka.mori.engine.core.MoriEngine
+import me.ashishekka.mori.persona.lifecycle.MoriLifecycleManager
 
 /**
  * The system entry point for the Mori Live Wallpaper.
