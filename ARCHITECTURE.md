@@ -60,7 +60,7 @@ graph TD
 
 ---
 
-## 3. The Smart Handover (Sync Strategy)
+### 3. The Smart Handover (Sync Strategy)
 
 To achieve **Zero-Allocation** in the rendering loop, we use a **Mirror Sync** protocol:
 
@@ -70,3 +70,10 @@ To achieve **Zero-Allocation** in the rendering loop, we use a **Mirror Sync** p
 4.  **The Draw:** The **Engine** reads directly from the mirror's primitive fields during its 16ms draw window.
 
 This ensures that the rendering thread never touches the Android Framework, never allocates memory, and never encounters a `ConcurrentModificationException`.
+
+---
+
+## 4. Architectural Debt & Evolution (Phase 1 Status)
+
+> **Note (Phase 1):** Current Engine implementation (`MoriEngine`) has temporary direct dependencies on `android.view.SurfaceHolder` and `android.graphics.Canvas`. These will be decoupled in **Phase 3 (The Bridge)** to achieve pure rendering isolation and platform-agnostic logic.
+
