@@ -60,7 +60,7 @@ graph TD
 
 ---
 
-### 3. The Smart Handover (Sync Strategy)
+## 3. The Smart Handover (Sync Strategy)
 
 To achieve **Zero-Allocation** in the rendering loop, we use a **Mirror Sync** protocol:
 
@@ -73,7 +73,19 @@ This ensures that the rendering thread never touches the Android Framework, neve
 
 ---
 
-## 4. Architectural Debt & Evolution (Phase 1 Status)
+## 4. Phase 1 Retrospective: The Agnostic Platform
 
-> **Note (Phase 1):** Current Engine implementation (`MoriEngine`) has temporary direct dependencies on `android.view.SurfaceHolder` and `android.graphics.Canvas`. These will be decoupled in **Phase 3 (The Bridge)** to achieve pure rendering isolation and platform-agnostic logic.
+**Status:** Completed (March 2026)
 
+### Summary of Decisions
+1.  **Strict UDF (StateManager):** We split the state hub into read-only (`StateManager`) and internal-only (`MutableStateManager`) interfaces to physically prevent state mutation from outside the `:persona` module.
+2.  **Service-as-Orchestrator:** Moved `MoriWallpaperService` to the `:app` module. This ensures the `:engine` module remains a pure drawing library while `:app` manages the complex binding between the "Brain" (Persona) and the "Muscle" (Engine).
+3.  **Feature-Based Hierarchy:** Reorganized modules into `.state`, `.lifecycle`, `.sensor`, and `.core` packages to support long-term scalability and internal encapsulation.
+
+### State of the Machine
+*   **The Brain (:persona):** Ready. Can store, update (atomically), and emit the `WorldState`.
+*   **The Muscle (:engine):** Skeleton Ready. Extracted from the Android framework and capable of receiving lifecycle signals.
+*   **The Orchestrator (:app):** Ready. Correctfully binds visibility events to sensor lifecycles and initializes the global DI graph.
+
+### Technical Debt (Phase 1)
+*   **Engine Coupling:** The `MoriEngine` implementation has temporary direct dependencies on `android.view.SurfaceHolder` and `android.graphics.Canvas`. These will be decoupled in **Phase 3 (The Bridge)** to achieve pure rendering isolation and platform-agnostic logic.
