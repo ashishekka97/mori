@@ -9,7 +9,7 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 
 ### 1.1 WorldState & Hub
 - [x] **1.1.1 WorldState Schema:** Define the flat-categorized data class with primitive types.
-- [ ] **1.1.2 StateManager Interface:** Define the contract for the central state hub.
+- [x] **1.1.2 StateManager Interface:** Define the contract for the central state hub.
 - [ ] **1.1.3 StateManager Implementation:** Implement the `MutableStateFlow` logic and atomic update functions.
 
 ### 1.2 Lifecycle & Registry
