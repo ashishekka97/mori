@@ -1,4 +1,4 @@
-package me.ashishekka.mori.persona
+package me.ashishekka.mori.persona.sensor
 
 /**
  * An internal, immutable implementation of the [StateProviderRegistry].

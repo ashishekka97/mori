@@ -1,4 +1,4 @@
-package me.ashishekka.mori.persona
+package me.ashishekka.mori.persona.sensor
 
 /**
  * The StateProvider interface defines the lifecycle contract for all data collectors

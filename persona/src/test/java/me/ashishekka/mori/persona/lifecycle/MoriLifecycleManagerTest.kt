@@ -1,4 +1,7 @@
-package me.ashishekka.mori.persona
+package me.ashishekka.mori.persona.lifecycle
+
+import me.ashishekka.mori.persona.sensor.StateProviderRegistry
+import me.ashishekka.mori.persona.sensor.StateProvider
 
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest

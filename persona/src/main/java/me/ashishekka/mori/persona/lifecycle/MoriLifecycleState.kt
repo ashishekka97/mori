@@ -1,4 +1,4 @@
-package me.ashishekka.mori.persona
+package me.ashishekka.mori.persona.lifecycle
 
 /**
  * Represents the high-level lifecycle state of the Mori system.

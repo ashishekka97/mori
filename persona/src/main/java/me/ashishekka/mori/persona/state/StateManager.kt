@@ -1,4 +1,4 @@
-package me.ashishekka.mori.persona
+package me.ashishekka.mori.persona.state
 
 import kotlinx.coroutines.flow.StateFlow
 

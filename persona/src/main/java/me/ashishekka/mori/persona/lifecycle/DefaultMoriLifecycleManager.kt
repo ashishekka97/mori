@@ -1,5 +1,6 @@
-package me.ashishekka.mori.persona
+package me.ashishekka.mori.persona.lifecycle
 
+import me.ashishekka.mori.persona.sensor.StateProviderRegistry
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

@@ -1,4 +1,4 @@
-package me.ashishekka.mori.persona
+package me.ashishekka.mori.persona.state
 
 /**
  * A flattened, performance-optimized snapshot of the device's current state.

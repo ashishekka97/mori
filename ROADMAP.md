@@ -19,7 +19,7 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 
 ### 1.3 Service Binding & DI
 - [x] **1.3.1 Service Lifecycle:** Connect `WallpaperService` visibility to the `LifecycleManager`.
-- [ ] **1.3.2 Persona DI:** Setup the Koin module for Phase 1 components.
+- [x] **1.3.2 Persona DI:** Setup the Koin module for Phase 1 components.
 - [ ] **1.3.3 Module Validation:** Add a `KoinTest` to ensure the Phase 1 graph is sound.
 
 ### 1.4 Phase 1 Finalization
