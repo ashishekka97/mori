@@ -13,7 +13,7 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 - [x] **1.1.3 StateManager Implementation:** Implement the `MutableStateFlow` logic and atomic update functions.
 
 ### 1.2 Lifecycle & Registry
-- [ ] **1.2.1 StateProvider Contract:** Define the `StateProvider` interface (start/stop).
+- [x] **1.2.1 StateProvider Contract:** Define the `StateProvider` interface (start/stop).
 - [ ] **1.2.2 Provider Registry:** Implement `StateProviderRegistry` to aggregate multiple sensors.
 - [ ] **1.2.3 Lifecycle Manager:** Implement `MoriLifecycleManager` with "Loading/Ready" state support.
 
