@@ -12,7 +12,7 @@ import me.ashishekka.mori.persona.MoriLifecycleManager
  */
 class MoriWallpaperService : WallpaperService() {
 
-    // Initialized in onCreateEngine()
+    // Initialized in onCreateEngine(). Will be injected via Koin in Phase 1.3.2.
     private lateinit var lifecycleManager: MoriLifecycleManager
 
     override fun onCreateEngine(): Engine {
@@ -23,17 +23,25 @@ class MoriWallpaperService : WallpaperService() {
 
         private val moriEngine = MoriEngine(this)
 
-        override fun onCreate(surfaceHolder: SurfaceHolder) {
-            super.onCreate(surfaceHolder)
-            moriEngine.onCreate(surfaceHolder)
-        }
-
         override fun onVisibilityChanged(visible: Boolean) {
             super.onVisibilityChanged(visible)
-            // Lifecycle binding will be implemented in the next commit
+            
+            if (::lifecycleManager.isInitialized) {
+                if (visible) {
+                    lifecycleManager.onStart()
+                } else {
+                    lifecycleManager.onStop()
+                }
+            }
+            
             if (visible) {
                 moriEngine.onDrawFrame()
             }
+        }
+
+        override fun onCreate(surfaceHolder: SurfaceHolder) {
+            super.onCreate(surfaceHolder)
+            moriEngine.onCreate(surfaceHolder)
         }
 
         override fun onSurfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
@@ -43,6 +51,12 @@ class MoriWallpaperService : WallpaperService() {
 
         override fun onSurfaceDestroyed(holder: SurfaceHolder) {
             super.onSurfaceDestroyed(holder)
+            
+            // Ensure lifecycle is stopped when surface is destroyed
+            if (::lifecycleManager.isInitialized) {
+                lifecycleManager.onStop()
+            }
+            
             moriEngine.onDestroy()
         }
     }

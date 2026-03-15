@@ -2,7 +2,6 @@ package me.ashishekka.mori.engine
 
 import android.service.wallpaper.WallpaperService
 import android.view.SurfaceHolder
-import androidx.core.graphics.toColorInt
 
 /**
  * The core rendering engine for Mori.
@@ -12,6 +11,9 @@ import androidx.core.graphics.toColorInt
 class MoriEngine(
     private val serviceEngine: WallpaperService.Engine
 ) {
+
+    // Pre-allocated color constant (Mori Dark Grey)
+    private val defaultBackgroundColor: Int = 0xFF121212.toInt()
 
     /**
      * Called when the engine is first created.
@@ -34,7 +36,7 @@ class MoriEngine(
         }
 
         canvas?.let {
-            it.drawColor("#121212".toColorInt()) // Mori Dark Grey
+            it.drawColor(defaultBackgroundColor)
             holder.unlockCanvasAndPost(it)
         }
     }
