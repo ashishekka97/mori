@@ -126,5 +126,50 @@ class MoriEngineTest {
         verify(exactly = 1) { mockFallbackRenderer.updateAndDraw(mockCanvas) }
         verify { mockSurfaceHolder.unlockCanvasAndPost(mockCanvas) }
     }
+
+    @Test
+    fun `doFrame should not re-register callback if not continuous`() {
+        // Given
+        engine.start()
+        engine.setContinuousRendering(false)
+        every { mockSurfaceHolder.lockCanvas() } returns mockCanvas
+
+        // Clear interactions from start()
+        io.mockk.clearMocks(mockChoreographer, answers = false)
+
+        // When
+        engine.doFrame(1_000_000_000L)
+
+        // Then (Draw happens, but callback is NOT posted again)
+        verify(exactly = 1) { mockSurfaceHolder.lockCanvas() }
+        verify(exactly = 0) { mockChoreographer.postFrameCallback(engine) }
+    }
+
+    @Test
+    fun `requestFrame should unregister and post callback if running`() {
+        // Given
+        engine.start() // Sets running = true
+        io.mockk.clearMocks(mockChoreographer, answers = false)
+
+        // When
+        engine.requestFrame()
+
+        // Then
+        verify(exactly = 1) { mockChoreographer.removeFrameCallback(engine) }
+        verify(exactly = 1) { mockChoreographer.postFrameCallback(engine) }
+    }
+
+    @Test
+    fun `requestFrame should do nothing if not running`() {
+        // Given
+        engine.stop() // Sets running = false
+        io.mockk.clearMocks(mockChoreographer, answers = false)
+
+        // When
+        engine.requestFrame()
+
+        // Then
+        verify(exactly = 0) { mockChoreographer.postFrameCallback(engine) }
+    }
 }
 
