@@ -6,6 +6,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import me.ashishekka.mori.engine.ChoreographerTicker
+import me.ashishekka.mori.engine.SurfaceHolderRenderSurface
 import me.ashishekka.mori.engine.core.MoriEngine
 import me.ashishekka.mori.persona.lifecycle.MoriLifecycleManager
 import me.ashishekka.mori.persona.state.StateManager
@@ -27,7 +29,10 @@ class MoriWallpaperService : WallpaperService() {
 
     private inner class MoriEngineImpl : Engine() {
 
-        private val moriEngine = MoriEngine(this)
+        private val moriEngine = MoriEngine(
+            ticker = ChoreographerTicker(),
+            renderSurface = SurfaceHolderRenderSurface(this)
+        )
         private val engineScope = CoroutineScope(Dispatchers.Main + Job())
         private var stateCollectionJob: Job? = null
 
