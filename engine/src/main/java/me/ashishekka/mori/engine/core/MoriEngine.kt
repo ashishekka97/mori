@@ -3,6 +3,8 @@ package me.ashishekka.mori.engine.core
 import android.service.wallpaper.WallpaperService
 import android.view.Choreographer
 import android.view.SurfaceHolder
+import me.ashishekka.mori.engine.renderer.EffectRenderer
+import me.ashishekka.mori.engine.renderer.StaticFallbackRenderer
 
 /**
  * The core rendering engine for Mori.
@@ -13,7 +15,8 @@ import android.view.SurfaceHolder
  */
 class MoriEngine(
     private val serviceEngine: WallpaperService.Engine,
-    private val choreographer: Choreographer = Choreographer.getInstance()
+    private val choreographer: Choreographer = Choreographer.getInstance(),
+    private val fallbackRenderer: EffectRenderer = StaticFallbackRenderer(0xFF121212.toInt())
 ) : Choreographer.FrameCallback {
     private var isRunning = false
 
@@ -26,9 +29,6 @@ class MoriEngine(
 
     private var lastFrameTimeNanos: Long = 0L
     private var frameIntervalNanos: Long = 1_000_000_000L / targetFps
-
-    // Pre-allocated color constant (Mori Dark Grey)
-    private val defaultBackgroundColor: Int = 0xFF121212.toInt()
 
     /**
      * Called when the engine is first created.
@@ -85,8 +85,15 @@ class MoriEngine(
         }
 
         canvas?.let {
-            it.drawColor(defaultBackgroundColor)
-            holder.unlockCanvasAndPost(it)
+            try {
+                // In the future: layerManager.updateAndDraw(it)
+                it.drawColor(0xFF121212.toInt())
+            } catch (e: Throwable) {
+                // Failsafe: if the complex render loop fails, draw the fallback
+                fallbackRenderer.updateAndDraw(it)
+            } finally {
+                holder.unlockCanvasAndPost(it)
+            }
         }
     }
 

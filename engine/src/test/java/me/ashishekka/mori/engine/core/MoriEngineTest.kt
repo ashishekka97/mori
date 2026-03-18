@@ -7,6 +7,7 @@ import android.view.SurfaceHolder
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import me.ashishekka.mori.engine.renderer.EffectRenderer
 import org.junit.Before
 import org.junit.Test
 
@@ -16,18 +17,20 @@ class MoriEngineTest {
     private lateinit var mockSurfaceHolder: SurfaceHolder
     private lateinit var mockCanvas: Canvas
     private lateinit var mockChoreographer: Choreographer
+    private lateinit var mockFallbackRenderer: EffectRenderer
     private lateinit var engine: MoriEngine
 
     @Before
     fun setUp() {
         mockServiceEngine = mockk(relaxed = true)
         mockSurfaceHolder = mockk(relaxed = true)
-        mockCanvas = mockk(relaxed = true)
+        mockCanvas = mockk<Canvas>(relaxed = true)
         mockChoreographer = mockk<Choreographer>(relaxed = true)
+        mockFallbackRenderer = mockk<EffectRenderer>(relaxed = true)
 
         every { mockServiceEngine.surfaceHolder } returns mockSurfaceHolder
         
-        engine = MoriEngine(mockServiceEngine, mockChoreographer)
+        engine = MoriEngine(mockServiceEngine, mockChoreographer, mockFallbackRenderer)
     }
 
     @Test
@@ -101,10 +104,27 @@ class MoriEngineTest {
         engine.stop()
 
         // When
-        engine.doFrame(1000L)
+        engine.doFrame(1_000_000_000L)
 
         // Then
         verify(exactly = 0) { mockSurfaceHolder.lockCanvas() }
         verify(exactly = 0) { mockChoreographer.postFrameCallback(any()) }
     }
+
+    @Test
+    fun `onDrawFrame should use fallback when drawing fails`() {
+        // Given
+        every { mockSurfaceHolder.lockCanvas() } returns mockCanvas
+        // Force an exception during drawColor using answers to avoid immediate execution issues
+        every { mockCanvas.drawColor(any<Int>()) } answers { throw RuntimeException("Draw failure") }
+
+        // When
+        engine.onDrawFrame()
+
+        // Then
+        // Should trigger the fallback renderer
+        verify(exactly = 1) { mockFallbackRenderer.updateAndDraw(mockCanvas) }
+        verify { mockSurfaceHolder.unlockCanvasAndPost(mockCanvas) }
+    }
 }
+
