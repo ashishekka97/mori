@@ -3,6 +3,7 @@ package me.ashishekka.mori.engine.core
 import me.ashishekka.mori.engine.core.interfaces.EngineTicker
 import me.ashishekka.mori.engine.core.interfaces.RenderSurface
 import me.ashishekka.mori.engine.renderer.EffectRenderer
+import me.ashishekka.mori.engine.renderer.LayerManager
 import me.ashishekka.mori.engine.renderer.StaticFallbackRenderer
 
 /**
@@ -18,6 +19,7 @@ class MoriEngine(
 
     private var isRunning = false
     private val state = MoriEngineState()
+    private val layerManager = LayerManager()
 
     // FPS Control
     var targetFps: Int = 60
@@ -41,12 +43,20 @@ class MoriEngine(
     }
 
     /**
+     * Adds an effect to the rendering stack.
+     */
+    fun addEffect(effect: EffectRenderer): Boolean {
+        return layerManager.addEffect(effect)
+    }
+
+    /**
      * Updates the surface dimensions and density.
      */
     fun onSurfaceChanged(width: Int, height: Int, density: Float) {
         state.surfaceWidth = width
         state.surfaceHeight = height
         state.surfaceDensity = density
+        layerManager.onSurfaceChanged(width, height, density)
         fallbackRenderer.onSurfaceChanged(width, height, density)
     }
 
@@ -94,8 +104,7 @@ class MoriEngine(
 
         canvas?.let {
             try {
-                // In the future: layerManager.updateAndDraw(state, it)
-                it.drawColor(0xFF121212.toInt())
+                layerManager.updateAndDraw(state, it)
             } catch (e: Throwable) {
                 // Failsafe: if the complex render loop fails, draw the fallback
                 fallbackRenderer.updateAndDraw(state, it)

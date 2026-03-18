@@ -39,7 +39,7 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 - [x] **2.1.6 Pulse Orchestrator:** Implement "Continuous vs On-Demand" ticking logic for battery efficiency, driven by the `:app` orchestrator.
 
 ### 2.2 Rendering Architecture
-- [ ] **2.2.1 Effect Interface:** Define the `EffectRenderer` contract.
+- [x] **2.2.1 Effect Interface:** Define the `EffectRenderer` contract.
 - [ ] **2.2.2 Layer Manager:** Implement the Z-Order system for rendering layers.
 - [ ] **2.2.3 Engine DI:** Setup the Koin module for the rendering core.
 

@@ -11,6 +11,8 @@ class StaticFallbackRenderer(
     private val color: Int
 ) : EffectRenderer {
 
+    override val zOrder: Int = Int.MIN_VALUE
+
     override fun onSurfaceChanged(width: Int, height: Int, density: Float) {
         // No pre-calculation needed for solid color
     }
