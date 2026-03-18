@@ -8,6 +8,7 @@ import me.ashishekka.mori.engine.core.interfaces.EngineCanvas
 import me.ashishekka.mori.engine.core.interfaces.EngineTicker
 import me.ashishekka.mori.engine.core.interfaces.RenderSurface
 import me.ashishekka.mori.engine.renderer.EffectRenderer
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -125,8 +126,12 @@ class MoriEngineTest {
     fun `onDrawFrame should use fallback when drawing fails`() {
         // Given
         engine.start()
+        // Force an effect that fails to trigger fallback
+        val mockEffect = mockk<EffectRenderer>(relaxed = true)
+        every { mockEffect.updateAndDraw(any(), any()) } throws RuntimeException("Draw failure")
+        engine.addEffect(mockEffect)
+
         every { mockRenderSurface.lockCanvas() } returns mockCanvas
-        every { mockCanvas.drawColor(any<Int>()) } answers { throw RuntimeException("Draw failure") }
 
         // When
         engine.onDrawFrame()
@@ -137,7 +142,7 @@ class MoriEngineTest {
     }
 
     @Test
-    fun `onDrawFrame should draw color and post on success`() {
+    fun `onDrawFrame should post to surface on success`() {
         // Given
         engine.start()
         every { mockRenderSurface.lockCanvas() } returns mockCanvas
@@ -146,8 +151,50 @@ class MoriEngineTest {
         engine.onDrawFrame()
 
         // Then
-        verify(exactly = 1) { mockCanvas.drawColor(0xFF121212.toInt()) }
         verify(exactly = 1) { mockRenderSurface.unlockCanvasAndPost(mockCanvas) }
+    }
+
+    @Test
+    fun `addEffect should return true when added to layer manager`() {
+        // Given
+        val mockEffect = mockk<EffectRenderer>(relaxed = true)
+
+        // When
+        val result = engine.addEffect(mockEffect)
+
+        // Then
+        assertTrue(result)
+    }
+
+    @Test
+    fun `onDrawFrame should draw all layers`() {
+        // Given
+        engine.start()
+        val mockEffect = mockk<EffectRenderer>(relaxed = true)
+        engine.addEffect(mockEffect)
+        every { mockRenderSurface.lockCanvas() } returns mockCanvas
+
+        // When
+        engine.onDrawFrame()
+
+        // Then
+        verify(exactly = 1) { mockEffect.updateAndDraw(any(), mockCanvas) }
+    }
+
+    @Test
+    fun `onDrawFrame should use fallback when layer manager fails`() {
+        // Given
+        engine.start()
+        val mockEffect = mockk<EffectRenderer>(relaxed = true)
+        engine.addEffect(mockEffect)
+        every { mockEffect.updateAndDraw(any(), any()) } throws RuntimeException("Layer failure")
+        every { mockRenderSurface.lockCanvas() } returns mockCanvas
+
+        // When
+        engine.onDrawFrame()
+
+        // Then
+        verify(exactly = 1) { mockFallbackRenderer.updateAndDraw(any(), mockCanvas) }
     }
 
     @Test

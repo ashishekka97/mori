@@ -10,6 +10,11 @@ import me.ashishekka.mori.engine.core.interfaces.EngineCanvas
 interface EffectRenderer {
 
     /**
+     * Determines the drawing order. Lower values are drawn first (Background).
+     */
+    val zOrder: Int
+
+    /**
      * Called when the drawing surface size or density changes.
      * This is the place to pre-calculate geometry or coordinates
      * based on the surface dimensions.
