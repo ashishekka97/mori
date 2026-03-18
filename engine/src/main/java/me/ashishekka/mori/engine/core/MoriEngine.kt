@@ -16,6 +16,8 @@ class MoriEngine(
     private val fallbackRenderer: EffectRenderer = StaticFallbackRenderer(0xFF121212.toInt())
 ) {
 
+    private var isRunning = false
+
     // FPS Control
     var targetFps: Int = 60
         set(value) {
@@ -28,6 +30,7 @@ class MoriEngine(
 
     init {
         ticker.setOnTickCallback { frameTimeNanos ->
+            if (!isRunning) return@setOnTickCallback
             val delta = frameTimeNanos - lastFrameTimeNanos
             if (delta >= frameIntervalNanos) {
                 onDrawFrame()
@@ -40,15 +43,21 @@ class MoriEngine(
      * Starts the engine and begins rendering.
      */
     fun start() {
-        lastFrameTimeNanos = 0L // Reset to trigger immediate draw
-        ticker.start()
+        if (!isRunning) {
+            isRunning = true
+            lastFrameTimeNanos = 0L // Reset to trigger immediate draw
+            ticker.start()
+        }
     }
 
     /**
      * Stops the engine.
      */
     fun stop() {
-        ticker.stop()
+        if (isRunning) {
+            isRunning = false
+            ticker.stop()
+        }
     }
 
     /**

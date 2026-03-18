@@ -3,15 +3,16 @@ package me.ashishekka.mori
 import android.service.wallpaper.WallpaperService
 import android.view.SurfaceHolder
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import me.ashishekka.mori.engine.ChoreographerTicker
-import me.ashishekka.mori.engine.SurfaceHolderRenderSurface
 import me.ashishekka.mori.engine.core.MoriEngine
+import me.ashishekka.mori.engine.core.interfaces.EngineTicker
+import me.ashishekka.mori.engine.core.interfaces.RenderSurface
 import me.ashishekka.mori.persona.lifecycle.MoriLifecycleManager
 import me.ashishekka.mori.persona.state.StateManager
 import org.koin.android.ext.android.inject
+import org.koin.core.parameter.parametersOf
+import org.koin.core.qualifier.named
 
 /**
  * The system entry point for the Mori Live Wallpaper.
@@ -22,6 +23,7 @@ class MoriWallpaperService : WallpaperService() {
 
     private val lifecycleManager: MoriLifecycleManager by inject()
     private val stateManager: StateManager by inject()
+    private val engineScope: CoroutineScope by inject(named("EngineScope"))
 
     override fun onCreateEngine(): Engine {
         return MoriEngineImpl()
@@ -29,11 +31,10 @@ class MoriWallpaperService : WallpaperService() {
 
     private inner class MoriEngineImpl : Engine() {
 
-        private val moriEngine = MoriEngine(
-            ticker = ChoreographerTicker(),
-            renderSurface = SurfaceHolderRenderSurface(this)
-        )
-        private val engineScope = CoroutineScope(Dispatchers.Main + Job())
+        private val ticker: EngineTicker by inject()
+        private val renderSurface: RenderSurface by inject { parametersOf(this) }
+        private val moriEngine: MoriEngine by inject { parametersOf(ticker, renderSurface) }
+        
         private var stateCollectionJob: Job? = null
 
         override fun onVisibilityChanged(visible: Boolean) {

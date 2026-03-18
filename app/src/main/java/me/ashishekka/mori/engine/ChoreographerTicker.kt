@@ -7,7 +7,7 @@ import me.ashishekka.mori.engine.core.interfaces.EngineTicker
  * Android implementation of [EngineTicker] using the system [Choreographer].
  */
 class ChoreographerTicker(
-    private val choreographer: Choreographer = Choreographer.getInstance()
+    private val choreographer: Choreographer
 ) : EngineTicker, Choreographer.FrameCallback {
 
     private var isRunning = false

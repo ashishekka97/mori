@@ -41,6 +41,7 @@ class MoriEngineTest {
 
     @Test
     fun `stop should delegate to ticker`() {
+        engine.start()
         engine.stop()
         verify { mockTicker.stop() }
     }
@@ -60,6 +61,7 @@ class MoriEngineTest {
     @Test
     fun `tick should not trigger draw if stopped`() {
         // Given
+        engine.start()
         engine.stop()
 
         // When
@@ -72,6 +74,7 @@ class MoriEngineTest {
     @Test
     fun `tick should trigger draw when interval is met`() {
         // Given
+        engine.start()
         every { mockRenderSurface.lockCanvas() } returns mockCanvas
 
         // When (Trigger first frame - 1 second mark)
@@ -84,6 +87,7 @@ class MoriEngineTest {
     @Test
     fun `tick should skip draw if interval is too small (30FPS)`() {
         // Given (30 FPS = ~33.3ms interval)
+        engine.start()
         engine.targetFps = 30
         every { mockRenderSurface.lockCanvas() } returns mockCanvas
 
@@ -102,6 +106,7 @@ class MoriEngineTest {
     @Test
     fun `tick should draw after correct interval (30FPS)`() {
         // Given (30 FPS = ~33.3ms interval)
+        engine.start()
         engine.targetFps = 30
         every { mockRenderSurface.lockCanvas() } returns mockCanvas
 
@@ -128,6 +133,31 @@ class MoriEngineTest {
         // Then
         verify(exactly = 1) { mockFallbackRenderer.updateAndDraw(mockCanvas) }
         verify { mockRenderSurface.unlockCanvasAndPost(mockCanvas) }
+    }
+
+    @Test
+    fun `onDrawFrame should draw color and post on success`() {
+        // Given
+        every { mockRenderSurface.lockCanvas() } returns mockCanvas
+
+        // When
+        engine.onDrawFrame()
+
+        // Then
+        verify(exactly = 1) { mockCanvas.drawColor(0xFF121212.toInt()) }
+        verify(exactly = 1) { mockRenderSurface.unlockCanvasAndPost(mockCanvas) }
+    }
+
+    @Test
+    fun `onDestroy should stop engine`() {
+        // Given
+        engine.start()
+        
+        // When
+        engine.onDestroy()
+        
+        // Then
+        verify { mockTicker.stop() }
     }
 }
 

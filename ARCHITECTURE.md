@@ -27,7 +27,7 @@ graph TD
         I --> J{EffectRegistry}
         J --> K[EffectRenderer 1: Sky]
         J --> L[EffectRenderer 2: Flora]
-        K & L -->|Zero-Allocation Draw| M[Hardware Canvas]
+        K & L -->|Zero-Allocation Draw| M[Agnostic Canvas]
     end
 ```
 
@@ -37,7 +37,7 @@ graph TD
 
 1.  **App Layer (`:app`)**
     *   **Role:** The Orchestrator.
-    *   **Responsibilities:** Manages the `WallpaperService` lifecycle, initializes the Koin dependency graph, and binds the Persona's data lifecycle to the Engine's visibility.
+    *   **Responsibilities:** Manages the `WallpaperService` lifecycle, initializes the Koin dependency graph, and binds the Persona's data lifecycle to the Engine's visibility. Implements Android-specific components like `ChoreographerTicker` and `SurfaceHolderRenderSurface`.
 
 2.  **UI Layer (`:ui`)**
     *   **Role:** The Face (Pulse Design System).
@@ -56,7 +56,7 @@ graph TD
 
 5.  **Engine Layer (`:engine`)**
     *   **Role:** The Muscle (Rendering VM).
-    *   **Responsibilities:** A "dumb" rendering loop driven by the Android `Choreographer`. Consumes raw pixel data from the `MoriEngineState` mirror. Strictly isolated from Android Framework UI libraries.
+    *   **Responsibilities:** A platform-agnostic rendering core. Interacts with the platform via `EngineTicker` and `RenderSurface` interfaces. Consumes raw pixel data from the `MoriEngineState` mirror. Strictly isolated from the Android Framework.
 
 ---
 
@@ -81,11 +81,9 @@ This ensures that the rendering thread never touches the Android Framework, neve
 1.  **Strict UDF (StateManager):** We split the state hub into read-only (`StateManager`) and internal-only (`MutableStateManager`) interfaces to physically prevent state mutation from outside the `:persona` module.
 2.  **Service-as-Orchestrator:** Moved `MoriWallpaperService` to the `:app` module. This ensures the `:engine` module remains a pure drawing library while `:app` manages the complex binding between the "Brain" (Persona) and the "Muscle" (Engine).
 3.  **Feature-Based Hierarchy:** Reorganized modules into `.state`, `.lifecycle`, `.sensor`, and `.core` packages to support long-term scalability and internal encapsulation.
+4.  **Decoupled Rendering:** Extracted `EngineTicker` and `RenderSurface` interfaces to isolate the `:engine` module from the Android Framework (`Canvas`, `Choreographer`, `SurfaceHolder`). This enables platform-agnostic testing and future-proofs the rendering logic.
 
 ### State of the Machine
 *   **The Brain (:persona):** Ready. Can store, update (atomically), and emit the `WorldState`.
-*   **The Muscle (:engine):** Skeleton Ready. Extracted from the Android framework and capable of receiving lifecycle signals.
+*   **The Muscle (:engine):** Ready. Decoupled from the Android framework and capable of receiving lifecycle signals from any platform.
 *   **The Orchestrator (:app):** Ready. Correctfully binds visibility events to sensor lifecycles and initializes the global DI graph.
-
-### Technical Debt (Phase 1)
-*   **Engine Coupling:** The `MoriEngine` implementation has temporary direct dependencies on `android.view.SurfaceHolder` and `android.graphics.Canvas`. These will be decoupled in **Phase 3 (The Bridge)** to achieve pure rendering isolation and platform-agnostic logic.
