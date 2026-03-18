@@ -146,3 +146,10 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 - [ ] **9.2 Snapshot Testing:** Visual regression suite.
 - [ ] **9.3 Performance Audit:** Frame-time and battery profiling.
 - [ ] **9.4 Phase 9 Finalization:** Documentation, Retrospective, and Tagging.
+
+---
+
+## Meta: AI Configuration
+*Goal: Maintain standardized agent behavior across the codebase.*
+
+- [x] **Meta.1 Gemini Configuration:** Setup `.gemini/settings.json` to point to `AGENTS.md`.
