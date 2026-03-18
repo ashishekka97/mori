@@ -1,25 +1,22 @@
 package me.ashishekka.mori.engine.core
 
-import android.service.wallpaper.WallpaperService
-import android.view.Choreographer
-import android.view.SurfaceHolder
+import me.ashishekka.mori.engine.core.interfaces.EngineTicker
+import me.ashishekka.mori.engine.core.interfaces.RenderSurface
 import me.ashishekka.mori.engine.renderer.EffectRenderer
 import me.ashishekka.mori.engine.renderer.StaticFallbackRenderer
 
 /**
  * The core rendering engine for Mori.
- * This class is responsible for the actual drawing on the [SurfaceHolder]'s canvas.
- * It is managed by the [WallpaperService.Engine] lifecycle.
- *
- * Implements [Choreographer.FrameCallback] to drive a 60FPS (or display native) rendering loop.
+ * This class is a platform-agnostic orchestrator that delegates timing to [EngineTicker]
+ * and drawing to [RenderSurface].
  */
 class MoriEngine(
-    private val serviceEngine: WallpaperService.Engine,
-    private val choreographer: Choreographer = Choreographer.getInstance(),
+    private val ticker: EngineTicker,
+    private val renderSurface: RenderSurface,
     private val fallbackRenderer: EffectRenderer = StaticFallbackRenderer(0xFF121212.toInt())
-) : Choreographer.FrameCallback {
+) {
+
     private var isRunning = false
-    private var isContinuous = true
 
     // FPS Control
     var targetFps: Int = 60
@@ -31,12 +28,15 @@ class MoriEngine(
     private var lastFrameTimeNanos: Long = 0L
     private var frameIntervalNanos: Long = 1_000_000_000L / targetFps
 
-    /**
-     * Called when the engine is first created.
-     * Pre-allocate your paints, paths, and bitmaps here. No 'new' or allocations allowed after this!
-     */
-    fun onCreate(surfaceHolder: SurfaceHolder) {
-        // Initial setup
+    init {
+        ticker.setOnTickCallback { frameTimeNanos ->
+            if (!isRunning) return@setOnTickCallback
+            val delta = frameTimeNanos - lastFrameTimeNanos
+            if (delta >= frameIntervalNanos) {
+                onDrawFrame()
+                lastFrameTimeNanos = frameTimeNanos
+            }
+        }
     }
 
     /**
@@ -46,7 +46,7 @@ class MoriEngine(
         if (!isRunning) {
             isRunning = true
             lastFrameTimeNanos = 0L // Reset to trigger immediate draw
-            requestFrame()
+            ticker.start()
         }
     }
 
@@ -54,8 +54,10 @@ class MoriEngine(
      * Stops the engine.
      */
     fun stop() {
-        isRunning = false
-        choreographer.removeFrameCallback(this)
+        if (isRunning) {
+            isRunning = false
+            ticker.stop()
+        }
     }
 
     /**
@@ -63,51 +65,21 @@ class MoriEngine(
      * or only renders when a frame is explicitly requested.
      */
     fun setContinuousRendering(enabled: Boolean) {
-        isContinuous = enabled
-        if (enabled && isRunning) {
-            requestFrame()
-        }
+        ticker.setContinuous(enabled)
     }
 
     /**
      * Requests a single frame to be rendered.
      */
     fun requestFrame() {
-        if (isRunning) {
-            choreographer.removeFrameCallback(this)
-            choreographer.postFrameCallback(this)
-        }
-    }
-
-    /**
-     * Choreographer callback triggered on every VSYNC.
-     */
-    override fun doFrame(frameTimeNanos: Long) {
-        if (!isRunning) return
-
-        val delta = frameTimeNanos - lastFrameTimeNanos
-        if (delta >= frameIntervalNanos) {
-            onDrawFrame()
-            lastFrameTimeNanos = frameTimeNanos
-            if (isContinuous) {
-                choreographer.postFrameCallback(this)
-            }
-        } else {
-            // Wait for the next vsync to satisfy frame interval
-            choreographer.postFrameCallback(this)
-        }
+        ticker.requestTick()
     }
 
     /**
      * Triggers the rendering of a single frame.
      */
     fun onDrawFrame() {
-        val holder = serviceEngine.surfaceHolder
-        val canvas = try {
-            holder.lockCanvas()
-        } catch (e: Exception) {
-            null
-        }
+        val canvas = renderSurface.lockCanvas()
 
         canvas?.let {
             try {
@@ -117,7 +89,7 @@ class MoriEngine(
                 // Failsafe: if the complex render loop fails, draw the fallback
                 fallbackRenderer.updateAndDraw(it)
             } finally {
-                holder.unlockCanvasAndPost(it)
+                renderSurface.unlockCanvasAndPost(it)
             }
         }
     }

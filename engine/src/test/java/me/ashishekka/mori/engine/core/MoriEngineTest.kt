@@ -1,175 +1,163 @@
 package me.ashishekka.mori.engine.core
 
-import android.graphics.Canvas
-import android.service.wallpaper.WallpaperService
-import android.view.Choreographer
-import android.view.SurfaceHolder
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
+import me.ashishekka.mori.engine.core.interfaces.EngineCanvas
+import me.ashishekka.mori.engine.core.interfaces.EngineTicker
+import me.ashishekka.mori.engine.core.interfaces.RenderSurface
 import me.ashishekka.mori.engine.renderer.EffectRenderer
 import org.junit.Before
 import org.junit.Test
 
 class MoriEngineTest {
 
-    private lateinit var mockServiceEngine: WallpaperService.Engine
-    private lateinit var mockSurfaceHolder: SurfaceHolder
-    private lateinit var mockCanvas: Canvas
-    private lateinit var mockChoreographer: Choreographer
+    private lateinit var mockTicker: EngineTicker
+    private lateinit var mockRenderSurface: RenderSurface
+    private lateinit var mockCanvas: EngineCanvas
     private lateinit var mockFallbackRenderer: EffectRenderer
     private lateinit var engine: MoriEngine
 
+    private val tickCallbackSlot = slot<(Long) -> Unit>()
+
     @Before
     fun setUp() {
-        mockServiceEngine = mockk(relaxed = true)
-        mockSurfaceHolder = mockk(relaxed = true)
-        mockCanvas = mockk<Canvas>(relaxed = true)
-        mockChoreographer = mockk<Choreographer>(relaxed = true)
+        mockTicker = mockk(relaxed = true)
+        mockRenderSurface = mockk(relaxed = true)
+        mockCanvas = mockk<EngineCanvas>(relaxed = true)
         mockFallbackRenderer = mockk<EffectRenderer>(relaxed = true)
 
-        every { mockServiceEngine.surfaceHolder } returns mockSurfaceHolder
+        every { mockTicker.setOnTickCallback(capture(tickCallbackSlot)) } returns Unit
         
-        engine = MoriEngine(mockServiceEngine, mockChoreographer, mockFallbackRenderer)
+        engine = MoriEngine(mockTicker, mockRenderSurface, mockFallbackRenderer)
     }
 
     @Test
-    fun `start should register frame callback`() {
+    fun `start should delegate to ticker`() {
         engine.start()
-        verify { mockChoreographer.postFrameCallback(engine) }
+        verify { mockTicker.start() }
     }
 
     @Test
-    fun `stop should unregister frame callback`() {
-        engine.start() // Ensure it is running
+    fun `stop should delegate to ticker`() {
+        engine.start()
         engine.stop()
-        verify { mockChoreographer.removeFrameCallback(engine) }
+        verify { mockTicker.stop() }
     }
 
     @Test
-    fun `doFrame should trigger draw and re-register callback when running`() {
+    fun `setContinuousRendering should delegate to ticker`() {
+        engine.setContinuousRendering(false)
+        verify { mockTicker.setContinuous(false) }
+    }
+
+    @Test
+    fun `requestFrame should delegate to ticker`() {
+        engine.requestFrame()
+        verify { mockTicker.requestTick() }
+    }
+
+    @Test
+    fun `tick should not trigger draw if stopped`() {
         // Given
         engine.start()
-        every { mockSurfaceHolder.lockCanvas() } returns mockCanvas
-
-        // When (Trigger first frame - 1 second mark)
-        engine.doFrame(1_000_000_000L)
-
-        // Then
-        verify(exactly = 1) { mockSurfaceHolder.lockCanvas() }
-        verify(exactly = 2) { mockChoreographer.postFrameCallback(engine) } // start() + 1x doFrame()
-    }
-
-    @Test
-    fun `doFrame should skip draw if interval is too small (30FPS)`() {
-        // Given (30 FPS = ~33.3ms interval)
-        engine.targetFps = 30
-        engine.start()
-        every { mockSurfaceHolder.lockCanvas() } returns mockCanvas
-
-        // Trigger first frame at 1s mark
-        engine.doFrame(1_000_000_000L)
-        verify(exactly = 1) { mockSurfaceHolder.lockCanvas() }
-
-        // When (Trigger second frame only 16ms later)
-        // 1,016,000,000L - 1,000,000,000L = 16ms < 33ms
-        engine.doFrame(1_016_000_000L)
-
-        // Then (Should still only have 1 draw call total)
-        verify(exactly = 1) { mockSurfaceHolder.lockCanvas() }
-        verify(exactly = 3) { mockChoreographer.postFrameCallback(engine) } // start() + 2x doFrame()
-    }
-
-    @Test
-    fun `doFrame should draw after correct interval (30FPS)`() {
-        // Given (30 FPS = ~33.3ms interval)
-        engine.targetFps = 30
-        engine.start()
-        every { mockSurfaceHolder.lockCanvas() } returns mockCanvas
-
-        // Trigger first frame at 1s mark
-        engine.doFrame(1_000_000_000L)
-        
-        // When (Trigger second frame 40ms later)
-        // 1,040,000,000L - 1,000,000,000L = 40ms > 33ms
-        engine.doFrame(1_040_000_000L)
-
-        // Then (Should have 2 draw calls total)
-        verify(exactly = 2) { mockSurfaceHolder.lockCanvas() }
-    }
-
-    @Test
-    fun `doFrame should not trigger draw if stopped`() {
-        // Given
         engine.stop()
 
         // When
-        engine.doFrame(1_000_000_000L)
+        tickCallbackSlot.captured.invoke(1_000_000_000L)
 
         // Then
-        verify(exactly = 0) { mockSurfaceHolder.lockCanvas() }
-        verify(exactly = 0) { mockChoreographer.postFrameCallback(any()) }
+        verify(exactly = 0) { mockRenderSurface.lockCanvas() }
+    }
+
+    @Test
+    fun `tick should trigger draw when interval is met`() {
+        // Given
+        engine.start()
+        every { mockRenderSurface.lockCanvas() } returns mockCanvas
+
+        // When (Trigger first frame - 1 second mark)
+        tickCallbackSlot.captured.invoke(1_000_000_000L)
+
+        // Then
+        verify(exactly = 1) { mockRenderSurface.lockCanvas() }
+    }
+
+    @Test
+    fun `tick should skip draw if interval is too small (30FPS)`() {
+        // Given (30 FPS = ~33.3ms interval)
+        engine.start()
+        engine.targetFps = 30
+        every { mockRenderSurface.lockCanvas() } returns mockCanvas
+
+        // Trigger first frame at 1s mark
+        tickCallbackSlot.captured.invoke(1_000_000_000L)
+        verify(exactly = 1) { mockRenderSurface.lockCanvas() }
+
+        // When (Trigger second frame only 16ms later)
+        // 1,016,000,000L - 1,000,000,000L = 16ms < 33ms
+        tickCallbackSlot.captured.invoke(1_016_000_000L)
+
+        // Then (Should still only have 1 draw call total)
+        verify(exactly = 1) { mockRenderSurface.lockCanvas() }
+    }
+
+    @Test
+    fun `tick should draw after correct interval (30FPS)`() {
+        // Given (30 FPS = ~33.3ms interval)
+        engine.start()
+        engine.targetFps = 30
+        every { mockRenderSurface.lockCanvas() } returns mockCanvas
+
+        // Trigger first frame at 1s mark
+        tickCallbackSlot.captured.invoke(1_000_000_000L)
+        
+        // When (Trigger second frame 40ms later)
+        // 1,040,000,000L - 1,000,000,000L = 40ms > 33ms
+        tickCallbackSlot.captured.invoke(1_040_000_000L)
+
+        // Then (Should have 2 draw calls total)
+        verify(exactly = 2) { mockRenderSurface.lockCanvas() }
     }
 
     @Test
     fun `onDrawFrame should use fallback when drawing fails`() {
         // Given
-        every { mockSurfaceHolder.lockCanvas() } returns mockCanvas
-        // Force an exception during drawColor using answers to avoid immediate execution issues
+        every { mockRenderSurface.lockCanvas() } returns mockCanvas
         every { mockCanvas.drawColor(any<Int>()) } answers { throw RuntimeException("Draw failure") }
 
         // When
         engine.onDrawFrame()
 
         // Then
-        // Should trigger the fallback renderer
         verify(exactly = 1) { mockFallbackRenderer.updateAndDraw(mockCanvas) }
-        verify { mockSurfaceHolder.unlockCanvasAndPost(mockCanvas) }
+        verify { mockRenderSurface.unlockCanvasAndPost(mockCanvas) }
     }
 
     @Test
-    fun `doFrame should not re-register callback if not continuous`() {
+    fun `onDrawFrame should draw color and post on success`() {
+        // Given
+        every { mockRenderSurface.lockCanvas() } returns mockCanvas
+
+        // When
+        engine.onDrawFrame()
+
+        // Then
+        verify(exactly = 1) { mockCanvas.drawColor(0xFF121212.toInt()) }
+        verify(exactly = 1) { mockRenderSurface.unlockCanvasAndPost(mockCanvas) }
+    }
+
+    @Test
+    fun `onDestroy should stop engine`() {
         // Given
         engine.start()
-        engine.setContinuousRendering(false)
-        every { mockSurfaceHolder.lockCanvas() } returns mockCanvas
-
-        // Clear interactions from start()
-        io.mockk.clearMocks(mockChoreographer, answers = false)
-
+        
         // When
-        engine.doFrame(1_000_000_000L)
-
-        // Then (Draw happens, but callback is NOT posted again)
-        verify(exactly = 1) { mockSurfaceHolder.lockCanvas() }
-        verify(exactly = 0) { mockChoreographer.postFrameCallback(engine) }
-    }
-
-    @Test
-    fun `requestFrame should unregister and post callback if running`() {
-        // Given
-        engine.start() // Sets running = true
-        io.mockk.clearMocks(mockChoreographer, answers = false)
-
-        // When
-        engine.requestFrame()
-
+        engine.onDestroy()
+        
         // Then
-        verify(exactly = 1) { mockChoreographer.removeFrameCallback(engine) }
-        verify(exactly = 1) { mockChoreographer.postFrameCallback(engine) }
-    }
-
-    @Test
-    fun `requestFrame should do nothing if not running`() {
-        // Given
-        engine.stop() // Sets running = false
-        io.mockk.clearMocks(mockChoreographer, answers = false)
-
-        // When
-        engine.requestFrame()
-
-        // Then
-        verify(exactly = 0) { mockChoreographer.postFrameCallback(engine) }
+        verify { mockTicker.stop() }
     }
 }
 

@@ -1,6 +1,6 @@
 package me.ashishekka.mori.engine.renderer
 
-import android.graphics.Canvas
+import me.ashishekka.mori.engine.core.interfaces.EngineCanvas
 
 /**
  * A failsafe renderer that draws a solid color.
@@ -12,7 +12,7 @@ class StaticFallbackRenderer(
     private val fallbackColor: Int
 ) : EffectRenderer {
 
-    override fun updateAndDraw(canvas: Canvas) {
+    override fun updateAndDraw(canvas: EngineCanvas) {
         canvas.drawColor(fallbackColor)
     }
 }
