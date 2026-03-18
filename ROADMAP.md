@@ -40,7 +40,7 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 
 ### 2.2 Rendering Architecture
 - [x] **2.2.1 Effect Interface:** Define the `EffectRenderer` contract.
-- [ ] **2.2.2 Layer Manager:** Implement the Z-Order system for rendering layers.
+- [x] **2.2.2 Layer Manager:** Implement the Z-Order system for rendering layers.
 - [ ] **2.2.3 Engine DI:** Setup the Koin module for the rendering core.
 
 ### 2.3 Phase 2 Finalization
