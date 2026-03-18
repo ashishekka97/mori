@@ -34,7 +34,8 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 - [x] **2.1.1 Choreographer Loop:** Implement the basic `FrameCallback` loop in `:engine`.
 - [x] **2.1.2 FPS Controller:** Add logic for 30/60 FPS toggling and frame skipping.
 - [x] **2.1.3 Static Fallback:** Build the `StaticFallbackRenderer` safety net (renders a solid brand color).
-- [ ] **2.1.4 Pulse Orchestrator:** Implement "Continuous vs On-Demand" ticking logic for battery efficiency.
+- [ ] **2.1.4 Tactical Realignment: Engine Coupling Debt:** Shift orchestrator responsibilities to the `:app` module to prevent expanding Phase 1 technical debt.
+- [ ] **2.1.5 Pulse Orchestrator:** Implement "Continuous vs On-Demand" ticking logic for battery efficiency, driven by the `:app` orchestrator.
 
 ### 2.2 Rendering Architecture
 - [ ] **2.2.1 Effect Interface:** Define the `EffectRenderer` contract.

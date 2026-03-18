@@ -32,6 +32,12 @@ Before touching a single line of code in a new Phase:
 3.  **High-Level Planning:** Discuss the Phase's core goals, technical hurdles, and performance/battery strategy.
 4.  **Backlog Generation:** Create **all** GitHub Issues for the Phase tasks at once, ensuring each contains a detailed technical spec derived from the planning discussion.
 
+### The Task Pre-Flight Ritual (Realignment)
+Because issues are created at the start of a phase, they can become short-sighted as the implementation evolves. Before starting implementation of any task:
+1. **Realignment Review:** Review the issue's technical spec against the `ARCHITECTURE.md` and current codebase.
+2. **Pre-Flight Update:** If the architectural approach has shifted or technical debt is expanding beyond budget, rewrite the issue spec *before* coding.
+3. **Tactical Task Creation:** If a realignment requires significant refactoring or a shift in strategy, explicitly create a new "Tactical Realignment" task in `ROADMAP.md` right before the current task to handle the architectural correction.
+
 ### The Tactical Course Correction Protocol
 If a critical gap or "unknown unknown" is discovered **during execution**:
 *   **Flag & Audit:** Immediately stop and report the discovery.
