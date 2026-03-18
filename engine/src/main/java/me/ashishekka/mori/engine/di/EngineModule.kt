@@ -1,6 +1,8 @@
 package me.ashishekka.mori.engine.di
 
 import me.ashishekka.mori.engine.core.MoriEngine
+import me.ashishekka.mori.engine.core.interfaces.EngineTicker
+import me.ashishekka.mori.engine.core.interfaces.RenderSurface
 import me.ashishekka.mori.engine.renderer.LayerManager
 import org.koin.dsl.module
 
@@ -13,8 +15,7 @@ val engineModule = module {
     factory { LayerManager() }
 
     // The core rendering engine
-    factory { (ticker: me.ashishekka.mori.engine.core.interfaces.EngineTicker, 
-                renderSurface: me.ashishekka.mori.engine.core.interfaces.RenderSurface) ->
+    factory { (ticker: EngineTicker, renderSurface: RenderSurface) ->
         MoriEngine(
             ticker = ticker,
             renderSurface = renderSurface,
