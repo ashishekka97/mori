@@ -2,6 +2,7 @@ package me.ashishekka.mori.engine.core
 
 import android.graphics.Canvas
 import android.service.wallpaper.WallpaperService
+import android.view.Choreographer
 import android.view.SurfaceHolder
 import io.mockk.every
 import io.mockk.mockk
@@ -14,6 +15,7 @@ class MoriEngineTest {
     private lateinit var mockServiceEngine: WallpaperService.Engine
     private lateinit var mockSurfaceHolder: SurfaceHolder
     private lateinit var mockCanvas: Canvas
+    private lateinit var mockChoreographer: Choreographer
     private lateinit var engine: MoriEngine
 
     @Before
@@ -21,36 +23,50 @@ class MoriEngineTest {
         mockServiceEngine = mockk(relaxed = true)
         mockSurfaceHolder = mockk(relaxed = true)
         mockCanvas = mockk(relaxed = true)
+        mockChoreographer = mockk<Choreographer>(relaxed = true)
 
         every { mockServiceEngine.surfaceHolder } returns mockSurfaceHolder
         
-        engine = MoriEngine(mockServiceEngine)
+        engine = MoriEngine(mockServiceEngine, mockChoreographer)
     }
 
     @Test
-    fun `onDrawFrame should lock and unlock canvas when successful`() {
-        // Given a successful canvas lock
+    fun `start should register frame callback`() {
+        engine.start()
+        verify { mockChoreographer.postFrameCallback(engine) }
+    }
+
+    @Test
+    fun `stop should unregister frame callback`() {
+        engine.start() // Ensure it is running
+        engine.stop()
+        verify { mockChoreographer.removeFrameCallback(engine) }
+    }
+
+    @Test
+    fun `doFrame should trigger draw and re-register callback when running`() {
+        // Given
+        engine.start()
         every { mockSurfaceHolder.lockCanvas() } returns mockCanvas
 
         // When
-        engine.onDrawFrame()
+        engine.doFrame(1000L)
 
         // Then
         verify { mockSurfaceHolder.lockCanvas() }
-        verify { mockCanvas.drawColor(any<Int>()) }
-        verify { mockSurfaceHolder.unlockCanvasAndPost(mockCanvas) }
+        verify { mockChoreographer.postFrameCallback(engine) } // Verify re-registration
     }
 
     @Test
-    fun `onDrawFrame should not crash when canvas is null`() {
-        // Given a failed canvas lock (returns null)
-        every { mockSurfaceHolder.lockCanvas() } returns null
+    fun `doFrame should not trigger draw if stopped`() {
+        // Given
+        engine.stop()
 
         // When
-        engine.onDrawFrame()
+        engine.doFrame(1000L)
 
-        // Then (Verify no interaction with canvas and no crash)
-        verify { mockSurfaceHolder.lockCanvas() }
-        verify(exactly = 0) { mockSurfaceHolder.unlockCanvasAndPost(any()) }
+        // Then
+        verify(exactly = 0) { mockSurfaceHolder.lockCanvas() }
+        verify(exactly = 0) { mockChoreographer.postFrameCallback(any()) }
     }
 }

@@ -35,7 +35,9 @@ class MoriWallpaperService : WallpaperService() {
             }
             
             if (visible) {
-                moriEngine.onDrawFrame()
+                moriEngine.start()
+            } else {
+                moriEngine.stop()
             }
         }
 
@@ -46,6 +48,7 @@ class MoriWallpaperService : WallpaperService() {
 
         override fun onSurfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
             super.onSurfaceChanged(holder, format, width, height)
+            // Initial frame when surface is created or changed
             moriEngine.onDrawFrame()
         }
 
