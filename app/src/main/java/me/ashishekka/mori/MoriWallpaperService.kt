@@ -2,8 +2,14 @@ package me.ashishekka.mori
 
 import android.service.wallpaper.WallpaperService
 import android.view.SurfaceHolder
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import me.ashishekka.mori.engine.core.MoriEngine
 import me.ashishekka.mori.persona.lifecycle.MoriLifecycleManager
+import me.ashishekka.mori.persona.state.StateManager
+import org.koin.android.ext.android.inject
 
 /**
  * The system entry point for the Mori Live Wallpaper.
@@ -12,8 +18,8 @@ import me.ashishekka.mori.persona.lifecycle.MoriLifecycleManager
  */
 class MoriWallpaperService : WallpaperService() {
 
-    // Initialized in onCreateEngine(). Will be injected via Koin in Phase 1.3.2.
-    private lateinit var lifecycleManager: MoriLifecycleManager
+    private val lifecycleManager: MoriLifecycleManager by inject()
+    private val stateManager: StateManager by inject()
 
     override fun onCreateEngine(): Engine {
         return MoriEngineImpl()
@@ -22,23 +28,36 @@ class MoriWallpaperService : WallpaperService() {
     private inner class MoriEngineImpl : Engine() {
 
         private val moriEngine = MoriEngine(this)
+        private val engineScope = CoroutineScope(Dispatchers.Main + Job())
+        private var stateCollectionJob: Job? = null
 
         override fun onVisibilityChanged(visible: Boolean) {
             super.onVisibilityChanged(visible)
             
-            if (::lifecycleManager.isInitialized) {
-                if (visible) {
-                    lifecycleManager.onStart()
-                } else {
-                    lifecycleManager.onStop()
+            if (visible) {
+                lifecycleManager.onStart()
+                moriEngine.start()
+                startStateCollection()
+            } else {
+                lifecycleManager.onStop()
+                moriEngine.stop()
+                stopStateCollection()
+            }
+        }
+
+        private fun startStateCollection() {
+            if (stateCollectionJob?.isActive == true) return
+            stateCollectionJob = engineScope.launch {
+                stateManager.state.collect { state ->
+                    // 2.1.4: Orchestrator triggers on-demand rendering on state change
+                    moriEngine.requestFrame()
                 }
             }
-            
-            if (visible) {
-                moriEngine.start()
-            } else {
-                moriEngine.stop()
-            }
+        }
+
+        private fun stopStateCollection() {
+            stateCollectionJob?.cancel()
+            stateCollectionJob = null
         }
 
         override fun onCreate(surfaceHolder: SurfaceHolder) {
@@ -55,11 +74,8 @@ class MoriWallpaperService : WallpaperService() {
         override fun onSurfaceDestroyed(holder: SurfaceHolder) {
             super.onSurfaceDestroyed(holder)
             
-            // Ensure lifecycle is stopped when surface is destroyed
-            if (::lifecycleManager.isInitialized) {
-                lifecycleManager.onStop()
-            }
-            
+            lifecycleManager.onStop()
+            stopStateCollection()
             moriEngine.onDestroy()
         }
     }
