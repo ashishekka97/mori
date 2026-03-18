@@ -37,5 +37,5 @@ val appModule = module {
     }
 
     // Scopes
-    single(named("EngineScope")) { CoroutineScope(Dispatchers.Main + Job()) }
+    single(named("EngineScope")) { CoroutineScope(Dispatchers.Default + Job()) }
 }
