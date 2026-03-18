@@ -58,6 +58,18 @@ class MoriEngineTest {
     }
 
     @Test
+    fun `tick should not trigger draw if stopped`() {
+        // Given
+        engine.stop()
+
+        // When
+        tickCallbackSlot.captured.invoke(1_000_000_000L)
+
+        // Then
+        verify(exactly = 0) { mockRenderSurface.lockCanvas() }
+    }
+
+    @Test
     fun `tick should trigger draw when interval is met`() {
         // Given
         every { mockRenderSurface.lockCanvas() } returns mockCanvas
