@@ -83,7 +83,24 @@ This ensures that the rendering thread never touches the Android Framework, neve
 3.  **Feature-Based Hierarchy:** Reorganized modules into `.state`, `.lifecycle`, `.sensor`, and `.core` packages to support long-term scalability and internal encapsulation.
 4.  **Decoupled Rendering:** Extracted `EngineTicker` and `RenderSurface` interfaces to isolate the `:engine` module from the Android Framework (`Canvas`, `Choreographer`, `SurfaceHolder`). This enables platform-agnostic testing and future-proofs the rendering logic.
 
+---
+
+## 5. Phase 2 Retrospective: The Pulse Engine
+
+**Status:** Completed (March 2026)
+
+### Summary of Decisions
+1.  **Zero-Allocation Core:** Implemented `LayerManager` using a fixed-size pre-allocated array (16 layers) and manual indexing. This ensures that the rendering loop never triggers the Garbage Collector, even with multiple active effects.
+2.  **Agnostic Timing:** Decoupled the rendering heartbeat from the Android `Choreographer`. The engine now consumes a generic `onTick(nanos)` signal, allowing for deterministic unit testing of frame-skipping and FPS capping logic.
+3.  **Flat-Memory Mirror (`MoriEngineState`):** Created a mutable primitive-only mirror of the `WorldState`. This allows the bridge to copy data once per frame, while renderers read from a stable, thread-safe memory block without allocations.
+4.  **Constructor-Injected Rendering:** Refactored `MoriEngine` to accept all its managers (`Ticker`, `Surface`, `LayerManager`) via constructor injection. This enabled 100% test coverage of the engine's core orchestration logic.
+
 ### State of the Machine
-*   **The Brain (:persona):** Ready. Can store, update (atomically), and emit the `WorldState`.
-*   **The Muscle (:engine):** Ready. Decoupled from the Android framework and capable of receiving lifecycle signals from any platform.
-*   **The Orchestrator (:app):** Ready. Correctfully binds visibility events to sensor lifecycles and initializes the global DI graph.
+*   **The Heartbeat (:engine):** Robust. Capable of 30/60 FPS toggling, Z-Order layer management, and automatic fallback to a safe static state on failure. Includes `DebugPulseRenderer` for visual validation.
+*   **The Plumbing (:app):** Ready. The `ChoreographerTicker` and `SurfaceHolderRenderSurface` provide the high-performance Android bindings needed for the engine to breathe.
+
+### Visual Validation (Smoke Test)
+We implemented a `DebugPulseRenderer` that oscillates the background color between deep purple and black. This proves that the multi-module orchestration is working:
+1.  **Ticker:** Driving the loop via Android Choreographer.
+2.  **Manager:** Correctfully sorting and iterating layers.
+3.  **Canvas:** Succesfully drawing platform-agnostic pixels to the Android surface.
