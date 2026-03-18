@@ -54,7 +54,7 @@ class MoriEngineTest {
 
         // Then
         verify(exactly = 1) { mockSurfaceHolder.lockCanvas() }
-        verify { mockChoreographer.postFrameCallback(engine) } // Verify re-registration
+        verify(exactly = 2) { mockChoreographer.postFrameCallback(engine) } // start() + 1x doFrame()
     }
 
     @Test
