@@ -19,6 +19,7 @@ class MoriEngine(
     private val fallbackRenderer: EffectRenderer = StaticFallbackRenderer(0xFF121212.toInt())
 ) : Choreographer.FrameCallback {
     private var isRunning = false
+    private var isContinuous = true
 
     // FPS Control
     var targetFps: Int = 60
@@ -39,22 +40,43 @@ class MoriEngine(
     }
 
     /**
-     * Starts the rendering loop.
+     * Starts the engine and begins rendering.
      */
     fun start() {
         if (!isRunning) {
             isRunning = true
             lastFrameTimeNanos = 0L // Reset to trigger immediate draw
-            choreographer.postFrameCallback(this)
+            requestFrame()
         }
     }
 
     /**
-     * Stops the rendering loop.
+     * Stops the engine.
      */
     fun stop() {
         isRunning = false
         choreographer.removeFrameCallback(this)
+    }
+
+    /**
+     * Toggles whether the engine continuously renders frames (e.g., 60 FPS) 
+     * or only renders when a frame is explicitly requested.
+     */
+    fun setContinuousRendering(enabled: Boolean) {
+        isContinuous = enabled
+        if (enabled && isRunning) {
+            requestFrame()
+        }
+    }
+
+    /**
+     * Requests a single frame to be rendered.
+     */
+    fun requestFrame() {
+        if (isRunning) {
+            choreographer.removeFrameCallback(this)
+            choreographer.postFrameCallback(this)
+        }
     }
 
     /**
@@ -67,10 +89,13 @@ class MoriEngine(
         if (delta >= frameIntervalNanos) {
             onDrawFrame()
             lastFrameTimeNanos = frameTimeNanos
+            if (isContinuous) {
+                choreographer.postFrameCallback(this)
+            }
+        } else {
+            // Wait for the next vsync to satisfy frame interval
+            choreographer.postFrameCallback(this)
         }
-
-        // Schedule the next frame
-        choreographer.postFrameCallback(this)
     }
 
     /**
