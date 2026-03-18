@@ -43,6 +43,8 @@ class MoriWallpaperService : WallpaperService() {
             
             if (visible) {
                 lifecycleManager.onStart()
+                // Phase 2 Smoke Test: Manual instantiation of debug effect.
+                // TODO: Replace with DSL-driven Rule Engine in Phase 6.
                 moriEngine.addEffect(DebugPulseRenderer())
                 moriEngine.start()
                 startStateCollection()
