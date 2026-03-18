@@ -8,6 +8,7 @@ import me.ashishekka.mori.engine.core.interfaces.EngineCanvas
 import me.ashishekka.mori.engine.core.interfaces.EngineTicker
 import me.ashishekka.mori.engine.core.interfaces.RenderSurface
 import me.ashishekka.mori.engine.renderer.EffectRenderer
+import me.ashishekka.mori.engine.renderer.LayerManager
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -17,6 +18,7 @@ class MoriEngineTest {
     private lateinit var mockTicker: EngineTicker
     private lateinit var mockRenderSurface: RenderSurface
     private lateinit var mockCanvas: EngineCanvas
+    private lateinit var layerManager: LayerManager
     private lateinit var mockFallbackRenderer: EffectRenderer
     private lateinit var engine: MoriEngine
 
@@ -27,11 +29,12 @@ class MoriEngineTest {
         mockTicker = mockk(relaxed = true)
         mockRenderSurface = mockk(relaxed = true)
         mockCanvas = mockk<EngineCanvas>(relaxed = true)
+        layerManager = LayerManager()
         mockFallbackRenderer = mockk<EffectRenderer>(relaxed = true)
 
         every { mockTicker.setOnTickCallback(capture(tickCallbackSlot)) } returns Unit
         
-        engine = MoriEngine(mockTicker, mockRenderSurface, mockFallbackRenderer)
+        engine = MoriEngine(mockTicker, mockRenderSurface, layerManager, mockFallbackRenderer)
     }
 
     @Test

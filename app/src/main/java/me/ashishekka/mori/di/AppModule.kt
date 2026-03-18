@@ -6,9 +6,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import me.ashishekka.mori.engine.ChoreographerTicker
 import me.ashishekka.mori.engine.SurfaceHolderRenderSurface
-import me.ashishekka.mori.engine.core.MoriEngine
 import me.ashishekka.mori.engine.core.interfaces.EngineTicker
 import me.ashishekka.mori.engine.core.interfaces.RenderSurface
+import me.ashishekka.mori.engine.di.engineModule
 import me.ashishekka.mori.persona.di.personaModule
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -18,22 +18,18 @@ import org.koin.dsl.module
  * Aggregates all sub-modules from other layers (Persona, Engine, etc.).
  */
 val appModule = module {
-    // Phase 1: Only includes the Persona (Brain) layer components.
-    includes(personaModule)
+    // Phase 1 & 2: Includes Persona (Brain) and Engine (Muscle) layers.
+    includes(personaModule, engineModule)
 
     // Android Framework
     single { Choreographer.getInstance() }
 
-    // Engine Core
+    // Engine Core Implementation (Android Specific)
     factory<EngineTicker> { ChoreographerTicker(get()) }
     
     // RenderSurface is special because it needs the Engine instance
     factory<RenderSurface> { (engine: android.service.wallpaper.WallpaperService.Engine) -> 
         SurfaceHolderRenderSurface(engine) 
-    }
-
-    factory { (ticker: EngineTicker, renderSurface: RenderSurface) ->
-        MoriEngine(ticker, renderSurface)
     }
 
     // Scopes

@@ -14,12 +14,12 @@ import me.ashishekka.mori.engine.renderer.StaticFallbackRenderer
 class MoriEngine(
     private val ticker: EngineTicker,
     private val renderSurface: RenderSurface,
+    private val layerManager: LayerManager,
     private val fallbackRenderer: EffectRenderer = StaticFallbackRenderer(0xFF121212.toInt())
 ) {
 
     private var isRunning = false
     private val state = MoriEngineState()
-    private val layerManager = LayerManager()
 
     // FPS Control
     var targetFps: Int = 60
