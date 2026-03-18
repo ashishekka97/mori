@@ -8,6 +8,7 @@ import kotlinx.coroutines.launch
 import me.ashishekka.mori.engine.core.MoriEngine
 import me.ashishekka.mori.engine.core.interfaces.EngineTicker
 import me.ashishekka.mori.engine.core.interfaces.RenderSurface
+import me.ashishekka.mori.engine.renderer.DebugPulseRenderer
 import me.ashishekka.mori.persona.lifecycle.MoriLifecycleManager
 import me.ashishekka.mori.persona.state.StateManager
 import org.koin.android.ext.android.inject
@@ -42,6 +43,7 @@ class MoriWallpaperService : WallpaperService() {
             
             if (visible) {
                 lifecycleManager.onStart()
+                moriEngine.addEffect(DebugPulseRenderer())
                 moriEngine.start()
                 startStateCollection()
             } else {

@@ -44,7 +44,7 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 - [x] **2.2.3 Engine DI:** Setup the Koin module for the rendering core.
 
 ### 2.3 Phase 2 Finalization
-- [ ] **2.3.1 Phase 2 Finalization:** Documentation, Retrospective, and Tagging.
+- [x] **2.3.1 Phase 2 Finalization:** Documentation, Retrospective, and Tagging.
 
 ---
 
