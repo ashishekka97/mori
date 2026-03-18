@@ -49,12 +49,50 @@ class MoriEngineTest {
         engine.start()
         every { mockSurfaceHolder.lockCanvas() } returns mockCanvas
 
-        // When
-        engine.doFrame(1000L)
+        // When (Trigger first frame - 1 second mark)
+        engine.doFrame(1_000_000_000L)
 
         // Then
-        verify { mockSurfaceHolder.lockCanvas() }
-        verify { mockChoreographer.postFrameCallback(engine) } // Verify re-registration
+        verify(exactly = 1) { mockSurfaceHolder.lockCanvas() }
+        verify(exactly = 2) { mockChoreographer.postFrameCallback(engine) } // start() + 1x doFrame()
+    }
+
+    @Test
+    fun `doFrame should skip draw if interval is too small (30FPS)`() {
+        // Given (30 FPS = ~33.3ms interval)
+        engine.targetFps = 30
+        engine.start()
+        every { mockSurfaceHolder.lockCanvas() } returns mockCanvas
+
+        // Trigger first frame at 1s mark
+        engine.doFrame(1_000_000_000L)
+        verify(exactly = 1) { mockSurfaceHolder.lockCanvas() }
+
+        // When (Trigger second frame only 16ms later)
+        // 1,016,000,000L - 1,000,000,000L = 16ms < 33ms
+        engine.doFrame(1_016_000_000L)
+
+        // Then (Should still only have 1 draw call total)
+        verify(exactly = 1) { mockSurfaceHolder.lockCanvas() }
+        verify(exactly = 3) { mockChoreographer.postFrameCallback(engine) } // start() + 2x doFrame()
+    }
+
+    @Test
+    fun `doFrame should draw after correct interval (30FPS)`() {
+        // Given (30 FPS = ~33.3ms interval)
+        engine.targetFps = 30
+        engine.start()
+        every { mockSurfaceHolder.lockCanvas() } returns mockCanvas
+
+        // Trigger first frame at 1s mark
+        engine.doFrame(1_000_000_000L)
+        
+        // When (Trigger second frame 40ms later)
+        // 1,040,000,000L - 1,000,000,000L = 40ms > 33ms
+        engine.doFrame(1_040_000_000L)
+
+        // Then (Should have 2 draw calls total)
+        verify(exactly = 2) { mockSurfaceHolder.lockCanvas() }
     }
 
     @Test
