@@ -17,6 +17,16 @@ class MoriEngine(
 ) : Choreographer.FrameCallback {
     private var isRunning = false
 
+    // FPS Control
+    var targetFps: Int = 60
+        set(value) {
+            field = value.coerceIn(1, 120) // Sanity check
+            frameIntervalNanos = 1_000_000_000L / field
+        }
+
+    private var lastFrameTimeNanos: Long = 0L
+    private var frameIntervalNanos: Long = 1_000_000_000L / targetFps
+
     // Pre-allocated color constant (Mori Dark Grey)
     private val defaultBackgroundColor: Int = 0xFF121212.toInt()
 
@@ -34,6 +44,7 @@ class MoriEngine(
     fun start() {
         if (!isRunning) {
             isRunning = true
+            lastFrameTimeNanos = 0L // Reset to trigger immediate draw
             choreographer.postFrameCallback(this)
         }
     }
@@ -52,7 +63,11 @@ class MoriEngine(
     override fun doFrame(frameTimeNanos: Long) {
         if (!isRunning) return
 
-        onDrawFrame()
+        val delta = frameTimeNanos - lastFrameTimeNanos
+        if (delta >= frameIntervalNanos) {
+            onDrawFrame()
+            lastFrameTimeNanos = frameTimeNanos
+        }
 
         // Schedule the next frame
         choreographer.postFrameCallback(this)
