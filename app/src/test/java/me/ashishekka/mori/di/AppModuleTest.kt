@@ -1,7 +1,10 @@
 package me.ashishekka.mori.di
 
 import android.service.wallpaper.WallpaperService
+import android.view.Choreographer
+import kotlinx.coroutines.CoroutineScope
 import me.ashishekka.mori.engine.core.MoriEngine
+import me.ashishekka.mori.engine.core.MoriEngineState
 import me.ashishekka.mori.engine.core.interfaces.EngineTicker
 import me.ashishekka.mori.engine.core.interfaces.RenderSurface
 import me.ashishekka.mori.engine.renderer.EffectRenderer
@@ -19,8 +22,9 @@ class AppModuleTest : KoinTest {
                 EngineTicker::class,
                 RenderSurface::class,
                 EffectRenderer::class,
-                kotlinx.coroutines.CoroutineScope::class,
-                android.view.Choreographer::class
+                MoriEngineState::class,
+                CoroutineScope::class,
+                Choreographer::class
             )
         )
     }

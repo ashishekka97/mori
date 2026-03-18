@@ -124,6 +124,7 @@ class MoriEngineTest {
     @Test
     fun `onDrawFrame should use fallback when drawing fails`() {
         // Given
+        engine.start()
         every { mockRenderSurface.lockCanvas() } returns mockCanvas
         every { mockCanvas.drawColor(any<Int>()) } answers { throw RuntimeException("Draw failure") }
 
@@ -131,13 +132,14 @@ class MoriEngineTest {
         engine.onDrawFrame()
 
         // Then
-        verify(exactly = 1) { mockFallbackRenderer.updateAndDraw(mockCanvas) }
+        verify(exactly = 1) { mockFallbackRenderer.updateAndDraw(any(), mockCanvas) }
         verify { mockRenderSurface.unlockCanvasAndPost(mockCanvas) }
     }
 
     @Test
     fun `onDrawFrame should draw color and post on success`() {
         // Given
+        engine.start()
         every { mockRenderSurface.lockCanvas() } returns mockCanvas
 
         // When
@@ -146,6 +148,15 @@ class MoriEngineTest {
         // Then
         verify(exactly = 1) { mockCanvas.drawColor(0xFF121212.toInt()) }
         verify(exactly = 1) { mockRenderSurface.unlockCanvasAndPost(mockCanvas) }
+    }
+
+    @Test
+    fun `onSurfaceChanged should propagate to fallback renderer`() {
+        // When
+        engine.onSurfaceChanged(1080, 1920, 2.5f)
+
+        // Then
+        verify { mockFallbackRenderer.onSurfaceChanged(1080, 1920, 2.5f) }
     }
 
     @Test
