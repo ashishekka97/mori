@@ -72,6 +72,8 @@ class MoriWallpaperService : WallpaperService() {
 
         override fun onSurfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
             super.onSurfaceChanged(holder, format, width, height)
+            val density = resources.displayMetrics.density
+            moriEngine.onSurfaceChanged(width, height, density)
             // Initial frame when surface is created or changed
             moriEngine.onDrawFrame()
         }

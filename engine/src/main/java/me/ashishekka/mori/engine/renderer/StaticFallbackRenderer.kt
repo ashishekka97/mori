@@ -1,18 +1,25 @@
 package me.ashishekka.mori.engine.renderer
 
+import me.ashishekka.mori.engine.core.MoriEngineState
 import me.ashishekka.mori.engine.core.interfaces.EngineCanvas
 
 /**
- * A failsafe renderer that draws a solid color.
- * Used when complex rendering layers fail or are in an invalid state.
- *
- * @param fallbackColor The color to fill the canvas with.
+ * A basic renderer that fills the canvas with a solid color.
+ * This is used as a safety fallback if complex renders fail.
  */
 class StaticFallbackRenderer(
-    private val fallbackColor: Int
+    private val color: Int
 ) : EffectRenderer {
 
-    override fun updateAndDraw(canvas: EngineCanvas) {
-        canvas.drawColor(fallbackColor)
+    override fun onSurfaceChanged(width: Int, height: Int, density: Float) {
+        // No pre-calculation needed for solid color
+    }
+
+    override fun update(state: MoriEngineState) {
+        // Static color, nothing to update
+    }
+
+    override fun render(canvas: EngineCanvas) {
+        canvas.drawColor(color)
     }
 }

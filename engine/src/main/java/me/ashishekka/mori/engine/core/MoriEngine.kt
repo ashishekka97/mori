@@ -17,6 +17,7 @@ class MoriEngine(
 ) {
 
     private var isRunning = false
+    private val state = MoriEngineState()
 
     // FPS Control
     var targetFps: Int = 60
@@ -37,6 +38,16 @@ class MoriEngine(
                 lastFrameTimeNanos = frameTimeNanos
             }
         }
+    }
+
+    /**
+     * Updates the surface dimensions and density.
+     */
+    fun onSurfaceChanged(width: Int, height: Int, density: Float) {
+        state.surfaceWidth = width
+        state.surfaceHeight = height
+        state.surfaceDensity = density
+        fallbackRenderer.onSurfaceChanged(width, height, density)
     }
 
     /**
@@ -83,11 +94,11 @@ class MoriEngine(
 
         canvas?.let {
             try {
-                // In the future: layerManager.updateAndDraw(it)
+                // In the future: layerManager.updateAndDraw(state, it)
                 it.drawColor(0xFF121212.toInt())
             } catch (e: Throwable) {
                 // Failsafe: if the complex render loop fails, draw the fallback
-                fallbackRenderer.updateAndDraw(it)
+                fallbackRenderer.updateAndDraw(state, it)
             } finally {
                 renderSurface.unlockCanvasAndPost(it)
             }
