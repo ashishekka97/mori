@@ -1,6 +1,7 @@
 package me.ashishekka.mori.engine
 
 import android.graphics.Canvas
+import android.graphics.Paint
 import android.service.wallpaper.WallpaperService
 import me.ashishekka.mori.engine.core.interfaces.EngineCanvas
 import me.ashishekka.mori.engine.core.interfaces.RenderSurface
@@ -9,8 +10,17 @@ import me.ashishekka.mori.engine.core.interfaces.RenderSurface
  * Android implementation of [EngineCanvas] wrapping a native [Canvas].
  */
 class AndroidEngineCanvas(val nativeCanvas: Canvas) : EngineCanvas {
+    
+    private val paint = Paint()
+
     override fun drawColor(colorInt: Int) {
         nativeCanvas.drawColor(colorInt)
+    }
+
+    override fun drawRect(left: Float, top: Float, right: Float, bottom: Float, color: Int) {
+        paint.color = color
+        paint.style = Paint.Style.FILL
+        nativeCanvas.drawRect(left, top, right, bottom, paint)
     }
 }
 
