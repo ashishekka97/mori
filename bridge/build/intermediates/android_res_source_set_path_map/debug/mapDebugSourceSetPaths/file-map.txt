@@ -1,0 +1,8 @@
+me.ashishekka.mori.bridge-pngs-0 /Users/ashishekka/code/Mori/bridge/build/generated/res/pngs/debug
+me.ashishekka.mori.bridge-updated_navigation_xml-1 /Users/ashishekka/code/Mori/bridge/build/generated/updated_navigation_xml/debug
+me.ashishekka.mori.bridge-mergeDebugResources-2 /Users/ashishekka/code/Mori/bridge/build/intermediates/incremental/debug/mergeDebugResources/merged.dir
+me.ashishekka.mori.bridge-mergeDebugResources-3 /Users/ashishekka/code/Mori/bridge/build/intermediates/incremental/debug/mergeDebugResources/stripped.dir
+me.ashishekka.mori.bridge-debug-4 /Users/ashishekka/code/Mori/bridge/build/intermediates/merged_res/debug/mergeDebugResources
+me.ashishekka.mori.bridge-debug-5 /Users/ashishekka/code/Mori/bridge/build/intermediates/packaged_res/debug/packageDebugResources
+me.ashishekka.mori.bridge-debug-6 /Users/ashishekka/code/Mori/bridge/src/debug/res
+me.ashishekka.mori.bridge-main-7 /Users/ashishekka/code/Mori/bridge/src/main/res
