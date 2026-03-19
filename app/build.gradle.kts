@@ -68,10 +68,10 @@ dependencies {
     ksp(libs.androidx.room.compiler)
 
     // Mori Library Modules
-    implementation(project(":engine"))
     implementation(project(":ui"))
     implementation(project(":persona"))
-    implementation(project(":biome"))
+    implementation(project(":engine"))
+    implementation(project(":bridge"))
 
     // Testing & Debug
     testImplementation(libs.junit)

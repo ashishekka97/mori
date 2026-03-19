@@ -4,6 +4,7 @@ import android.view.Choreographer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import me.ashishekka.mori.bridge.di.bridgeModule
 import me.ashishekka.mori.engine.ChoreographerTicker
 import me.ashishekka.mori.engine.SurfaceHolderRenderSurface
 import me.ashishekka.mori.engine.core.interfaces.EngineTicker
@@ -18,8 +19,8 @@ import org.koin.dsl.module
  * Aggregates all sub-modules from other layers (Persona, Engine, etc.).
  */
 val appModule = module {
-    // Phase 1 & 2: Includes Persona (Brain) and Engine (Muscle) layers.
-    includes(personaModule, engineModule)
+    // Phase 1, 2 & 3: Includes Persona, Engine, and Bridge layers.
+    includes(personaModule, engineModule, bridgeModule)
 
     // Android Framework
     single { Choreographer.getInstance() }
