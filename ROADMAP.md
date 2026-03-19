@@ -51,13 +51,14 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 ## Phase 3: The Engine Bridge (The Handover)
 *Goal: Pass data and geometry from Persona to Engine without allocations.*
 
-### 3.1 Memory Mirroring
-- [ ] **3.1.1 MoriEngineState:** Create the mutable, pre-allocated mirror of `WorldState`.
-- [ ] **3.1.2 State Synchronizer:** Implement the background `Flow` collector for state handover.
+### 3.1 Data Handover
+- [x] **3.1.1 MoriEngineState:** Create the mutable, pre-allocated mirror of `WorldState`. (Completed in 2.2.1)
+- [ ] **3.1.2 Bridge Module Setup:** Initialize the `:bridge` Android module and define its DI boundaries.
+- [ ] **3.1.3 State Synchronizer:** Implement the `Flow` collector that performs the zero-allocation handover from `WorldState` to `MoriEngineState`.
 
-### 3.2 Geometry & Scaling (Smart Bridge)
-- [ ] **3.2.1 Surface Metrics:** Track width/height and pre-calculate DP-to-Pixel offsets.
-- [ ] **3.2.2 Handover Logic:** Ensure the Engine only receives raw Pixel coordinates, keeping it "dumb" and fast.
+### 3.2 Geometry & Scaling (The Dumb Engine)
+- [ ] **3.2.1 Metric Calculator:** Implement DP-to-Pixel conversion logic in the Bridge.
+- [ ] **3.2.2 Visual Handover:** Pre-calculate visual offsets so the Engine remains purely pixel-based.
 
 ### 3.3 Phase 3 Finalization
 - [ ] **3.3.1 Phase 3 Finalization:** Documentation, Retrospective, and Tagging.

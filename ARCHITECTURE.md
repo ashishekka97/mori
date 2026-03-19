@@ -62,12 +62,13 @@ graph TD
 
 ## 3. The Smart Handover (Sync Strategy)
 
-To achieve **Zero-Allocation** in the rendering loop, we use a **Mirror Sync** protocol:
+To achieve **Zero-Allocation** in the rendering loop, we use a **Mirror Sync** protocol managed by the **`:bridge`** module:
 
 1.  **The Snapshot:** The Persona layer emits an immutable `WorldState` data class (The Brain).
-2.  **The Collection:** A background **Synchronizer** collects this snapshot on a dedicated thread.
+2.  **The Collection:** The **StateSynchronizer** (in the Bridge) collects this snapshot on a dedicated background thread.
 3.  **The Atomic Copy:** Values are copied field-by-field into a pre-allocated **MoriEngineState** (The Mirror).
-4.  **The Draw:** The **Engine** reads directly from the mirror's primitive fields during its 16ms draw window.
+4.  **The Geometry Translation:** The Bridge applies screen density corrections to any DP-based values, converting them into raw Pixels.
+5.  **The Draw:** The **Engine** reads directly from the mirror's primitive fields during its 16ms draw window.
 
 This ensures that the rendering thread never touches the Android Framework, never allocates memory, and never encounters a `ConcurrentModificationException`.
 

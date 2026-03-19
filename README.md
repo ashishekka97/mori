@@ -23,14 +23,15 @@ Mori turns the device's home screen into a "living dashboard." Instead of static
 
 ---
 
-## The "Smart Handover" Architecture
+## The 6-Module Architecture
 Mori uses a strict multi-module architecture to enforce separation of concerns and optimize build speeds:
 
-*   **`:app`** - **The Orchestrator.** Manages the `WallpaperService` and `Koin` graph.
-*   **`:ui`** - **The Face.** Built with the **Pulse Design System**. Handles onboarding and the dashboard.
+*   **`:app`** - **The Entry Point.** Manages the `WallpaperService` and hardware bindings.
 *   **`:persona`** - **The Brain.** Normalizes raw OS data into a flat, primitive `WorldState`.
+*   **`:bridge`** - **The Translator.** Handles zero-allocation data handover and DP-to-Pixel scaling.
+*   **`:engine`** - **The Muscle.** A platform-agnostic rendering VM. Zero-allocation Canvas loop.
 *   **`:biome`** - **The Assets.** Interprets declarative JSON configurations (The Rule Engine).
-*   **`:engine`** - **The Muscle.** A "dumb" rendering VM. Zero-allocation Canvas rendering loop.
+*   **`:ui`** - **The Face.** Built with the **Pulse Design System**. Handles dashboard and UX.
 
 For a deeper dive, see the **[Architecture Guide](ARCHITECTURE.md)**.
 
