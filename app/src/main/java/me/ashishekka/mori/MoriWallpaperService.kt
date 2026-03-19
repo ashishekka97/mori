@@ -6,6 +6,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import me.ashishekka.mori.bridge.metrics.MetricCalculator
+import me.ashishekka.mori.bridge.metrics.ScaleMode
 import me.ashishekka.mori.bridge.sync.StateSynchronizer
 import me.ashishekka.mori.engine.core.MoriEngine
 import me.ashishekka.mori.engine.core.interfaces.EngineTicker
@@ -70,7 +71,7 @@ class MoriWallpaperService : WallpaperService() {
             super.onSurfaceChanged(holder, format, width, height)
             val density = resources.displayMetrics.density
             metricCalculator.updateMetrics(width, height, density)
-            stateSynchronizer.updateViewport(1000f, 1000f)
+            stateSynchronizer.updateViewport(1000f, 1000f, ScaleMode.FIT)
             moriEngine.onSurfaceChanged(width, height, density)
             // Initial frame when surface is created or changed
             moriEngine.onDrawFrame()

@@ -17,9 +17,10 @@ class AndroidEngineCanvas(val nativeCanvas: Canvas) : EngineCanvas {
         nativeCanvas.drawColor(colorInt)
     }
 
-    override fun drawRect(left: Float, top: Float, right: Float, bottom: Float, color: Int) {
+    override fun drawRect(left: Float, top: Float, right: Float, bottom: Float, color: Int, isFilled: Boolean) {
         paint.color = color
-        paint.style = Paint.Style.FILL
+        paint.style = if (isFilled) Paint.Style.FILL else Paint.Style.STROKE
+        paint.strokeWidth = if (isFilled) 0f else 4f
         nativeCanvas.drawRect(left, top, right, bottom, paint)
     }
 }
