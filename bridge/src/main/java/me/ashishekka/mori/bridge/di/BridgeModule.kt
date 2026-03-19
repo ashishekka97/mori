@@ -17,6 +17,7 @@ val bridgeModule = module {
         StateSynchronizer(
             stateManager = get(),
             moriEngine = engine,
+            metricCalculator = get(),
             scope = scope
         )
     }

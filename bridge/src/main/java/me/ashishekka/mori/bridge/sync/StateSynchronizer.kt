@@ -4,6 +4,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import me.ashishekka.mori.bridge.metrics.MetricCalculator
+import me.ashishekka.mori.bridge.metrics.ScaleMode
 import me.ashishekka.mori.engine.core.MoriEngine
 import me.ashishekka.mori.engine.core.MoriEngineState
 import me.ashishekka.mori.persona.state.StateManager
@@ -18,6 +20,7 @@ import me.ashishekka.mori.persona.state.WorldState
 class StateSynchronizer(
     private val stateManager: StateManager,
     private val moriEngine: MoriEngine,
+    private val metricCalculator: MetricCalculator,
     private val scope: CoroutineScope
 ) {
     private var job: Job? = null
@@ -42,6 +45,21 @@ class StateSynchronizer(
     fun stop() {
         job?.cancel()
         job = null
+    }
+
+    /**
+     * Recalculates the viewport stage based on reference dimensions.
+     * Uses ScaleMode.FILL to ensure the screen is always covered.
+     */
+    fun updateViewport(refW: Float, refH: Float) {
+        val engineState = moriEngine.state
+        val scale = metricCalculator.calculateScaleFactor(refW, refH, ScaleMode.FILL)
+        
+        engineState.viewportReferenceScale = scale
+        engineState.viewportSafeX = metricCalculator.getCenterXOffset(refW, scale)
+        engineState.viewportSafeY = metricCalculator.getCenterYOffset(refH, scale)
+        engineState.viewportSafeWidth = refW * scale
+        engineState.viewportSafeHeight = refH * scale
     }
 
     /**

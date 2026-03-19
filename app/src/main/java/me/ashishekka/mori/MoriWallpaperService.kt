@@ -65,6 +65,7 @@ class MoriWallpaperService : WallpaperService() {
             super.onSurfaceChanged(holder, format, width, height)
             val density = resources.displayMetrics.density
             metricCalculator.updateMetrics(width, height, density)
+            stateSynchronizer.updateViewport(1000f, 1000f)
             moriEngine.onSurfaceChanged(width, height, density)
             // Initial frame when surface is created or changed
             moriEngine.onDrawFrame()

@@ -58,7 +58,7 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 
 ### 3.2 Geometry & Scaling (The Dumb Engine)
 - [x] **3.2.1 Metric Calculator:** Implement DP-to-Pixel conversion logic in the Bridge.
-- [ ] **3.2.2 Visual Handover:** Pre-calculate visual offsets so the Engine remains purely pixel-based.
+- [x] **3.2.2 Visual Handover:** Pre-calculate visual offsets so the Engine remains purely pixel-based.
 
 ### 3.3 Phase 3 Finalization
 - [ ] **3.3.1 Phase 3 Finalization:** Documentation, Retrospective, and Tagging.

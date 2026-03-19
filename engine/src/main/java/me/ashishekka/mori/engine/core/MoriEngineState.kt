@@ -38,6 +38,22 @@ class MoriEngineState {
     var atmosLightLevel: Float = 1f
     var atmosIsPocketed: Boolean = false
     
+    // === VIEWPORT (Geometric Handover) ===
+    // These values translate the Artist's "Reference Canvas" (e.g. 1000x1000 units)
+    // into the physical pixel space of the device. This ensures the Engine stays
+    // "dumb" and only performs minimal pixel math.
+    
+    /** The X pixel offset to the start of the safe design area (top-left). */
+    var viewportSafeX: Float = 0f
+    /** The Y pixel offset to the start of the safe design area (top-left). */
+    var viewportSafeY: Float = 0f
+    /** The actual pixel width of the scaled reference canvas. */
+    var viewportSafeWidth: Float = 0f
+    /** The actual pixel height of the scaled reference canvas. */
+    var viewportSafeHeight: Float = 0f
+    /** The multiplier used to convert design units to physical pixels. */
+    var viewportReferenceScale: Float = 1f
+
     // === SURFACE (Geometry) ===
     var surfaceWidth: Int = 0
     var surfaceHeight: Int = 0
