@@ -5,6 +5,7 @@ import android.view.SurfaceHolder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import me.ashishekka.mori.bridge.sync.StateSynchronizer
 import me.ashishekka.mori.engine.core.MoriEngine
 import me.ashishekka.mori.engine.core.interfaces.EngineTicker
 import me.ashishekka.mori.engine.core.interfaces.RenderSurface
@@ -35,8 +36,7 @@ class MoriWallpaperService : WallpaperService() {
         private val ticker: EngineTicker by inject()
         private val renderSurface: RenderSurface by inject { parametersOf(this) }
         private val moriEngine: MoriEngine by inject { parametersOf(ticker, renderSurface) }
-        
-        private var stateCollectionJob: Job? = null
+        private val stateSynchronizer: StateSynchronizer by inject { parametersOf(engineScope, moriEngine) }
 
         override fun onVisibilityChanged(visible: Boolean) {
             super.onVisibilityChanged(visible)
@@ -47,27 +47,12 @@ class MoriWallpaperService : WallpaperService() {
                 // TODO: Replace with DSL-driven Rule Engine in Phase 6.
                 moriEngine.addEffect(DebugPulseRenderer())
                 moriEngine.start()
-                startStateCollection()
+                stateSynchronizer.start()
             } else {
                 lifecycleManager.onStop()
                 moriEngine.stop()
-                stopStateCollection()
+                stateSynchronizer.stop()
             }
-        }
-
-        private fun startStateCollection() {
-            if (stateCollectionJob?.isActive == true) return
-            stateCollectionJob = engineScope.launch {
-                stateManager.state.collect { state ->
-                    // 2.1.4: Orchestrator triggers on-demand rendering on state change
-                    moriEngine.requestFrame()
-                }
-            }
-        }
-
-        private fun stopStateCollection() {
-            stateCollectionJob?.cancel()
-            stateCollectionJob = null
         }
 
         override fun onCreate(surfaceHolder: SurfaceHolder) {
@@ -86,7 +71,7 @@ class MoriWallpaperService : WallpaperService() {
             super.onSurfaceDestroyed(holder)
             
             lifecycleManager.onStop()
-            stopStateCollection()
+            stateSynchronizer.stop()
             moriEngine.onDestroy()
         }
     }

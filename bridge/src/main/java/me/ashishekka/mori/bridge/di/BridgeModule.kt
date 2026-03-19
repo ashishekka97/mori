@@ -1,5 +1,8 @@
 package me.ashishekka.mori.bridge.di
 
+import kotlinx.coroutines.CoroutineScope
+import me.ashishekka.mori.bridge.sync.StateSynchronizer
+import me.ashishekka.mori.engine.core.MoriEngine
 import org.koin.dsl.module
 
 /**
@@ -7,5 +10,11 @@ import org.koin.dsl.module
  * Acts as the translator between Persona (Data) and Engine (Pixels).
  */
 val bridgeModule = module {
-    // Placeholder for StateSynchronizer and MetricCalculator in upcoming tasks
+    factory { (scope: CoroutineScope, engine: MoriEngine) ->
+        StateSynchronizer(
+            stateManager = get(),
+            moriEngine = engine,
+            scope = scope
+        )
+    }
 }
