@@ -57,7 +57,7 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 - [x] **3.1.3 State Synchronizer:** Implement the `Flow` collector that performs the zero-allocation handover from `WorldState` to `MoriEngineState`.
 
 ### 3.2 Geometry & Scaling (The Dumb Engine)
-- [ ] **3.2.1 Metric Calculator:** Implement DP-to-Pixel conversion logic in the Bridge.
+- [x] **3.2.1 Metric Calculator:** Implement DP-to-Pixel conversion logic in the Bridge.
 - [ ] **3.2.2 Visual Handover:** Pre-calculate visual offsets so the Engine remains purely pixel-based.
 
 ### 3.3 Phase 3 Finalization
