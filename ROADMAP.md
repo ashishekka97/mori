@@ -54,7 +54,7 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 ### 3.1 Data Handover
 - [x] **3.1.1 MoriEngineState:** Create the mutable, pre-allocated mirror of `WorldState`. (Completed in 2.2.1)
 - [x] **3.1.2 Bridge Module Setup:** Initialize the `:bridge` Android module and define its DI boundaries.
-- [ ] **3.1.3 State Synchronizer:** Implement the `Flow` collector that performs the zero-allocation handover from `WorldState` to `MoriEngineState`.
+- [x] **3.1.3 State Synchronizer:** Implement the `Flow` collector that performs the zero-allocation handover from `WorldState` to `MoriEngineState`.
 
 ### 3.2 Geometry & Scaling (The Dumb Engine)
 - [ ] **3.2.1 Metric Calculator:** Implement DP-to-Pixel conversion logic in the Bridge.

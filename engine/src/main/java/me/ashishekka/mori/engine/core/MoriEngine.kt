@@ -19,7 +19,7 @@ class MoriEngine(
 ) {
 
     private var isRunning = false
-    private val state = MoriEngineState()
+    val state = MoriEngineState()
 
     // FPS Control
     var targetFps: Int = 60

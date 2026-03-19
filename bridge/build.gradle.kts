@@ -49,4 +49,5 @@ dependencies {
     testImplementation(libs.mockk)
     testImplementation(libs.turbine)
     testImplementation(libs.koin.test)
+    testImplementation(libs.kotlinx.coroutines.test)
 }
