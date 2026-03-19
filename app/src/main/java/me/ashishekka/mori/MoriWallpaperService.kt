@@ -5,6 +5,7 @@ import android.view.SurfaceHolder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import me.ashishekka.mori.bridge.metrics.MetricCalculator
 import me.ashishekka.mori.bridge.sync.StateSynchronizer
 import me.ashishekka.mori.engine.core.MoriEngine
 import me.ashishekka.mori.engine.core.interfaces.EngineTicker
@@ -25,6 +26,7 @@ class MoriWallpaperService : WallpaperService() {
 
     private val lifecycleManager: MoriLifecycleManager by inject()
     private val stateManager: StateManager by inject()
+    private val metricCalculator: MetricCalculator by inject()
     private val engineScope: CoroutineScope by inject(named("EngineScope"))
 
     override fun onCreateEngine(): Engine {
@@ -62,6 +64,7 @@ class MoriWallpaperService : WallpaperService() {
         override fun onSurfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
             super.onSurfaceChanged(holder, format, width, height)
             val density = resources.displayMetrics.density
+            metricCalculator.updateMetrics(width, height, density)
             moriEngine.onSurfaceChanged(width, height, density)
             // Initial frame when surface is created or changed
             moriEngine.onDrawFrame()
