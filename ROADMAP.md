@@ -61,7 +61,7 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 - [x] **3.2.2 Visual Handover:** Pre-calculate visual offsets so the Engine remains purely pixel-based.
 
 ### 3.3 Phase 3 Finalization
-- [ ] **3.3.1 Phase 3 Finalization:** Documentation, Retrospective, and Tagging.
+- [x] **3.3.1 Phase 3 Finalization:** Documentation, Retrospective, and Tagging.
 
 ---
 

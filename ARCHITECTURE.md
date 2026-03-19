@@ -86,22 +86,16 @@ This ensures that the rendering thread never touches the Android Framework, neve
 
 ---
 
-## 5. Phase 2 Retrospective: The Pulse Engine
+## 6. Phase 3 Retrospective: The Engine Bridge
 
 **Status:** Completed (March 2026)
 
 ### Summary of Decisions
-1.  **Zero-Allocation Core:** Implemented `LayerManager` using a fixed-size pre-allocated array (16 layers) and manual indexing. This ensures that the rendering loop never triggers the Garbage Collector, even with multiple active effects.
-2.  **Agnostic Timing:** Decoupled the rendering heartbeat from the Android `Choreographer`. The engine now consumes a generic `onTick(nanos)` signal, allowing for deterministic unit testing of frame-skipping and FPS capping logic.
-3.  **Flat-Memory Mirror (`MoriEngineState`):** Created a mutable primitive-only mirror of the `WorldState`. This allows the bridge to copy data once per frame, while renderers read from a stable, thread-safe memory block without allocations.
-4.  **Constructor-Injected Rendering:** Refactored `MoriEngine` to accept all its managers (`Ticker`, `Surface`, `LayerManager`) via constructor injection. This enabled 100% test coverage of the engine's core orchestration logic.
+1.  **The Dedicated :bridge Module:** Extracted all handover logic from the `:app` module into a standalone `:bridge` Android Library. This ensures the app entry point remains a thin wrapper while the complex translation logic is isolated and unit-testable.
+2.  **The "Stage vs. Actor" Model:** Established a clear boundary between geometry and rendering. The Bridge acts as the **Stage Manager**, pre-calculating viewport bounds and scale factors, while the Engine's renderers act as **Actors** that simply read those pixel-perfect limits.
+3.  **Zero-Allocation Data Handover:** Implemented the `StateSynchronizer` using manual field-by-field mapping from `WorldState` to `MoriEngineState`. This satisfies the core mandate by ensuring no garbage collection pressure is created during the data transfer.
+4.  **Virtual Camera (MetricCalculator):** Centralized all DP-to-Pixel and aspect-ratio math into a single component. Supporting `FIT` and `FILL` scaling modes ensures the wallpaper is robust against Android's diverse screen ecosystem.
 
 ### State of the Machine
-*   **The Heartbeat (:engine):** Robust. Capable of 30/60 FPS toggling, Z-Order layer management, and automatic fallback to a safe static state on failure. Includes `DebugPulseRenderer` for visual validation.
-*   **The Plumbing (:app):** Ready. The `ChoreographerTicker` and `SurfaceHolderRenderSurface` provide the high-performance Android bindings needed for the engine to breathe.
-
-### Visual Validation (Smoke Test)
-We implemented a `DebugPulseRenderer` that oscillates the background color between deep purple and black. This proves that the multi-module orchestration is working:
-1.  **Ticker:** Driving the loop via Android Choreographer.
-2.  **Manager:** Correctfully sorting and iterating layers.
-3.  **Canvas:** Succesfully drawing platform-agnostic pixels to the Android surface.
+*   **The Translator (:bridge):** Robust. Handles background state collection, atomic mirroring, and density-aware coordinate scaling.
+*   **The Blueprint (:engine):** Ready for high-level art. All renderers now have immediate access to a "Safe Zone" pixel boundary without performing math.

@@ -49,11 +49,10 @@ class StateSynchronizer(
 
     /**
      * Recalculates the viewport stage based on reference dimensions.
-     * Uses ScaleMode.FILL to ensure the screen is always covered.
      */
-    fun updateViewport(refW: Float, refH: Float) {
+    fun updateViewport(refW: Float, refH: Float, mode: ScaleMode = ScaleMode.FILL) {
         val engineState = moriEngine.state
-        val scale = metricCalculator.calculateScaleFactor(refW, refH, ScaleMode.FILL)
+        val scale = metricCalculator.calculateScaleFactor(refW, refH, mode)
         
         engineState.viewportReferenceScale = scale
         engineState.viewportSafeX = metricCalculator.getCenterXOffset(refW, scale)
