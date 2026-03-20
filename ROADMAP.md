@@ -66,25 +66,26 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 ---
 
 ## Phase 4: Persona (Data Collectors)
-*Goal: Atomic collectors for device metrics with battery-aware ticking.*
+*Goal: Atomic collectors for device metrics with Energy-Rated providers.*
 
-### 4.1 Energy & Environment (Real-time)
-- [ ] **4.1.1 Battery Provider:** Implement the `BroadcastReceiver` for level/charging status.
-- [ ] **4.1.2 Thermal Provider:** Implement the `PowerManager` thermal status listener.
-- [ ] **4.1.3 Atmos Provider:** Implement Light/Proximity sensor fusion.
+### 4.1 Passive Pulse (Grade A - Passive)
+- [ ] **4.1.1 Energy Provider:** Battery level, Charging, and Power-Save status.
+- [ ] **4.1.2 Chronos Provider:** 1-minute resolution day progress and Next Alarm sync.
+- [ ] **4.1.3 System Zen:** DND status, Ringer mode, and Media active pulse.
 
-### 4.2 Chronos & Celestial (Low-Frequency)
-- [ ] **4.2.1 Time Ticker:** Implement the 1-minute system clock provider.
-- [ ] **4.2.2 Solar Math:** Implement low-frequency sun position updates (1-5 min).
-- [ ] **4.2.3 Lunar Math:** Implement low-frequency moon phase updates.
-- [ ] **4.2.4 Season Progress:** Implement day-of-year seasonal calculator.
+### 4.2 Celestial Calculus (Grade A/B - Math-Heavy)
+- [ ] **4.2.1 Solar Math:** Local Sun position based on time and coarse location.
+- [ ] **4.2.2 Lunar Math:** Local Moon phase and illumination calculations.
 
-### 4.3 Zen & Vitality (Optional/Special Permissions)
-- [ ] **4.3.1 DND Provider:** Implement the Do Not Disturb status listener.
-- [ ] **4.3.2 Usage Provider (Optional):** Implement `UsageStatsManager` with graceful fallback if permission is missing.
-- [ ] **4.3.3 Health Skeleton:** Create the `HealthConnect` bridge.
+### 4.3 Environmental Snapshots (Grade B - Gated)
+- [ ] **4.3.1 Atmos Provider:** Ambient Light "Burst" logic (Snapshot on visibility).
+- [ ] **4.3.2 Thermal Provider:** System thermal throttling levels.
 
-### 4.4 Phase 4 Finalization
+### 4.4 Narrative Workers (Grade B/C - Periodic)
+- [ ] **4.4.1 Vitality Provider:** Step count and health goal progress (Worker-driven).
+- [ ] **4.4.2 Social Provider:** Notification frequency summaries (Zen Pulse).
+
+### 4.5 Phase 4 Finalization
 - [ ] **4.4.1 Phase 4 Finalization:** Documentation, Retrospective, and Tagging.
 
 ---
