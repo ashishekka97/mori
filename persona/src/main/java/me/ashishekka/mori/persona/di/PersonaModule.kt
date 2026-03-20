@@ -16,11 +16,13 @@ import me.ashishekka.mori.persona.sensor.AndroidVitalityProvider
 import me.ashishekka.mori.persona.sensor.AndroidZenProvider
 import me.ashishekka.mori.persona.sensor.BuildVersionProvider
 import me.ashishekka.mori.persona.sensor.DefaultBuildVersionProvider
+import me.ashishekka.mori.persona.sensor.DefaultThermalListenerProvider
 import me.ashishekka.mori.persona.sensor.LunarCalculator
 import me.ashishekka.mori.persona.sensor.MoriStateProviderRegistry
 import me.ashishekka.mori.persona.sensor.SolarCalculator
 import me.ashishekka.mori.persona.sensor.StateProvider
 import me.ashishekka.mori.persona.sensor.StateProviderRegistry
+import me.ashishekka.mori.persona.sensor.ThermalListenerProvider
 import me.ashishekka.mori.persona.state.MoriStateManager
 import me.ashishekka.mori.persona.state.MutableStateManager
 import me.ashishekka.mori.persona.state.StateManager
@@ -35,13 +37,14 @@ val personaModule = module {
 
     // === SENSORS & PROVIDERS ===
     single<BuildVersionProvider> { DefaultBuildVersionProvider() }
+    single<ThermalListenerProvider> { DefaultThermalListenerProvider() }
     single { SolarCalculator() }
     single { LunarCalculator() }
     factory<StateProvider>(named("Energy")) { AndroidEnergyProvider(get()) }
     factory<StateProvider>(named("Chronos")) { AndroidChronosProvider(get()) }
     factory<StateProvider>(named("Zen")) { AndroidZenProvider(get()) }
-    factory<StateProvider>(named("Solar")) { AndroidSolarProvider(get(), get()) }
-    factory<StateProvider>(named("Lunar")) { AndroidLunarProvider(get(), get()) }
+    factory<StateProvider>(named("Solar")) { AndroidSolarProvider(get(), get<SolarCalculator>()) }
+    factory<StateProvider>(named("Lunar")) { AndroidLunarProvider(get(), get<LunarCalculator>()) }
     factory<StateProvider>(named("Atmos")) { AndroidAtmosProvider(get(), get(named("PersonaScope"))) }
     factory<StateProvider>(named("Thermal")) { AndroidThermalProvider(get(), get()) }
     factory<StateProvider>(named("Vitality")) { AndroidVitalityProvider(get()) }

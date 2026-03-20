@@ -7,7 +7,8 @@ package me.ashishekka.mori.engine.core.interfaces
  */
 interface EngineCanvas {
     fun drawColor(colorInt: Int)
-    fun drawRect(left: Float, top: Float, right: Float, bottom: Float, color: Int, isFilled: Boolean = true)
+    fun drawRect(left: Float, top: Float, right: Float, bottom: Float, color: Int, isFilled: Boolean = true, thickness: Float = 4f)
+    fun drawCircle(centerX: Float, centerY: Float, radius: Float, color: Int, isFilled: Boolean = true, thickness: Float = 4f)
     // Future: drawBitmap, etc.
 }
 

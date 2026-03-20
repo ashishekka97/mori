@@ -12,6 +12,11 @@ import kotlinx.coroutines.flow.Flow
 interface StateProvider {
 
     /**
+     * The battery impact rating of this provider.
+     */
+    val energyRating: EnergyRating
+
+    /**
      * A reactive stream of updates emitted by this provider.
      */
     val data: Flow<StateUpdate>

@@ -99,3 +99,25 @@ This ensures that the rendering thread never touches the Android Framework, neve
 ### State of the Machine
 *   **The Translator (:bridge):** Robust. Handles background state collection, atomic mirroring, and density-aware coordinate scaling.
 *   **The Blueprint (:engine):** Ready for high-level art. All renderers now have immediate access to a "Safe Zone" pixel boundary without performing math.
+
+---
+
+## 7. Phase 4 Retrospective: Persona (Data Collectors)
+
+**Status:** Completed (March 2026)
+
+### Summary of Decisions
+1.  **Energy-Rated Providers:** Categorized all system collectors into Grades (A, B, C) to ensure "Internal Excellence." Grade A (Passive) collectors like Battery and Time rely purely on system broadcasts, ensuring near-zero idle drain.
+2.  **Reactive State Handover:** Introduced the `StateUpdate` sealed hierarchy. This unified contract allows the `MoriStateManager` to remain a simple, reactive hub that merges multiple sensor streams into the `WorldState` without knowledge of Android-specific APIs.
+3.  **The "Burst" Sensor Strategy:** For Grade B sensors like Ambient Light, we implemented a 2-second "Burst" logic. The sensor is only active briefly when the wallpaper becomes visible, capturing a snapshot before shutting down to save power.
+4.  **Celestial & Narrative Readiness:** Built the foundational math for Solar/Lunar tracking and the "Health Pipe" for physical vitality. These systems are now ready to drive complex artistic biomes in Phase 7.
+
+### State of the Machine
+*   **The Brain (:persona):** Alive. It is actively sensing battery, time, focus, and environmental light.
+*   **The Translator (:bridge):** Fully functional. Correctly mapping normalized sensor data into pixel-perfect stage metrics.
+
+### Visual Validation (Living Pulse)
+The final smoke test for Phase 4 is the "Living Core" demo. A central pulsing circle now reacts to:
+*   **Speed:** Driven by real-time battery level and charging status.
+*   **Color:** Driven by the local sun altitude (shifting from gold to purple).
+*   **Size:** Driven by the user's current notification tray "noise."

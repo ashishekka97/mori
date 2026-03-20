@@ -13,13 +13,18 @@ import org.junit.Test
 class AndroidSocialProviderTest {
 
     @Test
-    fun `start should emit initial social noise level`() = runTest {
+    fun `start should emit initial social noise level excluding groups`() = runTest {
         // Given
         val mockContext = mockk<Context>(relaxed = true)
         val mockNotificationManager = mockk<NotificationManager>()
         
-        // Mock 5 active notifications
-        val mockNotifications = Array(5) { mockk<StatusBarNotification>() }
+        // Mock 3 individual notifications and 1 summary group
+        val individual1 = mockk<StatusBarNotification> { every { isGroup } returns false }
+        val individual2 = mockk<StatusBarNotification> { every { isGroup } returns false }
+        val individual3 = mockk<StatusBarNotification> { every { isGroup } returns false }
+        val summary = mockk<StatusBarNotification> { every { isGroup } returns true }
+        
+        val mockNotifications = arrayOf(individual1, individual2, individual3, summary)
         every { mockNotificationManager.activeNotifications } returns mockNotifications
         every { mockContext.getSystemService(Context.NOTIFICATION_SERVICE) } returns mockNotificationManager
 
@@ -31,8 +36,8 @@ class AndroidSocialProviderTest {
 
             // Then
             val state = awaitItem() as StateUpdate.Social
-            // 5 / 10 = 0.5
-            assertEquals(0.5f, state.noiseLevel, 0.01f)
+            // Should count only the 3 individuals: 3 / 10 = 0.3
+            assertEquals(0.3f, state.noiseLevel, 0.01f)
         }
     }
 
@@ -43,7 +48,7 @@ class AndroidSocialProviderTest {
         val mockNotificationManager = mockk<NotificationManager>()
         
         // Mock 15 active notifications
-        val mockNotifications = Array(15) { mockk<StatusBarNotification>() }
+        val mockNotifications = Array(15) { mockk<StatusBarNotification> { every { isGroup } returns false } }
         every { mockNotificationManager.activeNotifications } returns mockNotifications
         every { mockContext.getSystemService(Context.NOTIFICATION_SERVICE) } returns mockNotificationManager
 
