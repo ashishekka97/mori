@@ -7,8 +7,10 @@ import me.ashishekka.mori.persona.lifecycle.DefaultMoriLifecycleManager
 import me.ashishekka.mori.persona.lifecycle.MoriLifecycleManager
 import me.ashishekka.mori.persona.sensor.AndroidChronosProvider
 import me.ashishekka.mori.persona.sensor.AndroidEnergyProvider
+import me.ashishekka.mori.persona.sensor.AndroidLunarProvider
 import me.ashishekka.mori.persona.sensor.AndroidSolarProvider
 import me.ashishekka.mori.persona.sensor.AndroidZenProvider
+import me.ashishekka.mori.persona.sensor.LunarCalculator
 import me.ashishekka.mori.persona.sensor.MoriStateProviderRegistry
 import me.ashishekka.mori.persona.sensor.SolarCalculator
 import me.ashishekka.mori.persona.sensor.StateProvider
@@ -27,10 +29,12 @@ val personaModule = module {
 
     // === SENSORS & PROVIDERS ===
     single { SolarCalculator() }
+    single { LunarCalculator() }
     factory<StateProvider>(named("Energy")) { AndroidEnergyProvider(get()) }
     factory<StateProvider>(named("Chronos")) { AndroidChronosProvider(get()) }
     factory<StateProvider>(named("Zen")) { AndroidZenProvider(get()) }
     factory<StateProvider>(named("Solar")) { AndroidSolarProvider(get(), get()) }
+    factory<StateProvider>(named("Lunar")) { AndroidLunarProvider(get(), get()) }
 
     single<StateProviderRegistry> {
         MoriStateProviderRegistry(
@@ -38,7 +42,8 @@ val personaModule = module {
                 get(named("Energy")),
                 get(named("Chronos")),
                 get(named("Zen")),
-                get(named("Solar"))
+                get(named("Solar")),
+                get(named("Lunar"))
             )
         )
     }
