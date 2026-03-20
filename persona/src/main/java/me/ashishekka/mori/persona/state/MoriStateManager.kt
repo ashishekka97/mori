@@ -103,6 +103,13 @@ internal class MoriStateManager(
                     )
                 }
             }
+            is StateUpdate.Social -> {
+                update { current ->
+                    current.copy(
+                        zenSocialNoise = update.noiseLevel
+                    )
+                }
+            }
         }
     }
 }

@@ -10,6 +10,7 @@ import me.ashishekka.mori.persona.sensor.AndroidChronosProvider
 import me.ashishekka.mori.persona.sensor.AndroidEnergyProvider
 import me.ashishekka.mori.persona.sensor.AndroidLunarProvider
 import me.ashishekka.mori.persona.sensor.AndroidSolarProvider
+import me.ashishekka.mori.persona.sensor.AndroidSocialProvider
 import me.ashishekka.mori.persona.sensor.AndroidThermalProvider
 import me.ashishekka.mori.persona.sensor.AndroidVitalityProvider
 import me.ashishekka.mori.persona.sensor.AndroidZenProvider
@@ -44,6 +45,7 @@ val personaModule = module {
     factory<StateProvider>(named("Atmos")) { AndroidAtmosProvider(get(), get(named("PersonaScope"))) }
     factory<StateProvider>(named("Thermal")) { AndroidThermalProvider(get(), get()) }
     factory<StateProvider>(named("Vitality")) { AndroidVitalityProvider(get()) }
+    factory<StateProvider>(named("Social")) { AndroidSocialProvider(get()) }
 
     single<StateProviderRegistry> {
         MoriStateProviderRegistry(
@@ -55,7 +57,8 @@ val personaModule = module {
                 get(named("Lunar")),
                 get(named("Atmos")),
                 get(named("Thermal")),
-                get(named("Vitality"))
+                get(named("Vitality")),
+                get(named("Social"))
             )
         )
     }
