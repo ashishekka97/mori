@@ -2,46 +2,58 @@ package me.ashishekka.mori.engine.renderer
 
 import me.ashishekka.mori.engine.core.MoriEngineState
 import me.ashishekka.mori.engine.core.interfaces.EngineCanvas
+import kotlin.math.min
 import kotlin.math.sin
 
 /**
- * A debug renderer that pulses the background color within the safe area.
- * Verifies that the rendering loop is active and the LayerManager is working.
+ * A debug renderer that pulses a central "Living Core" circle.
+ * Verifies that multiple providers (Energy, Chronos, Zen, Atmos) are correctly
+ * mapped and reactive.
  */
 class DebugPulseRenderer : EffectRenderer {
 
-    override val zOrder: Int = 0 // Background layer
+    override val zOrder: Int = 0 
 
     private var pulseTime = 0f
     private var colorValue = 0
     private lateinit var state: MoriEngineState
 
     override fun onSurfaceChanged(width: Int, height: Int, density: Float) {
-        // No-op for pulse
+        // No-op
     }
 
     override fun update(state: MoriEngineState) {
         this.state = state
-        // Increment pulse based on a fixed speed (independent of FPS)
-        pulseTime += 0.05f
         
-        val intensity = ((sin(pulseTime) + 1f) / 2f) * 0.3f // 0.0 to 0.3 range
+        // 1. Battery drives Pulse Speed
+        val speed = 0.02f + (state.energyBatteryLevel * 0.08f)
+        pulseTime += if (state.energyIsCharging) speed * 2f else speed
+        
+        val intensity = ((sin(pulseTime) + 1f) / 2f) * 0.5f
         colorValue = (intensity * 255).toInt()
     }
 
     override fun render(canvas: EngineCanvas) {
-        // 1. Draw the Pulsing Box
-        val color = (0xFF shl 24) or (colorValue shl 16) or (colorValue)
-        canvas.drawRect(
-            state.viewportSafeX,
-            state.viewportSafeY,
-            state.viewportSafeX + state.viewportSafeWidth,
-            state.viewportSafeY + state.viewportSafeHeight,
-            color,
-            isFilled = true
-        )
+        // 2. Solar Altitude drives Color (Gold for Day, Purple for Night)
+        val color = if (state.chronosSunAltitude > 0) {
+            (0xFF shl 24) or (colorValue shl 16) or ((colorValue * 0.8f).toInt() shl 8)
+        } else {
+            (0xFF shl 24) or (colorValue shl 16) or (colorValue)
+        }
+        
+        // 3. Viewport metrics drive positioning
+        val centerX = state.viewportSafeX + (state.viewportSafeWidth / 2f)
+        val centerY = state.viewportSafeY + (state.viewportSafeHeight / 2f)
+        
+        // 4. Social Noise subtly expands the radius
+        val baseRadius = min(state.viewportSafeWidth, state.viewportSafeHeight) * 0.2f
+        val noiseRadius = state.zenSocialNoise * 50f
+        val finalRadius = baseRadius + noiseRadius
 
-        // 2. Draw a white border around the Safe Area for verification
+        // Draw the "Living Core"
+        canvas.drawCircle(centerX, centerY, finalRadius, color, isFilled = true)
+
+        // Draw the "Safe Area" border for verification
         canvas.drawRect(
             state.viewportSafeX,
             state.viewportSafeY,

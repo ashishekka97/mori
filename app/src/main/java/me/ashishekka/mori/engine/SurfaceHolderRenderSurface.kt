@@ -23,6 +23,13 @@ class AndroidEngineCanvas(val nativeCanvas: Canvas) : EngineCanvas {
         paint.strokeWidth = if (isFilled) 0f else 4f
         nativeCanvas.drawRect(left, top, right, bottom, paint)
     }
+
+    override fun drawCircle(centerX: Float, centerY: Float, radius: Float, color: Int, isFilled: Boolean) {
+        paint.color = color
+        paint.style = if (isFilled) Paint.Style.FILL else Paint.Style.STROKE
+        paint.strokeWidth = if (isFilled) 0f else 4f
+        nativeCanvas.drawCircle(centerX, centerY, radius, paint)
+    }
 }
 
 /**
