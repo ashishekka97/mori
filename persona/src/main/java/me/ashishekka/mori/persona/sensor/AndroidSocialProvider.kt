@@ -44,16 +44,22 @@ class AndroidSocialProvider(
     }
 
     private fun emitCurrentState() {
-        // Simple snapshot: count how many notifications are currently visible
+        // Simple snapshot: count how many notifications are currently visible.
         // Note: Accessing getActiveNotifications() doesn't require NotificationListenerService permission,
         // but it only returns notifications posted by THIS app unless the app is a system app or 
         // has special access. 
         // FALLBACK: We will treat this as a "Zen Pulse" skeleton. 
         // In Phase 10, we'll implement the full Listener Service.
-        val activeCount = notificationManager.activeNotifications.size
+        
+        val activeNotifications = notificationManager.activeNotifications
+        // Count individual notifications, excluding group summaries to get the true "Noise"
+        val activeCount = activeNotifications.count { !it.isGroup }
+        
+        // If no individual notifications are found (all grouped), fall back to the total count
+        val finalCount = if (activeCount == 0) activeNotifications.size else activeCount
         
         // Normalize: 10 notifications = 1.0 (Full Noise)
-        val noiseLevel = (activeCount / 10f).coerceIn(0f, 1f)
+        val noiseLevel = (finalCount / 10f).coerceIn(0f, 1f)
 
         _data.tryEmit(StateUpdate.Social(noiseLevel))
     }
