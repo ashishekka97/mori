@@ -1,9 +1,7 @@
 package me.ashishekka.mori.persona.sensor
 
 import android.content.Context
-import android.os.Build
 import android.os.PowerManager
-import androidx.annotation.RequiresApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 
@@ -13,32 +11,31 @@ import kotlinx.coroutines.flow.asSharedFlow
  */
 class AndroidThermalProvider(
     private val context: Context,
-    private val buildVersionProvider: BuildVersionProvider = DefaultBuildVersionProvider()
-) : StateProvider, PowerManager.OnThermalStatusChangedListener {
+    private val listenerProvider: ThermalListenerProvider = DefaultThermalListenerProvider()
+) : StateProvider {
 
     private val _data = MutableSharedFlow<StateUpdate>(replay = 1)
     override val data = _data.asSharedFlow()
 
     private val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
 
+    private val thermalListener = PowerManager.OnThermalStatusChangedListener { status ->
+        emitCurrentState(status)
+    }
+
     override fun start() {
-        if (buildVersionProvider.sdkInt >= Build.VERSION_CODES.Q) {
-            powerManager.addThermalStatusListener(this)
-            emitCurrentState(powerManager.currentThermalStatus)
-        } else {
-            // Fallback for older devices: always assume "Cool"
-            _data.tryEmit(StateUpdate.Thermal(0.0f))
-        }
+        listenerProvider.register(powerManager, thermalListener)
+        emitCurrentState(listenerProvider.getCurrentStatus(powerManager))
     }
 
     override fun stop() {
-        if (buildVersionProvider.sdkInt >= Build.VERSION_CODES.Q) {
-            powerManager.removeThermalStatusListener(this)
-        }
+        listenerProvider.unregister(powerManager, thermalListener)
     }
 
-    @RequiresApi(Build.VERSION_CODES.Q)
-    override fun onThermalStatusChanged(status: Int) {
+    /**
+     * Internal helper to test status changes.
+     */
+    internal fun handleStatusChanged(status: Int) {
         emitCurrentState(status)
     }
 
