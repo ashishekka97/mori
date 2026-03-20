@@ -1,13 +1,20 @@
 package me.ashishekka.mori.persona.sensor
 
+import kotlinx.coroutines.flow.Flow
+
 /**
- * The StateProvider interface defines the lifecycle contract for all data collectors
- * within the Mori ecosystem (e.g., Battery, Thermal, Time).
+ * The StateProvider interface defines the lifecycle and data contract for all 
+ * data collectors within the Mori ecosystem (e.g., Battery, Thermal, Time).
  *
  * Implementations are responsible for registering and unregistering from
  * Android system events or periodic tasks.
  */
 interface StateProvider {
+
+    /**
+     * A reactive stream of updates emitted by this provider.
+     */
+    val data: Flow<StateUpdate>
 
     /**
      * Initializes the provider and begins data collection.

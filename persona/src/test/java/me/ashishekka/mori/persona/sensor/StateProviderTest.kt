@@ -13,6 +13,8 @@ class StateProviderTest {
     class MockStateProvider : StateProvider {
         var isStarted = false
             private set
+        
+        override val data = kotlinx.coroutines.flow.emptyFlow<StateUpdate>()
 
         override fun start() {
             isStarted = true

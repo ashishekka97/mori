@@ -13,6 +13,7 @@ class MoriLifecycleManagerTest {
 
     private class MockStateProviderRegistry : StateProviderRegistry {
         override val providers: List<StateProvider> = emptyList()
+        override val data = kotlinx.coroutines.flow.emptyFlow<me.ashishekka.mori.persona.sensor.StateUpdate>()
         var startCalled = false
         var stopCalled = false
 
