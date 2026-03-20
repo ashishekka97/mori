@@ -44,6 +44,10 @@ sealed class StateUpdate {
         val standGoalProgress: Float = 0f
     ) : StateUpdate()
 
+    data class Social(
+        val noiseLevel: Float
+    ) : StateUpdate()
+
     // Future: data class Social(...)
 
 
