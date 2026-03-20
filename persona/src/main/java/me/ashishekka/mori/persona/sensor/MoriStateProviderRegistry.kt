@@ -12,6 +12,9 @@ internal class MoriStateProviderRegistry(
     override val providers: List<StateProvider>
 ) : StateProviderRegistry {
 
+    override val energyRating: EnergyRating
+        get() = providers.maxOfOrNull { it.energyRating } ?: EnergyRating.GRADE_A
+
     override val data: Flow<StateUpdate> = providers.map { it.data }.merge()
 
     override fun start() {

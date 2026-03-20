@@ -17,6 +17,7 @@ class AndroidVitalityProvider(
     private val context: Context
 ) : StateProvider, SensorEventListener {
 
+    override val energyRating = EnergyRating.GRADE_B
     private val _data = MutableSharedFlow<StateUpdate>(replay = 1)
     override val data = _data.asSharedFlow()
 

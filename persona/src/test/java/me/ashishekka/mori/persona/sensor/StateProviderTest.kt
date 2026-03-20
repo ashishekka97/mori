@@ -11,6 +11,7 @@ class StateProviderTest {
      * and LifecycleManager correctly orchestrate the sensor lifecycles.
      */
     class MockStateProvider : StateProvider {
+        override val energyRating = EnergyRating.GRADE_A
         var isStarted = false
             private set
         

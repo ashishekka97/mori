@@ -2,6 +2,8 @@ package me.ashishekka.mori.persona.lifecycle
 
 import me.ashishekka.mori.persona.sensor.StateProviderRegistry
 import me.ashishekka.mori.persona.sensor.StateProvider
+import me.ashishekka.mori.persona.sensor.EnergyRating
+import me.ashishekka.mori.persona.sensor.StateUpdate
 
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -12,8 +14,9 @@ import org.junit.Test
 class MoriLifecycleManagerTest {
 
     private class MockStateProviderRegistry : StateProviderRegistry {
+        override val energyRating = EnergyRating.GRADE_A
         override val providers: List<StateProvider> = emptyList()
-        override val data = kotlinx.coroutines.flow.emptyFlow<me.ashishekka.mori.persona.sensor.StateUpdate>()
+        override val data = kotlinx.coroutines.flow.emptyFlow<StateUpdate>()
         var startCalled = false
         var stopCalled = false
 

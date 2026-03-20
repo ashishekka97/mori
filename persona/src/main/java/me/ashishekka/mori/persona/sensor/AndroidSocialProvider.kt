@@ -16,6 +16,7 @@ class AndroidSocialProvider(
     private val context: Context
 ) : StateProvider {
 
+    override val energyRating = EnergyRating.GRADE_C
     private val _data = MutableSharedFlow<StateUpdate>(replay = 1)
     override val data = _data.asSharedFlow()
 
