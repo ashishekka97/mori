@@ -16,5 +16,11 @@ sealed class StateUpdate {
         val nextAlarmTime: Long
     ) : StateUpdate()
 
-    // Future: data class Zen(...)
+    data class Zen(
+        val isDndActive: Boolean,
+        val isMusicActive: Boolean,
+        val ringerMode: Int
+    ) : StateUpdate()
+
+    // Future: data class Atmos(...)
 }

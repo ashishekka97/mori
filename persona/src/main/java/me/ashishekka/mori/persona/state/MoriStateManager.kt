@@ -57,6 +57,15 @@ internal class MoriStateManager(
                     )
                 }
             }
+            is StateUpdate.Zen -> {
+                update { current ->
+                    current.copy(
+                        zenIsDndActive = update.isDndActive,
+                        // Media activity adds a subtle "vibrancy" to the activity intensity
+                        vitalityActivityIntensity = if (update.isMusicActive) 0.2f else 0f
+                    )
+                }
+            }
         }
     }
 }
