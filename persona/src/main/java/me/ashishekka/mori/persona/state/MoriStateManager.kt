@@ -80,6 +80,13 @@ internal class MoriStateManager(
                     )
                 }
             }
+            is StateUpdate.Atmos -> {
+                update { current ->
+                    current.copy(
+                        atmosLightLevel = update.lightLevel
+                    )
+                }
+            }
         }
     }
 }

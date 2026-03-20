@@ -5,6 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import me.ashishekka.mori.persona.lifecycle.DefaultMoriLifecycleManager
 import me.ashishekka.mori.persona.lifecycle.MoriLifecycleManager
+import me.ashishekka.mori.persona.sensor.AndroidAtmosProvider
 import me.ashishekka.mori.persona.sensor.AndroidChronosProvider
 import me.ashishekka.mori.persona.sensor.AndroidEnergyProvider
 import me.ashishekka.mori.persona.sensor.AndroidLunarProvider
@@ -35,6 +36,7 @@ val personaModule = module {
     factory<StateProvider>(named("Zen")) { AndroidZenProvider(get()) }
     factory<StateProvider>(named("Solar")) { AndroidSolarProvider(get(), get()) }
     factory<StateProvider>(named("Lunar")) { AndroidLunarProvider(get(), get()) }
+    factory<StateProvider>(named("Atmos")) { AndroidAtmosProvider(get(), get(named("PersonaScope"))) }
 
     single<StateProviderRegistry> {
         MoriStateProviderRegistry(
@@ -43,7 +45,8 @@ val personaModule = module {
                 get(named("Chronos")),
                 get(named("Zen")),
                 get(named("Solar")),
-                get(named("Lunar"))
+                get(named("Lunar")),
+                get(named("Atmos"))
             )
         )
     }

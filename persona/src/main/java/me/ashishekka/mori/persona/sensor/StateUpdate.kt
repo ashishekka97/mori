@@ -30,6 +30,10 @@ sealed class StateUpdate {
         val phase: Float
     ) : StateUpdate()
 
-    // Future: data class Atmos(...)
+    data class Atmos(
+        val lightLevel: Float
+    ) : StateUpdate()
+
+    // Future: data class Thermal(...)
 
 }
