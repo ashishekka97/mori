@@ -38,6 +38,13 @@ sealed class StateUpdate {
         val stressLevel: Float
     ) : StateUpdate()
 
-    // Future: data class Vitality(...)
+    data class Vitality(
+        val stepsProgress: Float = 0f,
+        val sleepClarity: Float = 1f,
+        val standGoalProgress: Float = 0f
+    ) : StateUpdate()
+
+    // Future: data class Social(...)
+
 
 }

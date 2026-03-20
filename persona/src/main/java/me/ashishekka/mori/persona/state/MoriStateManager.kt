@@ -94,6 +94,15 @@ internal class MoriStateManager(
                     )
                 }
             }
+            is StateUpdate.Vitality -> {
+                update { current ->
+                    current.copy(
+                        vitalityStepsProgress = update.stepsProgress,
+                        vitalitySleepClarity = update.sleepClarity,
+                        vitalityStandGoalProgress = update.standGoalProgress
+                    )
+                }
+            }
         }
     }
 }
