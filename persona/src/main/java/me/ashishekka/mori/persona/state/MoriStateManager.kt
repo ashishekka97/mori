@@ -66,6 +66,13 @@ internal class MoriStateManager(
                     )
                 }
             }
+            is StateUpdate.Solar -> {
+                update { current ->
+                    current.copy(
+                        chronosSunAltitude = update.altitude
+                    )
+                }
+            }
         }
     }
 }
