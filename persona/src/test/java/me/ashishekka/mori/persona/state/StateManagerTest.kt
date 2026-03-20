@@ -4,12 +4,17 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import me.ashishekka.mori.persona.sensor.StateProviderRegistry
+import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -19,16 +24,27 @@ class StateManagerTest {
         every { data } returns emptyFlow()
         every { providers } returns emptyList()
     }
+    
+    private val testScope = TestScope(UnconfinedTestDispatcher())
+    private lateinit var stateManager: MoriStateManager
+
+    @Before
+    fun setUp() {
+        stateManager = MoriStateManager(mockRegistry, testScope)
+    }
+
+    @After
+    fun tearDown() {
+        testScope.cancel()
+    }
 
     @Test
     fun `initialState should match default WorldState`() = runTest {
-        val stateManager = MoriStateManager(mockRegistry, backgroundScope)
         assertEquals(WorldState(), stateManager.state.value)
     }
 
     @Test
     fun `update should atomically transform state`() = runTest {
-        val stateManager = MoriStateManager(mockRegistry, backgroundScope)
         val numCoroutines = 100
         val incrementPerCoroutine = 0.01f
 
@@ -48,7 +64,6 @@ class StateManagerTest {
 
     @Test
     fun `stateFlow should emit updated value`() = runTest {
-        val stateManager = MoriStateManager(mockRegistry, backgroundScope)
         val newState = WorldState(energyBatteryLevel = 0.5f)
 
         stateManager.update { newState }
