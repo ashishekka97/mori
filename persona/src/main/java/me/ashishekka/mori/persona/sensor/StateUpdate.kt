@@ -26,5 +26,10 @@ sealed class StateUpdate {
         val altitude: Float
     ) : StateUpdate()
 
-    // Future: data class Lunar(...)
+    data class Lunar(
+        val phase: Float
+    ) : StateUpdate()
+
+    // Future: data class Atmos(...)
+
 }

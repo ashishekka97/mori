@@ -73,6 +73,13 @@ internal class MoriStateManager(
                     )
                 }
             }
+            is StateUpdate.Lunar -> {
+                update { current ->
+                    current.copy(
+                        chronosMoonPhase = update.phase
+                    )
+                }
+            }
         }
     }
 }
