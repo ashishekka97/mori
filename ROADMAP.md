@@ -80,7 +80,7 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 
 ### 4.3 Environmental Snapshots (Grade B - Gated)
 - [x] **4.3.1 Atmos Provider:** Ambient Light "Burst" logic (Snapshot on visibility).
-- [ ] **4.3.2 Thermal Provider:** System thermal throttling levels.
+- [x] **4.3.2 Thermal Provider:** System thermal throttling levels.
 
 ### 4.4 Narrative Workers (Grade B/C - Periodic)
 - [ ] **4.4.1 Vitality Provider:** Step count and health goal progress (Worker-driven).
