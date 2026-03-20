@@ -10,7 +10,10 @@ import me.ashishekka.mori.persona.sensor.AndroidChronosProvider
 import me.ashishekka.mori.persona.sensor.AndroidEnergyProvider
 import me.ashishekka.mori.persona.sensor.AndroidLunarProvider
 import me.ashishekka.mori.persona.sensor.AndroidSolarProvider
+import me.ashishekka.mori.persona.sensor.AndroidThermalProvider
 import me.ashishekka.mori.persona.sensor.AndroidZenProvider
+import me.ashishekka.mori.persona.sensor.BuildVersionProvider
+import me.ashishekka.mori.persona.sensor.DefaultBuildVersionProvider
 import me.ashishekka.mori.persona.sensor.LunarCalculator
 import me.ashishekka.mori.persona.sensor.MoriStateProviderRegistry
 import me.ashishekka.mori.persona.sensor.SolarCalculator
@@ -29,6 +32,7 @@ import org.koin.dsl.module
 val personaModule = module {
 
     // === SENSORS & PROVIDERS ===
+    single<BuildVersionProvider> { DefaultBuildVersionProvider() }
     single { SolarCalculator() }
     single { LunarCalculator() }
     factory<StateProvider>(named("Energy")) { AndroidEnergyProvider(get()) }
@@ -37,6 +41,7 @@ val personaModule = module {
     factory<StateProvider>(named("Solar")) { AndroidSolarProvider(get(), get()) }
     factory<StateProvider>(named("Lunar")) { AndroidLunarProvider(get(), get()) }
     factory<StateProvider>(named("Atmos")) { AndroidAtmosProvider(get(), get(named("PersonaScope"))) }
+    factory<StateProvider>(named("Thermal")) { AndroidThermalProvider(get(), get()) }
 
     single<StateProviderRegistry> {
         MoriStateProviderRegistry(
@@ -46,7 +51,8 @@ val personaModule = module {
                 get(named("Zen")),
                 get(named("Solar")),
                 get(named("Lunar")),
-                get(named("Atmos"))
+                get(named("Atmos")),
+                get(named("Thermal"))
             )
         )
     }

@@ -87,6 +87,13 @@ internal class MoriStateManager(
                     )
                 }
             }
+            is StateUpdate.Thermal -> {
+                update { current ->
+                    current.copy(
+                        energyThermalStress = update.stressLevel
+                    )
+                }
+            }
         }
     }
 }

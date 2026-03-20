@@ -34,6 +34,10 @@ sealed class StateUpdate {
         val lightLevel: Float
     ) : StateUpdate()
 
-    // Future: data class Thermal(...)
+    data class Thermal(
+        val stressLevel: Float
+    ) : StateUpdate()
+
+    // Future: data class Vitality(...)
 
 }
