@@ -75,7 +75,7 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 
 
 ### 4.2 Celestial Calculus (Grade A/B - Math-Heavy)
-- [ ] **4.2.1 Solar Math:** Local Sun position based on time and coarse location.
+- [x] **4.2.1 Solar Math:** Local Sun position based on time and coarse location.
 - [ ] **4.2.2 Lunar Math:** Local Moon phase and illumination calculations.
 
 ### 4.3 Environmental Snapshots (Grade B - Gated)

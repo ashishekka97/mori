@@ -22,5 +22,9 @@ sealed class StateUpdate {
         val ringerMode: Int
     ) : StateUpdate()
 
-    // Future: data class Atmos(...)
+    data class Solar(
+        val altitude: Float
+    ) : StateUpdate()
+
+    // Future: data class Lunar(...)
 }

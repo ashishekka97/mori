@@ -7,8 +7,10 @@ import me.ashishekka.mori.persona.lifecycle.DefaultMoriLifecycleManager
 import me.ashishekka.mori.persona.lifecycle.MoriLifecycleManager
 import me.ashishekka.mori.persona.sensor.AndroidChronosProvider
 import me.ashishekka.mori.persona.sensor.AndroidEnergyProvider
+import me.ashishekka.mori.persona.sensor.AndroidSolarProvider
 import me.ashishekka.mori.persona.sensor.AndroidZenProvider
 import me.ashishekka.mori.persona.sensor.MoriStateProviderRegistry
+import me.ashishekka.mori.persona.sensor.SolarCalculator
 import me.ashishekka.mori.persona.sensor.StateProvider
 import me.ashishekka.mori.persona.sensor.StateProviderRegistry
 import me.ashishekka.mori.persona.state.MoriStateManager
@@ -24,16 +26,19 @@ import org.koin.dsl.module
 val personaModule = module {
 
     // === SENSORS & PROVIDERS ===
+    single { SolarCalculator() }
     factory<StateProvider>(named("Energy")) { AndroidEnergyProvider(get()) }
     factory<StateProvider>(named("Chronos")) { AndroidChronosProvider(get()) }
     factory<StateProvider>(named("Zen")) { AndroidZenProvider(get()) }
+    factory<StateProvider>(named("Solar")) { AndroidSolarProvider(get(), get()) }
 
     single<StateProviderRegistry> {
         MoriStateProviderRegistry(
             providers = listOf(
                 get(named("Energy")),
                 get(named("Chronos")),
-                get(named("Zen"))
+                get(named("Zen")),
+                get(named("Solar"))
             )
         )
     }
