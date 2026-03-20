@@ -69,9 +69,10 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 *Goal: Atomic collectors for device metrics with Energy-Rated providers.*
 
 ### 4.1 Passive Pulse (Grade A - Passive)
-- [ ] **4.1.1 Energy Provider:** Battery level, Charging, and Power-Save status.
-- [ ] **4.1.2 Chronos Provider:** 1-minute resolution day progress and Next Alarm sync.
+- [x] **4.1.1 Energy Provider:** Battery level, Charging, and Power-Save status.
+- [x] **4.1.2 Chronos Provider:** 1-minute resolution day progress and Next Alarm sync.
 - [ ] **4.1.3 System Zen:** DND status, Ringer mode, and Media active pulse.
+
 
 ### 4.2 Celestial Calculus (Grade A/B - Math-Heavy)
 - [ ] **4.2.1 Solar Math:** Local Sun position based on time and coarse location.
