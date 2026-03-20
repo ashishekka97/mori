@@ -17,17 +17,17 @@ class AndroidEngineCanvas(val nativeCanvas: Canvas) : EngineCanvas {
         nativeCanvas.drawColor(colorInt)
     }
 
-    override fun drawRect(left: Float, top: Float, right: Float, bottom: Float, color: Int, isFilled: Boolean) {
+    override fun drawRect(left: Float, top: Float, right: Float, bottom: Float, color: Int, isFilled: Boolean, thickness: Float) {
         paint.color = color
         paint.style = if (isFilled) Paint.Style.FILL else Paint.Style.STROKE
-        paint.strokeWidth = if (isFilled) 0f else 4f
+        paint.strokeWidth = if (isFilled) 0f else thickness
         nativeCanvas.drawRect(left, top, right, bottom, paint)
     }
 
-    override fun drawCircle(centerX: Float, centerY: Float, radius: Float, color: Int, isFilled: Boolean) {
+    override fun drawCircle(centerX: Float, centerY: Float, radius: Float, color: Int, isFilled: Boolean, thickness: Float) {
         paint.color = color
         paint.style = if (isFilled) Paint.Style.FILL else Paint.Style.STROKE
-        paint.strokeWidth = if (isFilled) 0f else 4f
+        paint.strokeWidth = if (isFilled) 0f else thickness
         nativeCanvas.drawCircle(centerX, centerY, radius, paint)
     }
 }

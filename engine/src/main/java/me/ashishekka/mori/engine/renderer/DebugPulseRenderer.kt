@@ -45,22 +45,26 @@ class DebugPulseRenderer : EffectRenderer {
         val centerX = state.viewportSafeX + (state.viewportSafeWidth / 2f)
         val centerY = state.viewportSafeY + (state.viewportSafeHeight / 2f)
         
-        // 4. Social Noise subtly expands the radius
+        // 4. Social Noise subtly expands the radius and border
         val baseRadius = min(state.viewportSafeWidth, state.viewportSafeHeight) * 0.2f
         val noiseRadius = state.zenSocialNoise * 50f
         val finalRadius = baseRadius + noiseRadius
+        
+        // Social noise also drives the thickness of the "noise border"
+        val borderThickness = 4f + (state.zenSocialNoise * 16f)
 
-        // Draw the "Living Core"
+        // Draw the "Living Core" (Filled)
         canvas.drawCircle(centerX, centerY, finalRadius, color, isFilled = true)
 
-        // Draw the "Safe Area" border for verification
-        canvas.drawRect(
-            state.viewportSafeX,
-            state.viewportSafeY,
-            state.viewportSafeX + state.viewportSafeWidth,
-            state.viewportSafeY + state.viewportSafeHeight,
+        // Draw the "Noise Border" (Stroked)
+        // Note: The radius remains the same, but it's drawn as an outline
+        canvas.drawCircle(
+            centerX,
+            centerY,
+            finalRadius,
             0xFFFFFFFF.toInt(),
-            isFilled = false
+            isFilled = false,
+            thickness = borderThickness
         )
     }
 }
