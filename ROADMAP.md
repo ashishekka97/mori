@@ -83,7 +83,7 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 - [x] **4.3.2 Thermal Provider:** System thermal throttling levels.
 
 ### 4.4 Narrative Workers (Grade B/C - Periodic)
-- [ ] **4.4.1 Vitality Provider:** Step count and health goal progress (Worker-driven).
+- [ ] **4.4.1 Vitality Provider:** Sensor-based Step counting (Establishing the Health Pipe).
 - [ ] **4.4.2 Social Provider:** Notification frequency summaries (Zen Pulse).
 
 ### 4.5 Phase 4 Finalization
@@ -151,6 +151,12 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 - [ ] **9.2 Snapshot Testing:** Visual regression suite.
 - [ ] **9.3 Performance Audit:** Frame-time and battery profiling.
 - [ ] **9.4 Phase 9 Finalization:** Documentation, Retrospective, and Tagging.
+
+---
+
+## Phase 10: The Extended Brain (Future)
+- [ ] **10.1.1 Health Connect:** Replace sensor-based vitality with full system-wide health data.
+- [ ] **10.1.2 Remote Weather:** Opt-in weather data via secure API bridge.
 
 ---
 
