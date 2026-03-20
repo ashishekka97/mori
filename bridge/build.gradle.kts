@@ -1,14 +1,16 @@
 plugins {
     alias(libs.plugins.android.library)
+    alias(libs.plugins.ktlint)
 }
 
 android {
     namespace = "me.ashishekka.mori.bridge"
 
     compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
+        version =
+            release(36) {
+                minorApiLevel = 1
+            }
     }
 
     defaultConfig {
@@ -22,7 +24,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
