@@ -79,7 +79,7 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 - [x] **4.2.2 Lunar Math:** Local Moon phase and illumination calculations.
 
 ### 4.3 Environmental Snapshots (Grade B - Gated)
-- [ ] **4.3.1 Atmos Provider:** Ambient Light "Burst" logic (Snapshot on visibility).
+- [x] **4.3.1 Atmos Provider:** Ambient Light "Burst" logic (Snapshot on visibility).
 - [ ] **4.3.2 Thermal Provider:** System thermal throttling levels.
 
 ### 4.4 Narrative Workers (Grade B/C - Periodic)
