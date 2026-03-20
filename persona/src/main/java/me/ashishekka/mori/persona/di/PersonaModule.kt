@@ -5,6 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import me.ashishekka.mori.persona.lifecycle.DefaultMoriLifecycleManager
 import me.ashishekka.mori.persona.lifecycle.MoriLifecycleManager
+import me.ashishekka.mori.persona.sensor.AndroidChronosProvider
 import me.ashishekka.mori.persona.sensor.AndroidEnergyProvider
 import me.ashishekka.mori.persona.sensor.MoriStateProviderRegistry
 import me.ashishekka.mori.persona.sensor.StateProvider
@@ -23,11 +24,13 @@ val personaModule = module {
 
     // === SENSORS & PROVIDERS ===
     factory<StateProvider>(named("Energy")) { AndroidEnergyProvider(get()) }
+    factory<StateProvider>(named("Chronos")) { AndroidChronosProvider(get()) }
 
     single<StateProviderRegistry> {
         MoriStateProviderRegistry(
             providers = listOf(
-                get(named("Energy"))
+                get(named("Energy")),
+                get(named("Chronos"))
             )
         )
     }

@@ -50,6 +50,13 @@ internal class MoriStateManager(
                     )
                 }
             }
+            is StateUpdate.Chronos -> {
+                update { current ->
+                    current.copy(
+                        chronosTimeProgress = update.dayProgress
+                    )
+                }
+            }
         }
     }
 }

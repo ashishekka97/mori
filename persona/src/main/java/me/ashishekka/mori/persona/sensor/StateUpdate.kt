@@ -11,5 +11,10 @@ sealed class StateUpdate {
         val isPowerSaveMode: Boolean
     ) : StateUpdate()
 
-    // Future: data class Chronos(...), data class Zen(...)
+    data class Chronos(
+        val dayProgress: Float,
+        val nextAlarmTime: Long
+    ) : StateUpdate()
+
+    // Future: data class Zen(...)
 }
