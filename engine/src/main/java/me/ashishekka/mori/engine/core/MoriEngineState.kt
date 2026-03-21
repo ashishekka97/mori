@@ -53,6 +53,11 @@ class MoriEngineState {
     var viewportSafeHeight: Float = 0f
     /** The multiplier used to convert design units to physical pixels. */
     var viewportReferenceScale: Float = 1f
+    
+    /** The original design width (e.g., 1000f). */
+    var referenceWidth: Float = 1000f
+    /** The original design height (e.g., 1000f). */
+    var referenceHeight: Float = 1000f
 
     // === SURFACE (Geometry) ===
     var surfaceWidth: Int = 0

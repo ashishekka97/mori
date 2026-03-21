@@ -3,14 +3,12 @@ package me.ashishekka.mori
 import android.service.wallpaper.WallpaperService
 import android.view.SurfaceHolder
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 import me.ashishekka.mori.bridge.metrics.MetricCalculator
-import me.ashishekka.mori.bridge.metrics.ScaleMode
 import me.ashishekka.mori.bridge.sync.StateSynchronizer
 import me.ashishekka.mori.engine.core.MoriEngine
 import me.ashishekka.mori.engine.core.interfaces.EngineTicker
 import me.ashishekka.mori.engine.core.interfaces.RenderSurface
+import me.ashishekka.mori.engine.core.models.ScaleMode
 import me.ashishekka.mori.engine.renderer.DebugPulseRenderer
 import me.ashishekka.mori.engine.renderer.StaticFallbackRenderer
 import me.ashishekka.mori.persona.lifecycle.MoriLifecycleManager
@@ -51,7 +49,7 @@ class MoriWallpaperService : WallpaperService() {
                 // Phase 3 Smoke Test: Dual-layer verification
                 // 1. Physical Background (Full Screen)
                 moriEngine.addEffect(StaticFallbackRenderer(0xFF1A1A1A.toInt()))
-                // 2. Safe Area Foreground (Calculated by Bridge)
+                // 2. Safe Area Foreground (Calculated by Engine Internal Math)
                 moriEngine.addEffect(DebugPulseRenderer())
                 
                 moriEngine.start()
@@ -70,10 +68,19 @@ class MoriWallpaperService : WallpaperService() {
         override fun onSurfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
             super.onSurfaceChanged(holder, format, width, height)
             val density = resources.displayMetrics.density
-            metricCalculator.updateMetrics(width, height, density)
-            stateSynchronizer.updateViewport(1000f, 1000f, ScaleMode.FIT)
+            
+            // Initializing Engine Configuration
+            moriEngine.targetScaleMode = ScaleMode.FIT
+            moriEngine.state.referenceWidth = 1000f
+            moriEngine.state.referenceHeight = 1000f
+            
+            // UNIFIED: Use the engine's internal math for the viewport
             moriEngine.onSurfaceChanged(width, height, density)
-            // Initial frame when surface is created or changed
+            
+            // Keep the bridge informed for metrics (optional but good for future sensors)
+            metricCalculator.updateMetrics(width, height, density)
+            
+            // Initial frame
             moriEngine.onDrawFrame()
         }
 

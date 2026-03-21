@@ -13,19 +13,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import me.ashishekka.mori.engine.core.MoriEngine
+import me.ashishekka.mori.engine.core.models.ScaleMode
 import me.ashishekka.mori.engine.renderer.DebugPulseRenderer
 import me.ashishekka.mori.engine.renderer.LayerManager
 import me.ashishekka.mori.persona.state.WorldState
 import me.ashishekka.mori.ui.theme.MoriTheme
-import kotlin.math.max
-import kotlin.math.min
-
-/**
- * Strategy for scaling a reference canvas to the actual device screen.
- */
-enum class EngineScaleMode {
-    FIT, FILL
-}
 
 /**
  * A Compose-native backdrop that renders the Mori Engine directly to a Canvas.
@@ -36,7 +28,7 @@ fun EngineBackdrop(
     modifier: Modifier = Modifier,
     worldState: WorldState = WorldState(),
     layerManager: LayerManager = remember { LayerManager().apply { addEffect(DebugPulseRenderer()) } },
-    scaleMode: EngineScaleMode = EngineScaleMode.FIT,
+    scaleMode: ScaleMode = ScaleMode.FIT,
     referenceWidth: Float = 1000f,
     referenceHeight: Float = 1000f
 ) {
@@ -44,7 +36,13 @@ fun EngineBackdrop(
     val ticker = remember { ComposeEngineTicker() }
     val composeCanvas = remember { ComposeEngineCanvas() }
     val renderSurface = remember { ComposeRenderSurface(composeCanvas) }
-    val moriEngine = remember { MoriEngine(ticker, renderSurface, layerManager) }
+    val moriEngine = remember { 
+        MoriEngine(ticker, renderSurface, layerManager).apply {
+            this.targetScaleMode = scaleMode
+            this.state.referenceWidth = referenceWidth
+            this.state.referenceHeight = referenceHeight
+        } 
+    }
     
     val density = LocalDensity.current.density
     
@@ -81,22 +79,8 @@ fun EngineBackdrop(
         val height = size.height
         
         if (moriEngine.state.surfaceWidth != width.toInt() || moriEngine.state.surfaceHeight != height.toInt()) {
-            val scaleX = width / referenceWidth
-            val scaleY = height / referenceHeight
-            val scale = when (scaleMode) {
-                EngineScaleMode.FIT -> min(scaleX, scaleY)
-                EngineScaleMode.FILL -> max(scaleX, scaleY)
-            }
-            
-            // We use the Engine's own method for surface updates
+            // We use the Engine's own method for surface updates (Unifies Viewport Math)
             moriEngine.onSurfaceChanged(width.toInt(), height.toInt(), density)
-            
-            // Manual viewport calculation (Shared logic from Bridge)
-            moriEngine.state.viewportReferenceScale = scale
-            moriEngine.state.viewportSafeWidth = referenceWidth * scale
-            moriEngine.state.viewportSafeHeight = referenceHeight * scale
-            moriEngine.state.viewportSafeX = (width - moriEngine.state.viewportSafeWidth) / 2f
-            moriEngine.state.viewportSafeY = (height - moriEngine.state.viewportSafeHeight) / 2f
         }
 
         // EXECUTE: Bridging the DrawScope to the Engine

@@ -1,4 +1,4 @@
-package me.ashishekka.mori.bridge.metrics
+package me.ashishekka.mori.engine.core.models
 
 /**
  * Strategy for scaling a reference canvas to the actual device screen.
