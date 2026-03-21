@@ -65,17 +65,17 @@ fun PulseToggle(
         modifier = modifier
             .width(52.dp)
             .height(28.dp)
-            .moriGlass(thermalStress, shape = CircleShape, borderAlpha = 0.3f)
+            .moriGlassBackground(thermalStress, shape = CircleShape, borderAlpha = 0.3f)
             .clickable(
                 interactionSource = interactionSource,
-                indication = null, // No ripple on the track
+                indication = null,
                 enabled = enabled,
                 onClick = { onCheckedChange(!checked) }
             )
             .padding(4.dp),
         contentAlignment = Alignment.CenterStart
     ) {
-        // The Thumb
+        // The Thumb (Lives outside the blurred background node)
         Box(
             modifier = Modifier
                 .offset(x = thumbOffset)

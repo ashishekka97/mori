@@ -19,12 +19,7 @@ import me.ashishekka.mori.persona.state.WorldState
 import me.ashishekka.mori.ui.theme.MoriTheme
 
 /**
- * A glassmorphic container that blurs the shared [LocalHazeSource] wallpaper layer.
- * 
- * @param modifier The modifier to be applied to the card.
- * @param thermalStress The current thermal stress level. Blurs are disabled when stress > 0.8.
- * @param shape The shape of the card.
- * @param content The content to be displayed inside the card.
+ * A glassmorphic container that ensures content remains sharp while the background is blurred.
  */
 @Composable
 fun MoriCard(
@@ -33,12 +28,14 @@ fun MoriCard(
     shape: Shape = RoundedCornerShape(24.dp),
     content: @Composable () -> Unit
 ) {
-    Box(
-        modifier = modifier.moriGlass(thermalStress, shape)
+    MoriGlassBox(
+        modifier = modifier,
+        thermalStress = thermalStress,
+        shape = shape
     ) {
         Box(
             modifier = Modifier
-                .matchParentSize()
+                .fillMaxSize()
                 .padding(16.dp)
         ) {
             content()

@@ -11,6 +11,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.ashishekka.mori.ui.theme.MoriTheme
@@ -39,22 +40,20 @@ fun MoriSlider(
         colors = SliderDefaults.colors(
             thumbColor = colors.accent,
             activeTrackColor = colors.accent.copy(alpha = 0.5f),
-            inactiveTrackColor = colors.surface.copy(alpha = 0.2f)
+            inactiveTrackColor = Color.Transparent
         ),
         track = { sliderState ->
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(8.dp)
-                    .moriGlass(thermalStress, shape = CircleShape, borderAlpha = 0.2f)
+                    .moriGlassBackground(thermalStress, shape = CircleShape, borderAlpha = 0.2f)
             )
-            // Note: M3 Slider handles the active portion internally, 
-            // we provide the base glass track here.
             SliderDefaults.Track(
                 sliderState = sliderState,
                 colors = SliderDefaults.colors(
                     activeTrackColor = colors.accent,
-                    inactiveTrackColor = androidx.compose.ui.graphics.Color.Transparent
+                    inactiveTrackColor = Color.Transparent
                 )
             )
         }

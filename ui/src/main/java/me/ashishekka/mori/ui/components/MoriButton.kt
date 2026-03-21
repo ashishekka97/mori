@@ -35,19 +35,23 @@ fun MoriButton(
     val colors = MoriTheme.colors
     val interactionSource = remember { MutableInteractionSource() }
 
-    Box(
-        modifier = modifier
-            .moriGlass(thermalStress, shape, borderAlpha = 0.6f)
-            .clickable(
-                interactionSource = interactionSource,
-                indication = ripple(color = colors.accent),
-                enabled = enabled,
-                onClick = onClick
-            )
-            .padding(horizontal = 24.dp, vertical = 12.dp),
-        contentAlignment = Alignment.Center
+    MoriGlassBox(
+        modifier = modifier.clickable(
+            interactionSource = interactionSource,
+            indication = ripple(color = colors.accent),
+            enabled = enabled,
+            onClick = onClick
+        ),
+        thermalStress = thermalStress,
+        shape = shape,
+        borderAlpha = 0.6f
     ) {
-        content()
+        Box(
+            modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            content()
+        }
     }
 }
 

@@ -6,6 +6,7 @@ import android.os.Build
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,14 +46,16 @@ private const val FROST_SHADER = """
 """
 
 /**
- * A reusable modifier that applies Mori's glassmorphic effect.
- * It handles the mirrored backdrop blur, AGSL frosting, and rim light.
+ * A glassmorphic container that ensures content remains sharp while the background is blurred.
  */
-fun Modifier.moriGlass(
+@Composable
+fun MoriGlassBox(
+    modifier: Modifier = Modifier,
     thermalStress: Float = 0f,
     shape: Shape,
-    borderAlpha: Float = 0.4f
-): Modifier = composed {
+    borderAlpha: Float = 0.4f,
+    content: @Composable BoxScope.() -> Unit
+) {
     val hazeSource = LocalHazeSource.current
     val colors = MoriTheme.colors
     var positionInRoot by remember { mutableStateOf(androidx.compose.ui.geometry.Offset.Zero) }
@@ -88,31 +91,96 @@ fun Modifier.moriGlass(
         Color.White.copy(alpha = borderAlpha)
     }
 
-    this
-        .onGloballyPositioned { coordinates ->
-            positionInRoot = coordinates.positionInRoot()
+    Box(
+        modifier = modifier
+            .onGloballyPositioned { coordinates ->
+                positionInRoot = coordinates.positionInRoot()
+            }
+            .clip(shape)
+            .border(
+                BorderStroke(
+                    1.dp,
+                    Brush.verticalGradient(
+                        listOf(rimLightColor, Color.Transparent)
+                    )
+                ),
+                shape = shape
+            )
+    ) {
+        // LAYER 1: The Blurred Background
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .then(blurModifier)
+                .drawBehind {
+                    // MIRROR DRAW
+                    hazeSource.layer?.let { layer ->
+                        drawContext.canvas.save()
+                        drawContext.canvas.translate(-positionInRoot.x, -positionInRoot.y)
+                        drawLayer(layer)
+                        drawContext.canvas.restore()
+                    }
+                    // TINT
+                    drawRect(color = colors.surface)
+                }
+        )
+
+        // LAYER 2: The Sharp Content
+        Box(modifier = Modifier.matchParentSize()) {
+            content()
         }
+    }
+}
+
+/**
+ * A simple internal modifier for background-only glass (no content isolation).
+ * Used for tracks and decorative elements where children aren't present.
+ */
+fun Modifier.moriGlassBackground(
+    thermalStress: Float = 0f,
+    shape: Shape,
+    borderAlpha: Float = 0.2f
+): Modifier = composed {
+    val hazeSource = LocalHazeSource.current
+    val colors = MoriTheme.colors
+    var positionInRoot by remember { mutableStateOf(androidx.compose.ui.geometry.Offset.Zero) }
+
+    val isBlurEnabled = thermalStress < 0.8f && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+    val blurModifier = if (isBlurEnabled) {
+        Modifier.graphicsLayer {
+            val blur = 60f
+            val baseEffect = RenderEffect.createBlurEffect(
+                blur, blur, android.graphics.Shader.TileMode.CLAMP
+            )
+            renderEffect = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                val shader = RuntimeShader(FROST_SHADER)
+                shader.setFloatUniform("noiseAmount", 0.03f)
+                RenderEffect.createChainEffect(
+                    RenderEffect.createRuntimeShaderEffect(shader, "composable"),
+                    baseEffect
+                )
+            } else {
+                baseEffect
+            }.asComposeRenderEffect()
+        }
+    } else {
+        Modifier
+    }
+
+    val rimLightColor = if (colors.isDark) Color.White.copy(alpha = 0.15f) else Color.White.copy(alpha = borderAlpha)
+
+    this
+        .onGloballyPositioned { coordinates -> positionInRoot = coordinates.positionInRoot() }
         .clip(shape)
         .then(blurModifier)
         .drawBehind {
-            // 1. MIRROR DRAW (Backdrop Blur Source)
             hazeSource.layer?.let { layer ->
                 drawContext.canvas.save()
                 drawContext.canvas.translate(-positionInRoot.x, -positionInRoot.y)
                 drawLayer(layer)
                 drawContext.canvas.restore()
             }
-            
-            // 2. TINT (Frosted Surface)
             drawRect(color = colors.surface)
         }
-        .border(
-            BorderStroke(
-                1.dp,
-                Brush.verticalGradient(
-                    listOf(rimLightColor, Color.Transparent)
-                )
-            ),
-            shape = shape
-        )
+        .border(BorderStroke(1.dp, Brush.verticalGradient(listOf(rimLightColor, Color.Transparent))), shape = shape)
 }
