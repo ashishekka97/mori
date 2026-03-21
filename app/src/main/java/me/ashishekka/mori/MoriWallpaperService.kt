@@ -40,22 +40,31 @@ class MoriWallpaperService : WallpaperService() {
         private val moriEngine: MoriEngine by inject { parametersOf(ticker, renderSurface) }
         private val stateSynchronizer: StateSynchronizer by inject { parametersOf(engineScope, moriEngine) }
 
+        private var isLifecycleStarted = false
+
         override fun onVisibilityChanged(visible: Boolean) {
             super.onVisibilityChanged(visible)
             
             if (visible) {
-                lifecycleManager.onStart()
+                if (!isLifecycleStarted) {
+                    lifecycleManager.onStart()
+                    isLifecycleStarted = true
+                }
                 
-                // Phase 3 Smoke Test: Dual-layer verification
-                // 1. Physical Background (Full Screen)
+                // Ensure effects are added (Safe for multiple calls)
                 moriEngine.addEffect(StaticFallbackRenderer(0xFF1A1A1A.toInt()))
-                // 2. Safe Area Foreground (Calculated by Engine Internal Math)
                 moriEngine.addEffect(DebugPulseRenderer())
                 
                 moriEngine.start()
                 stateSynchronizer.start()
             } else {
-                lifecycleManager.onStop()
+                // We stop the engine immediately on hide for battery,
+                // but we keep the lifecycle count until destroyed or truly idle.
+                // However, for Mori, "Hidden" = "Stop Sensors" if no one else is using them.
+                if (isLifecycleStarted) {
+                    lifecycleManager.onStop()
+                    isLifecycleStarted = false
+                }
                 moriEngine.stop()
                 stateSynchronizer.stop()
             }
@@ -69,25 +78,22 @@ class MoriWallpaperService : WallpaperService() {
             super.onSurfaceChanged(holder, format, width, height)
             val density = resources.displayMetrics.density
             
-            // Initializing Engine Configuration
             moriEngine.targetScaleMode = ScaleMode.FIT
             moriEngine.state.referenceWidth = 1000f
             moriEngine.state.referenceHeight = 1000f
             
-            // UNIFIED: Use the engine's internal math for the viewport
             moriEngine.onSurfaceChanged(width, height, density)
-            
-            // Keep the bridge informed for metrics (optional but good for future sensors)
             metricCalculator.updateMetrics(width, height, density)
-            
-            // Initial frame
             moriEngine.onDrawFrame()
         }
 
         override fun onSurfaceDestroyed(holder: SurfaceHolder) {
             super.onSurfaceDestroyed(holder)
             
-            lifecycleManager.onStop()
+            if (isLifecycleStarted) {
+                lifecycleManager.onStop()
+                isLifecycleStarted = false
+            }
             stateSynchronizer.stop()
             moriEngine.onDestroy()
         }
