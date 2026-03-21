@@ -4,7 +4,10 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
@@ -33,13 +36,16 @@ fun EngineBackdrop(
     modifier: Modifier = Modifier,
     worldState: WorldState = WorldState(),
     layerManager: LayerManager = remember { LayerManager().apply { addEffect(DebugPulseRenderer()) } },
-    scaleMode: EngineScaleMode = EngineScaleMode.FILL,
+    scaleMode: EngineScaleMode = EngineScaleMode.FIT, // Default to FIT to match Service
     referenceWidth: Float = 1000f,
     referenceHeight: Float = 1000f
 ) {
     val engineState = remember { MoriEngineState() }
     val composeCanvas = remember { ComposeEngineCanvas() }
     val density = LocalDensity.current.density
+    
+    // A simple state that we update on every frame to trigger recomposition/invalidation
+    var frameTime by remember { mutableLongStateOf(0L) }
 
     // Update the engine state whenever worldState or surface metrics change
     LaunchedEffect(worldState, scaleMode, referenceWidth, referenceHeight) {
@@ -49,12 +55,8 @@ fun EngineBackdrop(
     // The Animation Loop (Driven by the device refresh rate)
     LaunchedEffect(Unit) {
         while (true) {
-            withFrameNanos { _ ->
-                // In Compose, we don't need to manually trigger draw here,
-                // we just need the worldState updates to flow.
-                // Recomposition will handle the rest if we use State.
-                // However, the Engine expects a tick. 
-                // For this component, we'll let the Canvas draw pass be the tick.
+            withFrameNanos { time ->
+                frameTime = time
             }
         }
     }
@@ -62,6 +64,10 @@ fun EngineBackdrop(
     Canvas(
         modifier = modifier.fillMaxSize()
     ) {
+        // Accessing frameTime here ensures this block is invalidated every frame
+        @Suppress("UNUSED_VARIABLE")
+        val invalidate = frameTime
+
         // 1. Update Surface Metrics
         val width = size.width
         val height = size.height
