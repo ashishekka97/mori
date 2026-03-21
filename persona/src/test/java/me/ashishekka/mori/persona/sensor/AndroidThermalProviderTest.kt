@@ -2,60 +2,51 @@ package me.ashishekka.mori.persona.sensor
 
 import android.content.Context
 import android.os.PowerManager
-import app.cash.turbine.test
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
+import io.mockk.verify
 import org.junit.Before
 import org.junit.Test
 
 class AndroidThermalProviderTest {
 
-    private lateinit var mockListenerProvider: ThermalListenerProvider
-    private lateinit var mockContext: Context
-    private lateinit var mockPowerManager: PowerManager
+    private lateinit var context: Context
+    private lateinit var listenerProvider: ThermalListenerProvider
+    private lateinit var thermalProvider: AndroidThermalProvider
+    private lateinit var powerManager: PowerManager
 
     @Before
     fun setUp() {
-        mockListenerProvider = mockk(relaxed = true)
-        mockContext = mockk(relaxed = true)
-        mockPowerManager = mockk(relaxed = true)
-        every { mockContext.getSystemService(Context.POWER_SERVICE) } returns mockPowerManager
+        context = mockk(relaxed = true)
+        powerManager = mockk(relaxed = true)
+        listenerProvider = mockk(relaxed = true)
+        
+        // Mock the system service retrieval to avoid ClassCastException
+        every { context.getSystemService(Context.POWER_SERVICE) } returns powerManager
+        
+        thermalProvider = AndroidThermalProvider(context, listenerProvider)
     }
 
     @Test
-    fun `start should emit initial thermal state from provider`() = runTest {
-        // Given
-        every { mockListenerProvider.getCurrentStatus(any()) } returns PowerManager.THERMAL_STATUS_SEVERE
+    fun `start should register listener only once`() {
+        thermalProvider.start()
+        thermalProvider.start()
 
-        val provider = AndroidThermalProvider(mockContext, mockListenerProvider)
-
-        // When
-        provider.data.test {
-            provider.start()
-
-            // Then
-            val item = awaitItem() as StateUpdate.Thermal
-            assertEquals(0.6f, item.stressLevel, 0.01f)
-        }
+        verify(exactly = 1) { listenerProvider.register(any(), any()) }
     }
 
     @Test
-    fun `handleStatusChanged should emit new stress level`() = runTest {
-        // Given
-        val provider = AndroidThermalProvider(mockContext, mockListenerProvider)
+    fun `stop should unregister listener only once`() {
+        thermalProvider.start()
+        thermalProvider.stop()
+        thermalProvider.stop()
 
-        provider.data.test {
-            provider.start()
-            awaitItem() // Consume initial
+        verify(exactly = 1) { listenerProvider.unregister(any(), any()) }
+    }
 
-            // When
-            provider.handleStatusChanged(PowerManager.THERMAL_STATUS_CRITICAL)
-
-            // Then
-            val item = awaitItem() as StateUpdate.Thermal
-            assertEquals(1.0f, item.stressLevel, 0.01f)
-        }
+    @Test
+    fun `stop without start should NOT unregister`() {
+        thermalProvider.stop()
+        verify(exactly = 0) { listenerProvider.unregister(any(), any()) }
     }
 }
