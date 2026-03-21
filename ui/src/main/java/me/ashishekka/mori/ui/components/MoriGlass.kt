@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -47,6 +48,7 @@ private const val FROST_SHADER = """
 
 /**
  * A glassmorphic container that ensures content remains sharp while the background is blurred.
+ * Uses a two-layer strategy to prevent content from being blurred.
  */
 @Composable
 fun MoriGlassBox(
@@ -58,7 +60,7 @@ fun MoriGlassBox(
 ) {
     val hazeSource = LocalHazeSource.current
     val colors = MoriTheme.colors
-    var positionInRoot by remember { mutableStateOf(androidx.compose.ui.geometry.Offset.Zero) }
+    var positionInRoot by remember { mutableStateOf(Offset.Zero) }
 
     // Tiered Rendering Logic
     val isBlurEnabled = thermalStress < 0.8f && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
@@ -108,6 +110,7 @@ fun MoriGlassBox(
             )
     ) {
         // LAYER 1: The Blurred Background
+        // Fills the area defined by the parent (which is defined by LAYER 2)
         Box(
             modifier = Modifier
                 .matchParentSize()
@@ -116,6 +119,7 @@ fun MoriGlassBox(
                     // MIRROR DRAW
                     hazeSource.layer?.let { layer ->
                         drawContext.canvas.save()
+                        // Offset the draw to match the wallpaper's root position
                         drawContext.canvas.translate(-positionInRoot.x, -positionInRoot.y)
                         drawLayer(layer)
                         drawContext.canvas.restore()
@@ -126,15 +130,15 @@ fun MoriGlassBox(
         )
 
         // LAYER 2: The Sharp Content
-        Box(modifier = Modifier.matchParentSize()) {
+        // No matchParentSize() here, allowing the content to define the size of the parent Box.
+        Box {
             content()
         }
     }
 }
 
 /**
- * A simple internal modifier for background-only glass (no content isolation).
- * Used for tracks and decorative elements where children aren't present.
+ * A background-only modifier for decorative elements (like tracks) where children are not present.
  */
 fun Modifier.moriGlassBackground(
     thermalStress: Float = 0f,
@@ -143,22 +147,17 @@ fun Modifier.moriGlassBackground(
 ): Modifier = composed {
     val hazeSource = LocalHazeSource.current
     val colors = MoriTheme.colors
-    var positionInRoot by remember { mutableStateOf(androidx.compose.ui.geometry.Offset.Zero) }
+    var positionInRoot by remember { mutableStateOf(Offset.Zero) }
 
     val isBlurEnabled = thermalStress < 0.8f && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
     val blurModifier = if (isBlurEnabled) {
         Modifier.graphicsLayer {
             val blur = 60f
-            val baseEffect = RenderEffect.createBlurEffect(
-                blur, blur, android.graphics.Shader.TileMode.CLAMP
-            )
+            val baseEffect = RenderEffect.createBlurEffect(blur, blur, android.graphics.Shader.TileMode.CLAMP)
             renderEffect = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 val shader = RuntimeShader(FROST_SHADER)
                 shader.setFloatUniform("noiseAmount", 0.03f)
-                RenderEffect.createChainEffect(
-                    RenderEffect.createRuntimeShaderEffect(shader, "composable"),
-                    baseEffect
-                )
+                RenderEffect.createChainEffect(RenderEffect.createRuntimeShaderEffect(shader, "composable"), baseEffect)
             } else {
                 baseEffect
             }.asComposeRenderEffect()
