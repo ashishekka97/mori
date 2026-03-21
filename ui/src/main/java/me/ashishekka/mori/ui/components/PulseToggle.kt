@@ -39,18 +39,20 @@ fun PulseToggle(
     thermalStress: Float = 0f,
     enabled: Boolean = true
 ) {
-    val colors = MoriTheme.colors
+    // 1. Reactive Theme Check: Ensure we pull the LATEST accent color
+    val accentColor = MoriTheme.colors.accent
     val interactionSource = remember { MutableInteractionSource() }
 
-    // Animations
+    // 2. Animations
     val thumbOffset by animateDpAsState(
         targetValue = if (checked) 24.dp else 0.dp,
         animationSpec = tween(durationMillis = 200),
         label = "thumbOffset"
     )
     
+    // Explicitly reactive thumb color target
     val thumbColor by animateColorAsState(
-        targetValue = if (checked) colors.accent else Color.Gray.copy(alpha = 0.5f),
+        targetValue = if (checked) accentColor else Color.Gray.copy(alpha = 0.5f),
         animationSpec = tween(durationMillis = 200),
         label = "thumbColor"
     )
@@ -75,7 +77,7 @@ fun PulseToggle(
             .padding(4.dp),
         contentAlignment = Alignment.CenterStart
     ) {
-        // The Thumb (Lives outside the blurred background node)
+        // The Thumb
         Box(
             modifier = Modifier
                 .offset(x = thumbOffset)
