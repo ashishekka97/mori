@@ -37,7 +37,6 @@ import me.ashishekka.mori.ui.theme.MoriTheme
 
 /**
  * AGSL Shader for advanced "frosting" effect.
- * Provides a noise-based grain to simulate glass texture.
  */
 private const val FROST_SHADER = """
     uniform shader composable;
@@ -78,7 +77,7 @@ fun MoriCard(
     
     val blurModifier = if (isBlurEnabled) {
         Modifier.graphicsLayer {
-            val blur = 60f // High-quality depth blur
+            val blur = 60f
             val baseEffect = RenderEffect.createBlurEffect(
                 blur, blur, android.graphics.Shader.TileMode.CLAMP
             )
@@ -111,20 +110,6 @@ fun MoriCard(
                 positionInRoot = coordinates.positionInRoot()
             }
             .clip(shape)
-            .then(blurModifier)
-            .drawBehind {
-                // MIRROR DRAW: Draw the wallpaper layer into the card's background
-                hazeSource.layer?.let { layer ->
-                    // Offset the draw so the wallpaper pixels match their background position
-                    drawContext.canvas.save()
-                    drawContext.canvas.translate(-positionInRoot.x, -positionInRoot.y)
-                    drawLayer(layer)
-                    drawContext.canvas.restore()
-                }
-                
-                // TINT: Apply the frosted surface color over the mirrored wallpaper
-                drawRect(color = colors.surface)
-            }
             .border(
                 BorderStroke(
                     1.dp,
@@ -134,9 +119,35 @@ fun MoriCard(
                 ),
                 shape = shape
             )
-            .padding(16.dp)
     ) {
-        content()
+        // LAYER 1: The Blurred Background
+        // We apply the blur logic ONLY to this empty box
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .then(blurModifier)
+                .drawBehind {
+                    // MIRROR DRAW
+                    hazeSource.layer?.let { layer ->
+                        drawContext.canvas.save()
+                        drawContext.canvas.translate(-positionInRoot.x, -positionInRoot.y)
+                        drawLayer(layer)
+                        drawContext.canvas.restore()
+                    }
+                    // TINT
+                    drawRect(color = colors.surface)
+                }
+        )
+
+        // LAYER 2: The Sharp Content
+        // This layer is NOT affected by the graphicsLayer blur above
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .padding(16.dp)
+        ) {
+            content()
+        }
     }
 }
 
@@ -147,14 +158,13 @@ fun PreviewMoriCard() {
         modifier = Modifier.padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // 1. Golden Hour State
         val goldenHour = WorldState(chronosSunAltitude = 0.5f)
         MoriTheme(goldenHour) {
             MoriCard(
                 modifier = Modifier.size(width = 300.dp, height = 120.dp),
                 thermalStress = 0f
             ) {
-                Box(modifier = Modifier.padding(8.dp)) {
+                Box(modifier = Modifier.fillMaxSize()) {
                     Text("Golden Hour Glass", color = MoriTheme.colors.onSurface)
                 }
             }
@@ -162,30 +172,14 @@ fun PreviewMoriCard() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 2. Midnight State
         val midnight = WorldState(chronosSunAltitude = -1.0f)
         MoriTheme(midnight) {
             MoriCard(
                 modifier = Modifier.size(width = 300.dp, height = 120.dp),
                 thermalStress = 0f
             ) {
-                Box(modifier = Modifier.padding(8.dp)) {
+                Box(modifier = Modifier.fillMaxSize()) {
                     Text("Midnight Glass", color = MoriTheme.colors.onSurface)
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // 3. Thermal Stress State (Blur Disabled)
-        val stress = WorldState(energyThermalStress = 0.9f)
-        MoriTheme(stress) {
-            MoriCard(
-                modifier = Modifier.size(width = 300.dp, height = 120.dp),
-                thermalStress = 0.9f
-            ) {
-                Box(modifier = Modifier.padding(8.dp)) {
-                    Text("Thermal Stress (Safe Mode)", color = MoriTheme.colors.onSurface)
                 }
             }
         }
