@@ -12,7 +12,7 @@ import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
-import me.ashishekka.mori.engine.core.MoriEngineState
+import me.ashishekka.mori.engine.core.MoriEngine
 import me.ashishekka.mori.engine.renderer.DebugPulseRenderer
 import me.ashishekka.mori.engine.renderer.LayerManager
 import me.ashishekka.mori.persona.state.WorldState
@@ -36,48 +36,51 @@ fun EngineBackdrop(
     modifier: Modifier = Modifier,
     worldState: WorldState = WorldState(),
     layerManager: LayerManager = remember { LayerManager().apply { addEffect(DebugPulseRenderer()) } },
-    scaleMode: EngineScaleMode = EngineScaleMode.FIT, // Default to FIT to match Service
+    scaleMode: EngineScaleMode = EngineScaleMode.FIT,
     referenceWidth: Float = 1000f,
     referenceHeight: Float = 1000f
 ) {
-    val engineState = remember { MoriEngineState() }
+    // 1. Prepare the Core Engine Orchestrator
+    val ticker = remember { ComposeEngineTicker() }
     val composeCanvas = remember { ComposeEngineCanvas() }
+    val renderSurface = remember { ComposeRenderSurface(composeCanvas) }
+    val moriEngine = remember { MoriEngine(ticker, renderSurface, layerManager) }
+    
     val density = LocalDensity.current.density
     
-    // A simple state that we update on every frame to trigger recomposition/invalidation
+    // This state drives the recomposition loop
     var frameTime by remember { mutableLongStateOf(0L) }
 
-    // Update the engine state whenever worldState or surface metrics change
-    LaunchedEffect(worldState, scaleMode, referenceWidth, referenceHeight) {
-        syncWorldToEngine(worldState, engineState)
+    // 2. State Sync (Brain to Muscle)
+    LaunchedEffect(worldState) {
+        syncWorldToEngine(worldState, moriEngine.state)
     }
 
-    // The Animation Loop (Driven by the device refresh rate)
+    // 3. The Animation Loop (Ticker to Engine)
     LaunchedEffect(Unit) {
+        moriEngine.start()
         while (true) {
             withFrameNanos { time ->
                 frameTime = time
+                // The Ticker "invokes" the engine onDrawFrame logic
+                ticker.tick(time)
             }
         }
     }
 
+    // 4. The Muscle (Compose Surface)
     Canvas(
         modifier = modifier.fillMaxSize()
     ) {
-        // Accessing frameTime here ensures this block is invalidated every frame
+        // Accessing frameTime here ensures the Canvas is re-drawn every frame
         @Suppress("UNUSED_VARIABLE")
         val invalidate = frameTime
 
-        // 1. Update Surface Metrics
+        // Update Surface Metrics if they changed
         val width = size.width
         val height = size.height
         
-        if (engineState.surfaceWidth != width.toInt() || engineState.surfaceHeight != height.toInt()) {
-            engineState.surfaceWidth = width.toInt()
-            engineState.surfaceHeight = height.toInt()
-            engineState.surfaceDensity = density
-            
-            // Recalculate Viewport (Geometry Handover)
+        if (moriEngine.state.surfaceWidth != width.toInt() || moriEngine.state.surfaceHeight != height.toInt()) {
             val scaleX = width / referenceWidth
             val scaleY = height / referenceHeight
             val scale = when (scaleMode) {
@@ -85,27 +88,28 @@ fun EngineBackdrop(
                 EngineScaleMode.FILL -> max(scaleX, scaleY)
             }
             
-            engineState.viewportReferenceScale = scale
-            engineState.viewportSafeWidth = referenceWidth * scale
-            engineState.viewportSafeHeight = referenceHeight * scale
-            engineState.viewportSafeX = (width - engineState.viewportSafeWidth) / 2f
-            engineState.viewportSafeY = (height - engineState.viewportSafeHeight) / 2f
+            // We use the Engine's own method for surface updates
+            moriEngine.onSurfaceChanged(width.toInt(), height.toInt(), density)
             
-            layerManager.onSurfaceChanged(width.toInt(), height.toInt(), density)
+            // Manual viewport calculation (Shared logic from Bridge)
+            moriEngine.state.viewportReferenceScale = scale
+            moriEngine.state.viewportSafeWidth = referenceWidth * scale
+            moriEngine.state.viewportSafeHeight = referenceHeight * scale
+            moriEngine.state.viewportSafeX = (width - moriEngine.state.viewportSafeWidth) / 2f
+            moriEngine.state.viewportSafeY = (height - moriEngine.state.viewportSafeHeight) / 2f
         }
 
-        // 2. Draw the frame
-        engineState.currentTimeNanos = frameTime
+        // EXECUTE: Bridging the DrawScope to the Engine
         composeCanvas.drawScope = this
-        layerManager.updateAndDraw(engineState, composeCanvas)
+        moriEngine.onDrawFrame(frameTime) // Orchestrator handles updateAndDraw logic
         composeCanvas.drawScope = null
     }
 }
 
 /**
- * Manual field-by-field sync to maintain the zero-allocation mandate.
+ * Manual field-by-field sync.
  */
-private fun syncWorldToEngine(from: WorldState, to: MoriEngineState) {
+private fun syncWorldToEngine(from: WorldState, to: me.ashishekka.mori.engine.core.MoriEngineState) {
     to.chronosTimeProgress = from.chronosTimeProgress
     to.chronosSunAltitude = from.chronosSunAltitude
     to.chronosMoonPhase = from.chronosMoonPhase
@@ -138,7 +142,7 @@ fun PreviewEngineBackdrop() {
         EngineBackdrop(
             worldState = WorldState(
                 energyBatteryLevel = 0.8f,
-                chronosSunAltitude = 0.5f // Golden hour
+                chronosSunAltitude = 0.5f
             )
         )
     }
