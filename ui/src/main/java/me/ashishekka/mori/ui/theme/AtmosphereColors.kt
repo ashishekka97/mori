@@ -2,7 +2,9 @@ package me.ashishekka.mori.ui.theme
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import me.ashishekka.mori.persona.state.WorldState
@@ -17,6 +19,28 @@ data class AtmosphereColors(
     val onSurface: Color,
     val isDark: Boolean
 )
+
+/**
+ * CompositionLocal used to provide [AtmosphereColors] throughout the UI tree.
+ */
+val LocalAtmosphereColors = staticCompositionLocalOf {
+    AtmosphereColors(
+        accent = DayAccent,
+        surface = DaySurface,
+        onSurface = DayOnSurface,
+        isDark = false
+    )
+}
+
+/**
+ * Global access point for Mori's atmospheric tokens.
+ */
+object MoriTheme {
+    val colors: AtmosphereColors
+        @Composable
+        @ReadOnlyComposable
+        get() = LocalAtmosphereColors.current
+}
 
 /**
  * Calculates and animates the current atmospheric palette based on the WorldState.
