@@ -43,6 +43,13 @@ fun MoriSlider(
             inactiveTrackColor = Color.Transparent
         ),
         track = { sliderState ->
+            // Use a slight tint for the base track to ensure it's visible on dark backgrounds
+            val trackBaseColor = if (colors.isDark) {
+                Color.White.copy(alpha = 0.1f)
+            } else {
+                Color.Black.copy(alpha = 0.05f)
+            }
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -53,7 +60,7 @@ fun MoriSlider(
                 sliderState = sliderState,
                 colors = SliderDefaults.colors(
                     activeTrackColor = colors.accent,
-                    inactiveTrackColor = Color.Transparent
+                    inactiveTrackColor = trackBaseColor
                 )
             )
         }

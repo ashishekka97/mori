@@ -33,11 +33,9 @@ fun MoriCard(
         thermalStress = thermalStress,
         shape = shape
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
+        // UNIFIED: Use padding only, allow parent to wrap content.
+        // Removed fillMaxSize() which was causing the layout to push other components away.
+        Box(modifier = Modifier.padding(16.dp)) {
             content()
         }
     }
