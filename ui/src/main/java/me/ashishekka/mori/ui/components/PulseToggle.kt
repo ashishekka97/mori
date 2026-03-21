@@ -30,6 +30,7 @@ import me.ashishekka.mori.ui.theme.MoriTheme
 
 /**
  * A custom switch with a glassmorphic track and an accent-colored thumb.
+ * Uses [MoriGlassBox] to ensure the thumb remains sharp while the track is blurred.
  */
 @Composable
 fun PulseToggle(
@@ -39,18 +40,16 @@ fun PulseToggle(
     thermalStress: Float = 0f,
     enabled: Boolean = true
 ) {
-    // 1. Reactive Theme Check: Ensure we pull the LATEST accent color
     val accentColor = MoriTheme.colors.accent
     val interactionSource = remember { MutableInteractionSource() }
 
-    // 2. Animations
+    // Animations
     val thumbOffset by animateDpAsState(
         targetValue = if (checked) 24.dp else 0.dp,
         animationSpec = tween(durationMillis = 200),
         label = "thumbOffset"
     )
     
-    // Explicitly reactive thumb color target
     val thumbColor by animateColorAsState(
         targetValue = if (checked) accentColor else Color.Gray.copy(alpha = 0.5f),
         animationSpec = tween(durationMillis = 200),
@@ -63,23 +62,24 @@ fun PulseToggle(
         label = "thumbScale"
     )
 
-    Box(
+    MoriGlassBox(
         modifier = modifier
             .width(52.dp)
             .height(28.dp)
-            .moriGlassBackground(thermalStress, shape = CircleShape, borderAlpha = 0.3f)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
                 enabled = enabled,
                 onClick = { onCheckedChange(!checked) }
-            )
-            .padding(4.dp),
-        contentAlignment = Alignment.CenterStart
+            ),
+        thermalStress = thermalStress,
+        shape = CircleShape,
+        borderAlpha = 0.3f
     ) {
-        // The Thumb
+        // The Thumb (Lives in the sharp content layer of MoriGlassBox)
         Box(
             modifier = Modifier
+                .padding(4.dp)
                 .offset(x = thumbOffset)
                 .size(20.dp)
                 .scale(thumbScale)
