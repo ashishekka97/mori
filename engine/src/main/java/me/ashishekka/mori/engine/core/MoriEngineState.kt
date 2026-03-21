@@ -58,4 +58,8 @@ class MoriEngineState {
     var surfaceWidth: Int = 0
     var surfaceHeight: Int = 0
     var surfaceDensity: Float = 1f
+
+    // === TIME (Global Sync) ===
+    /** The absolute system frame time in nanoseconds, used to synchronize animations across instances. */
+    var currentTimeNanos: Long = 0L
 }

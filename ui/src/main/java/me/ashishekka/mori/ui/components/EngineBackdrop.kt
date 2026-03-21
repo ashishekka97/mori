@@ -95,6 +95,7 @@ fun EngineBackdrop(
         }
 
         // 2. Draw the frame
+        engineState.currentTimeNanos = frameTime
         composeCanvas.drawScope = this
         layerManager.updateAndDraw(engineState, composeCanvas)
         composeCanvas.drawScope = null

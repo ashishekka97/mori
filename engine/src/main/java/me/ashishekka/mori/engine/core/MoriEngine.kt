@@ -36,7 +36,7 @@ class MoriEngine(
             if (!isRunning) return@setOnTickCallback
             val delta = frameTimeNanos - lastFrameTimeNanos
             if (delta >= frameIntervalNanos) {
-                onDrawFrame()
+                onDrawFrame(frameTimeNanos)
                 lastFrameTimeNanos = frameTimeNanos
             }
         }
@@ -99,7 +99,8 @@ class MoriEngine(
     /**
      * Triggers the rendering of a single frame.
      */
-    fun onDrawFrame() {
+    fun onDrawFrame(frameTimeNanos: Long = System.nanoTime()) {
+        state.currentTimeNanos = frameTimeNanos
         val canvas = renderSurface.lockCanvas()
 
         canvas?.let {
