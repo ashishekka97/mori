@@ -32,6 +32,7 @@ android {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.koin.androidx.compose)
+    implementation(project(":persona"))
 
     // Jetpack Compose
     implementation(platform(libs.androidx.compose.bom))

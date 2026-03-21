@@ -1,5 +1,7 @@
 package me.ashishekka.mori.ui.theme
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
@@ -13,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import me.ashishekka.mori.persona.state.WorldState
 
 // We use the system's Sans-Serif family for maximum performance and zero-allocation loading.
 // The Pulse Design System relies on weight and spacing to create its atmosphere.
@@ -65,14 +68,37 @@ val PulseTypography = Typography(
     )
 )
 
-@Preview(showBackground = true, backgroundColor = 0xFF121212)
+@Preview(name = "Day Mode", showBackground = true)
 @Composable
-fun PulseTypographyPreview() {
-    Column(modifier = Modifier.padding(16.dp)) {
-        Text(text = "Good Morning", style = PulseTypography.displayLarge, color = Color.White)
-        Text(text = "The Island", style = PulseTypography.headlineMedium, color = Color.White)
-        Text(text = "Atmosphere", style = PulseTypography.titleLarge, color = Color.LightGray)
-        Text(text = "Your vitality is blooming today.", style = PulseTypography.bodyLarge, color = Color.Gray)
-        Text(text = "DND ACTIVE", style = PulseTypography.labelSmall, color = Color.Cyan)
+fun AtmosphereDayPreview() {
+    val state = WorldState(chronosSunAltitude = 1.0f) // Noon
+    val colors = rememberAtmosphereColors(state)
+    AtmospherePreview(colors, "Good Morning")
+}
+
+@Preview(name = "Night Mode", showBackground = true)
+@Composable
+fun AtmosphereNightPreview() {
+    val state = WorldState(chronosSunAltitude = -1.0f) // Midnight
+    val colors = rememberAtmosphereColors(state)
+    AtmospherePreview(colors, "Good Night")
+}
+
+@Composable
+private fun AtmospherePreview(colors: AtmosphereColors, greeting: String) {
+    Box(modifier = Modifier.background(Color.DarkGray).padding(16.dp)) {
+        Column(
+            modifier = Modifier
+                .background(colors.surface)
+                .padding(24.dp)
+        ) {
+            Text(text = greeting, style = PulseTypography.displayLarge, color = colors.onSurface)
+            Text(text = "The Island", style = PulseTypography.headlineMedium, color = colors.accent)
+            Text(
+                text = "Your vitality is blooming today.", 
+                style = PulseTypography.bodyLarge, 
+                color = colors.onSurface.copy(alpha = 0.7f)
+            )
+        }
     }
 }
