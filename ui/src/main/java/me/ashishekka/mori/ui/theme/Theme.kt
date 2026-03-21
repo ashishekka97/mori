@@ -52,7 +52,7 @@ fun MoriTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
+        typography = PulseTypography,
         content = content,
     )
 }
