@@ -93,20 +93,21 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 ---
 
 ## Phase 5: Pulse Design System (UI Foundations)
-*Goal: Build the atmospheric UI library in `:ui`.*
+*Goal: Build the atmospheric, glass-first UI library in `:ui`.*
 
 ### 5.1 Foundations
-- [ ] **5.1.1 Typography:** Define the `PulseTypography` system.
-- [ ] **5.1.2 Color Palette:** Define the atmospheric palette and dynamic gradients.
-- [ ] **5.1.3 Theme Wrapper:** Implement `MoriTheme` for token injection.
+- [ ] **5.1.1 Typography:** Define the `PulseTypography` system (High-legibility atmospheric type).
+- [ ] **5.1.2 Atmospheric Color System:** Reactive palette that shifts with Sun/Battery/Biome state.
+- [ ] **5.1.3 Theme Wrapper:** Implement `MoriTheme` with dynamic token injection.
 
-### 5.2 Atomic Components
-- [ ] **5.2.1 Glassmorphic Container:** Build `MoriCard` with custom shaders.
-- [ ] **5.2.2 Pulse Controls:** Build atmospheric switches, sliders, and buttons.
-- [ ] **5.2.3 Metric Visualizer:** A Canvas-based graph component for the dashboard.
+### 5.2 Pulse Components (Glassmorphism)
+- [ ] **5.2.1 Glassmorphic Container:** Build `MoriCard` with custom blur/AGSL shaders.
+- [ ] **5.2.2 Atmosphere Controls:** Glass-themed toggles (`PulseToggle`), sliders, and buttons.
+- [ ] **5.2.3 Data Visualizer:** Canvas-based `MetricGraph` for dashboard trends.
 
 ### 5.3 Phase 5 Finalization
-- [ ] **5.3.1 Phase 5 Finalization:** Documentation, Retrospective, and Tagging.
+- [ ] **5.3.1 Component Gallery:** Build an internal screen to verify all Pulse components.
+- [ ] **5.3.2 Phase 5 Finalization:** Documentation, Retrospective, and Tagging.
 
 ---
 
