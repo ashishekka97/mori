@@ -67,4 +67,8 @@ class MoriEngineState {
     // === TIME (Global Sync) ===
     /** The absolute system frame time in nanoseconds, used to synchronize animations across instances. */
     var currentTimeNanos: Long = 0L
+
+    // === PALETTE (Atmospheric) ===
+    /** The primary accent color currently being rendered (e.g., based on sun/battery). */
+    var dominantAccentColor: Int = 0xFF9575CD.toInt() // Default NightAccent
 }

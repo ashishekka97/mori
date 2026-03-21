@@ -8,14 +8,7 @@ import kotlin.random.Random
 
 /**
  * The Ultimate Phase 4 Smoke Test.
- * A "Living Core" that reacts to:
- * - Battery: Pulse Speed
- * - Sun: Color (Day/Night)
- * - Social: Border Thickness
- * - Atmos: Opacity (Dim in dark)
- * - Zen: Pause Pulse (Stillness in DND)
- * - Vitality: External Progress Ring (Steps)
- * - Thermal: Jitter (Shake on stress)
+ * A "Living Core" that reacts to atmospheric signals.
  */
 class DebugPulseRenderer : EffectRenderer {
 
@@ -30,22 +23,24 @@ class DebugPulseRenderer : EffectRenderer {
         this.state = state
 
         // 1. Calculate Pulse Phase based on GLOBAL TIME
-        // 1,000,000,000L nanos = 1 second.
-        // We use a double for the base time to ensure precision over long periods.
         val timeSeconds = state.currentTimeNanos / 1_000_000_000.0
-        
-        // 2. Battery drives Speed (Frequency)
         val frequency = 0.5 + (state.energyBatteryLevel * 2.0)
         val multiplier = if (state.energyIsCharging) 2.0 else 1.0
         
-        // Final intensity (0.0 to 1.0)
         val intensity = if (state.zenIsDndActive) {
-            0.5f // Stillness in DND
+            0.5f 
         } else {
             ((sin(timeSeconds * frequency * multiplier * Math.PI) + 1.0) / 2.0).toFloat()
         }
 
-        // 3. Atmos drives Opacity
+        // 2. Atmospheric Data Handover (Living Palette)
+        // We determine the "Dominant Color" based on the Sun's altitude
+        state.dominantAccentColor = if (state.chronosSunAltitude > 0) {
+            0xFFFFB74D.toInt() // Day Accent (Amber)
+        } else {
+            0xFF9575CD.toInt() // Night Accent (Purple)
+        }
+
         val alpha = (50 + (state.atmosLightLevel * 205)).toInt()
         val rgbValue = (intensity * 255).toInt()
         
@@ -53,7 +48,7 @@ class DebugPulseRenderer : EffectRenderer {
     }
 
     override fun render(canvas: EngineCanvas) {
-        // 4. Solar Altitude drives Color Hue
+        // 3. Solar Altitude drives Color Hue
         val baseColor = if (state.chronosSunAltitude > 0) {
             // Day: Amber
             (colorAlpha shl 24) or (pulseIntensity shl 16) or ((pulseIntensity * 0.8f).toInt() shl 8)
@@ -62,7 +57,7 @@ class DebugPulseRenderer : EffectRenderer {
             (colorAlpha shl 24) or (pulseIntensity shl 16) or (pulseIntensity)
         }
 
-        // 5. Thermal Stress drives Jitter
+        // 4. Thermal Stress drives Jitter
         var offsetX = 0f
         var offsetY = 0f
         if (state.energyThermalStress > 0.3f) {
@@ -74,7 +69,6 @@ class DebugPulseRenderer : EffectRenderer {
         val centerX = state.viewportSafeX + (state.viewportSafeWidth / 2f) + offsetX
         val centerY = state.viewportSafeY + (state.viewportSafeHeight / 2f) + offsetY
 
-        // 6. Social Noise drives Border Thickness
         val baseRadius = min(state.viewportSafeWidth, state.viewportSafeHeight) * 0.2f
         val noiseRadius = state.zenSocialNoise * 50f
         val coreRadius = baseRadius + noiseRadius
@@ -84,9 +78,9 @@ class DebugPulseRenderer : EffectRenderer {
         canvas.drawCircle(centerX, centerY, coreRadius, baseColor, isFilled = true)
         canvas.drawCircle(centerX, centerY, coreRadius, 0xFFFFFFFF.toInt(), isFilled = false, thickness = borderThickness)
 
-        // 7. Vitality drives the External Ring (Progress Bar)
+        // 5. Vitality drives the External Ring
         val vitalityRadius = coreRadius + 40f
-        val vitalityColor = (0x88 shl 24) or (0x00FF00) // Translucent Green
+        val vitalityColor = (0x88 shl 24) or (0x00FF00)
         canvas.drawCircle(centerX, centerY, vitalityRadius, 0x44FFFFFF.toInt(), isFilled = false, thickness = 2f)
         if (state.vitalityStepsProgress > 0) {
             canvas.drawCircle(centerX, centerY, vitalityRadius, vitalityColor, isFilled = false, thickness = 8f * state.vitalityStepsProgress)

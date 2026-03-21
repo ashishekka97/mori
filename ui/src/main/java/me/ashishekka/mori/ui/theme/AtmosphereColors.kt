@@ -44,21 +44,25 @@ object MoriTheme {
 
 /**
  * Calculates and animates the current atmospheric palette based on the WorldState.
+ * 
+ * @param worldState The current device state.
+ * @param accentOverride An optional color to override the base accent (e.g., from the Engine).
  */
 @Composable
-fun rememberAtmosphereColors(worldState: WorldState): AtmosphereColors {
-    return remember(worldState.chronosSunAltitude, worldState.energyThermalStress) {
+fun rememberAtmosphereColors(
+    worldState: WorldState,
+    accentOverride: Color? = null
+): AtmosphereColors {
+    return remember(worldState.chronosSunAltitude, worldState.energyThermalStress, accentOverride) {
         // 1. Calculate Time Factor (Normalize -1..1 to 0..1)
-        // 0.0 = Midnight, 0.5 = Sunset/Sunrise, 1.0 = Noon
         val timeFactor = ((worldState.chronosSunAltitude + 1f) / 2f).coerceIn(0f, 1f)
 
         // 2. Interpolate Day vs Night tokens
-        val baseAccent = lerp(NightAccent, DayAccent, timeFactor)
+        val baseAccent = accentOverride ?: lerp(NightAccent, DayAccent, timeFactor)
         val baseSurface = lerp(NightSurface, DaySurface, timeFactor)
         val baseOnSurface = lerp(NightOnSurface, DayOnSurface, timeFactor)
 
         // 3. Apply Thermal Stress (Desaturation)
-        // If stress is high, we pull the accent toward a neutral grey.
         val finalAccent = if (worldState.energyThermalStress > 0.5f) {
             lerp(baseAccent, StressMuted, (worldState.energyThermalStress - 0.5f) * 2f)
         } else {
