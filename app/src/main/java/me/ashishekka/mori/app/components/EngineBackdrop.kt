@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.platform.LocalDensity
@@ -56,7 +57,12 @@ fun EngineBackdrop(
     // 2. Prepare the Capture Layer (The source for glassmorphism)
     val graphicsLayer = rememberGraphicsLayer()
     val density = LocalDensity.current.density
+    
+    // Engine State extraction for UI Theme sync
     var frameTime by remember { mutableLongStateOf(0L) }
+    val dominantAccent = remember(moriEngine.state.dominantAccentColor) { 
+        Color(moriEngine.state.dominantAccentColor) 
+    }
 
     LaunchedEffect(worldState) {
         syncWorldToEngine(worldState, moriEngine.state)
@@ -101,8 +107,11 @@ fun EngineBackdrop(
             drawLayer(graphicsLayer)
         }
 
-        // Draw the Overlay Content (Cards, Dashboard, etc.)
-        content()
+        // 5. Inject the Living Palette into the UI content
+        // We re-wrap the content in a MoriTheme that uses the engine's accent
+        MoriTheme(worldState = worldState, accentOverride = dominantAccent) {
+            content()
+        }
     }
 }
 

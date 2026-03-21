@@ -7,6 +7,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
@@ -17,13 +18,15 @@ import me.ashishekka.mori.persona.state.WorldState
  * Injects [AtmosphereColors] and [PulseTypography] into the composition.
  * 
  * @param worldState The current state of the world used to drive the dynamic palette.
+ * @param accentOverride An optional color to override the base accent (e.g., from the Engine).
  */
 @Composable
 fun MoriTheme(
     worldState: WorldState = WorldState(),
+    accentOverride: Color? = null,
     content: @Composable () -> Unit
 ) {
-    val atmosphereColors = rememberAtmosphereColors(worldState)
+    val atmosphereColors = rememberAtmosphereColors(worldState, accentOverride)
     
     // Map our dynamic tokens to standard Material 3 slots
     val colorScheme = if (atmosphereColors.isDark) {
