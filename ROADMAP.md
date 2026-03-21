@@ -98,7 +98,7 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 ### 5.1 Foundations
 - [x] **5.1.1 Typography:** Define the `PulseTypography` system (High-legibility atmospheric type).
 - [x] **5.1.2 Atmospheric Color System:** Reactive palette that shifts with Sun/Battery/Biome state.
-- [ ] **5.1.3 Theme Wrapper:** Implement `MoriTheme` with dynamic token injection.
+- [x] **5.1.3 Theme Wrapper:** Implement `MoriTheme` with dynamic token injection.
 
 ### 5.2 Pulse Components (Glassmorphism)
 - [ ] **5.2.1 Glassmorphic Container:** Build `MoriCard` with custom blur/AGSL shaders.

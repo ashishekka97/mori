@@ -71,21 +71,22 @@ val PulseTypography = Typography(
 @Preview(name = "Day Mode", showBackground = true)
 @Composable
 fun AtmosphereDayPreview() {
-    val state = WorldState(chronosSunAltitude = 1.0f) // Noon
-    val colors = rememberAtmosphereColors(state)
-    AtmospherePreview(colors, "Good Morning")
+    MoriTheme(worldState = WorldState(chronosSunAltitude = 1.0f)) {
+        AtmospherePreview("Good Morning")
+    }
 }
 
 @Preview(name = "Night Mode", showBackground = true)
 @Composable
 fun AtmosphereNightPreview() {
-    val state = WorldState(chronosSunAltitude = -1.0f) // Midnight
-    val colors = rememberAtmosphereColors(state)
-    AtmospherePreview(colors, "Good Night")
+    MoriTheme(worldState = WorldState(chronosSunAltitude = -1.0f)) {
+        AtmospherePreview("Good Night")
+    }
 }
 
 @Composable
-private fun AtmospherePreview(colors: AtmosphereColors, greeting: String) {
+private fun AtmospherePreview(greeting: String) {
+    val colors = MoriTheme.colors
     Box(modifier = Modifier.background(Color.DarkGray).padding(16.dp)) {
         Column(
             modifier = Modifier
