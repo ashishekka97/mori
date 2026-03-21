@@ -101,6 +101,7 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 - [x] **5.1.3 Theme Wrapper:** Implement `MoriTheme` with dynamic token injection.
 
 ### 5.2 Pulse Components (Glassmorphism)
+- [x] **5.2.0 EngineBackdrop:** Compose-native `RenderSurface` for in-app wallpaper previews.
 - [ ] **5.2.1 Glassmorphic Container:** Build `MoriCard` with custom blur/AGSL shaders.
 - [ ] **5.2.2 Atmosphere Controls:** Glass-themed toggles (`PulseToggle`), sliders, and buttons.
 - [ ] **5.2.3 Data Visualizer:** Canvas-based `MetricGraph` for dashboard trends.
