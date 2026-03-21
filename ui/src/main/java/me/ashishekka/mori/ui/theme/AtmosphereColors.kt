@@ -29,6 +29,7 @@ fun rememberAtmosphereColors(worldState: WorldState): AtmosphereColors {
         val timeFactor = ((worldState.chronosSunAltitude + 1f) / 2f).coerceIn(0f, 1f)
 
         // 2. Interpolate Day vs Night tokens
+        // TODO (Phase 6): Pull these base tokens from the active Biome's asset configuration
         val baseAccent = lerp(NightAccent, DayAccent, timeFactor)
         val baseSurface = lerp(NightSurface, DaySurface, timeFactor)
         val baseOnSurface = lerp(NightOnSurface, DayOnSurface, timeFactor)
