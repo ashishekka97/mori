@@ -24,13 +24,19 @@ class AndroidThermalProvider(
         emitCurrentState(status)
     }
 
+    private var isRegistered = false
+
     override fun start() {
+        if (isRegistered) return
         listenerProvider.register(powerManager, thermalListener)
         emitCurrentState(listenerProvider.getCurrentStatus(powerManager))
+        isRegistered = true
     }
 
     override fun stop() {
+        if (!isRegistered) return
         listenerProvider.unregister(powerManager, thermalListener)
+        isRegistered = false
     }
 
     /**
