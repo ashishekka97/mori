@@ -1,4 +1,4 @@
-package me.ashishekka.mori.ui.components
+package me.ashishekka.mori.app.components
 
 import me.ashishekka.mori.engine.core.interfaces.EngineCanvas
 import me.ashishekka.mori.engine.core.interfaces.RenderSurface

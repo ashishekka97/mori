@@ -33,7 +33,6 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.koin.androidx.compose)
     implementation(project(":persona"))
-    implementation(project(":engine"))
 
     // Jetpack Compose
     implementation(platform(libs.androidx.compose.bom))
@@ -44,9 +43,4 @@ dependencies {
 
     // Tooling support for Compose Preview
     debugImplementation(libs.androidx.compose.ui.tooling)
-
-    // Testing
-    testImplementation(libs.junit)
-    testImplementation(libs.mockk)
-    testImplementation(libs.kotlinx.coroutines.test)
 }

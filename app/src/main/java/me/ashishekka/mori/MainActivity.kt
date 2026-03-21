@@ -21,7 +21,7 @@ import me.ashishekka.mori.engine.renderer.DebugPulseRenderer
 import me.ashishekka.mori.engine.renderer.LayerManager
 import me.ashishekka.mori.persona.lifecycle.MoriLifecycleManager
 import me.ashishekka.mori.persona.state.StateManager
-import me.ashishekka.mori.ui.components.EngineBackdrop
+import me.ashishekka.mori.app.components.EngineBackdrop
 import me.ashishekka.mori.ui.theme.MoriTheme
 import org.koin.android.ext.android.inject
 

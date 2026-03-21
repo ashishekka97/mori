@@ -1,4 +1,4 @@
-package me.ashishekka.mori.ui.components
+package me.ashishekka.mori.app.components
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
