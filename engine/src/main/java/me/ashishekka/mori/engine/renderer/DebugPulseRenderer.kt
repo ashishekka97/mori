@@ -21,8 +21,7 @@ class DebugPulseRenderer : EffectRenderer {
 
     override val zOrder: Int = 0
 
-    private var pulseTime = 0f
-    private var colorValue = 0
+    private var pulseIntensityValue = 0
     private lateinit var state: MoriEngineState
 
     override fun onSurfaceChanged(width: Int, height: Int, density: Float) {}
@@ -30,32 +29,37 @@ class DebugPulseRenderer : EffectRenderer {
     override fun update(state: MoriEngineState) {
         this.state = state
 
-        // 1. Zen (DND) stops the pulse time from advancing
-        if (!state.zenIsDndActive) {
-            // 2. Battery drives Speed
-            val speed = 0.02f + (state.energyBatteryLevel * 0.08f)
-            pulseTime += if (state.energyIsCharging) speed * 2f else speed
+        // 1. Calculate Pulse Phase based on GLOBAL TIME
+        // 1,000,000,000L nanos = 1 second.
+        // We use a double for the base time to ensure precision over long periods.
+        val timeSeconds = state.currentTimeNanos / 1_000_000_000.0
+        
+        // 2. Battery drives Speed (Frequency)
+        val frequency = 0.5 + (state.energyBatteryLevel * 2.0)
+        val multiplier = if (state.energyIsCharging) 2.0 else 1.0
+        
+        // Final intensity (0.0 to 1.0)
+        val intensity = if (state.zenIsDndActive) {
+            0.5f // Stillness in DND
+        } else {
+            ((sin(timeSeconds * frequency * multiplier * Math.PI) + 1.0) / 2.0).toFloat()
         }
 
         // 3. Atmos drives Opacity
-        // Mapping 0.0-1.0 Atmos to 50-255 Alpha
         val alpha = (50 + (state.atmosLightLevel * 205)).toInt()
-        
-        val intensity = ((sin(pulseTime) + 1f) / 2f) * 0.5f
         val rgbValue = (intensity * 255).toInt()
         
-        // Final color value with Atmos Alpha
-        colorValue = (alpha shl 24) or (rgbValue shl 16) // Simplified for base
+        pulseIntensityValue = (alpha shl 24) or (rgbValue shl 16)
     }
 
     override fun render(canvas: EngineCanvas) {
         // 4. Solar Altitude drives Color Hue
         val baseColor = if (state.chronosSunAltitude > 0) {
             // Day: Amber
-            (state.colorAlpha shl 24) or (state.pulseIntensity shl 16) or ((state.pulseIntensity * 0.8f).toInt() shl 8)
+            (colorAlpha shl 24) or (pulseIntensity shl 16) or ((pulseIntensity * 0.8f).toInt() shl 8)
         } else {
             // Night: Purple
-            (state.colorAlpha shl 24) or (state.pulseIntensity shl 16) or (state.pulseIntensity)
+            (colorAlpha shl 24) or (pulseIntensity shl 16) or (pulseIntensity)
         }
 
         // 5. Thermal Stress drives Jitter
@@ -83,18 +87,12 @@ class DebugPulseRenderer : EffectRenderer {
         // 7. Vitality drives the External Ring (Progress Bar)
         val vitalityRadius = coreRadius + 40f
         val vitalityColor = (0x88 shl 24) or (0x00FF00) // Translucent Green
-        // We'll draw it as a thin circle representing the goal
         canvas.drawCircle(centerX, centerY, vitalityRadius, 0x44FFFFFF.toInt(), isFilled = false, thickness = 2f)
-        // And a thicker one for actual progress (simplified as a full circle for now)
         if (state.vitalityStepsProgress > 0) {
             canvas.drawCircle(centerX, centerY, vitalityRadius, vitalityColor, isFilled = false, thickness = 8f * state.vitalityStepsProgress)
         }
     }
 
-    // Helper extensions for clean code
-    private val MoriEngineState.colorAlpha: Int
-        get() = (50 + (this.atmosLightLevel * 205)).toInt()
-    
-    private val MoriEngineState.pulseIntensity: Int
-        get() = colorValue and 0x00FFFFFF shr 16 // Extract the calculated pulse intensity
+    private val colorAlpha: Int get() = pulseIntensityValue ushr 24
+    private val pulseIntensity: Int get() = (pulseIntensityValue shr 16) and 0xFF
 }

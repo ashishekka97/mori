@@ -1,5 +1,6 @@
 package me.ashishekka.mori.bridge.metrics
 
+import me.ashishekka.mori.engine.core.models.ScaleMode
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test

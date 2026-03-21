@@ -3,14 +3,12 @@ package me.ashishekka.mori
 import android.service.wallpaper.WallpaperService
 import android.view.SurfaceHolder
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 import me.ashishekka.mori.bridge.metrics.MetricCalculator
-import me.ashishekka.mori.bridge.metrics.ScaleMode
 import me.ashishekka.mori.bridge.sync.StateSynchronizer
 import me.ashishekka.mori.engine.core.MoriEngine
 import me.ashishekka.mori.engine.core.interfaces.EngineTicker
 import me.ashishekka.mori.engine.core.interfaces.RenderSurface
+import me.ashishekka.mori.engine.core.models.ScaleMode
 import me.ashishekka.mori.engine.renderer.DebugPulseRenderer
 import me.ashishekka.mori.engine.renderer.StaticFallbackRenderer
 import me.ashishekka.mori.persona.lifecycle.MoriLifecycleManager
@@ -42,22 +40,31 @@ class MoriWallpaperService : WallpaperService() {
         private val moriEngine: MoriEngine by inject { parametersOf(ticker, renderSurface) }
         private val stateSynchronizer: StateSynchronizer by inject { parametersOf(engineScope, moriEngine) }
 
+        private var isLifecycleStarted = false
+
         override fun onVisibilityChanged(visible: Boolean) {
             super.onVisibilityChanged(visible)
             
             if (visible) {
-                lifecycleManager.onStart()
+                if (!isLifecycleStarted) {
+                    lifecycleManager.onStart()
+                    isLifecycleStarted = true
+                }
                 
-                // Phase 3 Smoke Test: Dual-layer verification
-                // 1. Physical Background (Full Screen)
+                // Ensure effects are added (Safe for multiple calls)
                 moriEngine.addEffect(StaticFallbackRenderer(0xFF1A1A1A.toInt()))
-                // 2. Safe Area Foreground (Calculated by Bridge)
                 moriEngine.addEffect(DebugPulseRenderer())
                 
                 moriEngine.start()
                 stateSynchronizer.start()
             } else {
-                lifecycleManager.onStop()
+                // We stop the engine immediately on hide for battery,
+                // but we keep the lifecycle count until destroyed or truly idle.
+                // However, for Mori, "Hidden" = "Stop Sensors" if no one else is using them.
+                if (isLifecycleStarted) {
+                    lifecycleManager.onStop()
+                    isLifecycleStarted = false
+                }
                 moriEngine.stop()
                 stateSynchronizer.stop()
             }
@@ -70,17 +77,23 @@ class MoriWallpaperService : WallpaperService() {
         override fun onSurfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
             super.onSurfaceChanged(holder, format, width, height)
             val density = resources.displayMetrics.density
-            metricCalculator.updateMetrics(width, height, density)
-            stateSynchronizer.updateViewport(1000f, 1000f, ScaleMode.FIT)
+            
+            moriEngine.targetScaleMode = ScaleMode.FIT
+            moriEngine.state.referenceWidth = 1000f
+            moriEngine.state.referenceHeight = 1000f
+            
             moriEngine.onSurfaceChanged(width, height, density)
-            // Initial frame when surface is created or changed
+            metricCalculator.updateMetrics(width, height, density)
             moriEngine.onDrawFrame()
         }
 
         override fun onSurfaceDestroyed(holder: SurfaceHolder) {
             super.onSurfaceDestroyed(holder)
             
-            lifecycleManager.onStop()
+            if (isLifecycleStarted) {
+                lifecycleManager.onStop()
+                isLifecycleStarted = false
+            }
             stateSynchronizer.stop()
             moriEngine.onDestroy()
         }

@@ -5,9 +5,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import me.ashishekka.mori.bridge.metrics.MetricCalculator
-import me.ashishekka.mori.bridge.metrics.ScaleMode
 import me.ashishekka.mori.engine.core.MoriEngine
 import me.ashishekka.mori.engine.core.MoriEngineState
+import me.ashishekka.mori.engine.core.models.ScaleMode
 import me.ashishekka.mori.persona.state.StateManager
 import me.ashishekka.mori.persona.state.WorldState
 

@@ -2,9 +2,12 @@ package me.ashishekka.mori.engine.core
 
 import me.ashishekka.mori.engine.core.interfaces.EngineTicker
 import me.ashishekka.mori.engine.core.interfaces.RenderSurface
+import me.ashishekka.mori.engine.core.models.ScaleMode
 import me.ashishekka.mori.engine.renderer.EffectRenderer
 import me.ashishekka.mori.engine.renderer.LayerManager
 import me.ashishekka.mori.engine.renderer.StaticFallbackRenderer
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * The core rendering engine for Mori.
@@ -21,6 +24,9 @@ class MoriEngine(
     private var isRunning = false
     val state = MoriEngineState()
 
+    // Geometric Configuration
+    var targetScaleMode: ScaleMode = ScaleMode.FIT
+
     // FPS Control
     var targetFps: Int = 60
         set(value) {
@@ -36,7 +42,7 @@ class MoriEngine(
             if (!isRunning) return@setOnTickCallback
             val delta = frameTimeNanos - lastFrameTimeNanos
             if (delta >= frameIntervalNanos) {
-                onDrawFrame()
+                onDrawFrame(frameTimeNanos)
                 lastFrameTimeNanos = frameTimeNanos
             }
         }
@@ -56,6 +62,23 @@ class MoriEngine(
         state.surfaceWidth = width
         state.surfaceHeight = height
         state.surfaceDensity = density
+
+        // 1. Calculate Scale Factor (Shared Logic)
+        val scaleX = width / state.referenceWidth
+        val scaleY = height / state.referenceHeight
+        val scale = when (targetScaleMode) {
+            ScaleMode.FIT -> min(scaleX, scaleY)
+            ScaleMode.FILL -> max(scaleX, scaleY)
+        }
+
+        // 2. Update Viewport Metrics (Geometry Handover)
+        state.viewportReferenceScale = scale
+        state.viewportSafeWidth = state.referenceWidth * scale
+        state.viewportSafeHeight = state.referenceHeight * scale
+        state.viewportSafeX = (width - state.viewportSafeWidth) / 2f
+        state.viewportSafeY = (height - state.viewportSafeHeight) / 2f
+
+        // 3. Propagate to renderers
         layerManager.onSurfaceChanged(width, height, density)
         fallbackRenderer.onSurfaceChanged(width, height, density)
     }
@@ -99,7 +122,8 @@ class MoriEngine(
     /**
      * Triggers the rendering of a single frame.
      */
-    fun onDrawFrame() {
+    fun onDrawFrame(frameTimeNanos: Long = System.nanoTime()) {
+        state.currentTimeNanos = frameTimeNanos
         val canvas = renderSurface.lockCanvas()
 
         canvas?.let {
