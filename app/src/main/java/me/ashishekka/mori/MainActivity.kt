@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,11 +11,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -40,6 +38,7 @@ import me.ashishekka.mori.ui.components.MoriSlider
 import me.ashishekka.mori.ui.components.PulseToggle
 import me.ashishekka.mori.ui.theme.MoriTheme
 import org.koin.android.ext.android.inject
+import kotlin.math.roundToInt
 
 class MainActivity : ComponentActivity() {
 
@@ -50,10 +49,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val worldState by stateManager.state.collectAsState()
-            var toggleChecked by remember { mutableStateOf(true) }
-            var sliderValue by remember { mutableFloatStateOf(0.5f) }
+            var pulseEnabled by remember { mutableStateOf(true) }
+            var dummyIntensity by remember { mutableFloatStateOf(0.7f) }
             
-            // Start the sensors when the Activity is active
             DisposableEffect(lifecycleManager) {
                 lifecycleManager.onStart()
                 onDispose {
@@ -84,63 +82,62 @@ class MainActivity : ComponentActivity() {
                         ) {
                             Spacer(modifier = Modifier.height(48.dp))
 
-                            // 1. GLASS CARD
-                            MoriCard(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(150.dp),
-                                thermalStress = worldState.energyThermalStress
-                            ) {
-                                Column(verticalArrangement = Arrangement.Center, modifier = Modifier.fillMaxSize()) {
+                            // 1. SYSTEM STATUS CARD
+                            MoriCard(modifier = Modifier.fillMaxWidth()) {
+                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                     Text(
-                                        text = "Atmosphere Controls",
-                                        style = MaterialTheme.typography.headlineSmall,
-                                        color = MoriTheme.colors.onSurface
+                                        text = "Environment",
+                                        style = MaterialTheme.typography.labelLarge,
+                                        color = MoriTheme.colors.accent
                                     )
-                                    Text(
-                                        text = "Synced Glassmorphism",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MoriTheme.colors.onSurface.copy(alpha = 0.7f)
-                                    )
+                                    StatusRow("Battery", "${(worldState.energyBatteryLevel * 100).roundToInt()}%")
+                                    StatusRow("Sun Altitude", String.format("%.2f", worldState.chronosSunAltitude))
+                                    StatusRow("Thermal Stress", String.format("%.2f", worldState.energyThermalStress))
                                 }
                             }
 
-                            // 2. TOGGLE & BUTTON ROW
+                            // 2. INTERACTIVE CONTROLS
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
                                 MoriCard(modifier = Modifier.weight(1f)) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        modifier = Modifier.fillMaxWidth()
-                                    ) {
-                                        Text("Pulse", color = MoriTheme.colors.onSurface)
+                                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        Text("Living Pulse", style = MaterialTheme.typography.labelMedium, color = MoriTheme.colors.onSurface)
                                         PulseToggle(
-                                            checked = toggleChecked,
-                                            onCheckedChange = { toggleChecked = it },
+                                            checked = pulseEnabled,
+                                            onCheckedChange = { pulseEnabled = it },
                                             thermalStress = worldState.energyThermalStress
                                         )
                                     }
                                 }
 
-                                MoriButton(
-                                    onClick = { /* Action */ },
-                                    modifier = Modifier.weight(1f),
-                                    thermalStress = worldState.energyThermalStress
-                                ) {
-                                    Text("Action", color = MoriTheme.colors.onSurface)
+                                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                                    MoriButton(
+                                        onClick = { /* Action */ },
+                                        modifier = Modifier.fillMaxWidth(),
+                                        thermalStress = worldState.energyThermalStress
+                                    ) {
+                                        Text("Sync", color = MoriTheme.colors.onSurface)
+                                    }
+                                    
+                                    MoriButton(
+                                        onClick = { /* Action */ },
+                                        modifier = Modifier.fillMaxWidth(),
+                                        thermalStress = worldState.energyThermalStress
+                                    ) {
+                                        Text("Reset", color = MoriTheme.colors.onSurface)
+                                    }
                                 }
                             }
 
-                            // 3. SLIDER CARD
+                            // 3. INTENSITY SLIDER
                             MoriCard(modifier = Modifier.fillMaxWidth()) {
-                                Column {
-                                    Text("Intensity", color = MoriTheme.colors.onSurface)
+                                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                    Text("Atmospheric Intensity", style = MaterialTheme.typography.labelMedium, color = MoriTheme.colors.onSurface)
                                     MoriSlider(
-                                        value = sliderValue,
-                                        onValueChange = { sliderValue = it },
+                                        value = dummyIntensity,
+                                        onValueChange = { dummyIntensity = it },
                                         thermalStress = worldState.energyThermalStress
                                     )
                                 }
@@ -148,17 +145,27 @@ class MainActivity : ComponentActivity() {
 
                             Spacer(modifier = Modifier.weight(1f))
 
-                            // UI Overlay
                             Text(
-                                text = "Mori: Engine Active",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MoriTheme.colors.onSurface.copy(alpha = 0.5f),
-                                modifier = Modifier.padding(bottom = 24.dp)
+                                text = "Mori Glass System v1.0",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MoriTheme.colors.onSurface.copy(alpha = 0.4f),
+                                modifier = Modifier.padding(bottom = 12.dp)
                             )
                         }
                     }
                 }
             }
+        }
+    }
+
+    @Composable
+    private fun StatusRow(label: String, value: String) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(text = label, style = MaterialTheme.typography.bodyMedium, color = MoriTheme.colors.onSurface.copy(alpha = 0.7f))
+            Text(text = value, style = MaterialTheme.typography.bodyMedium, color = MoriTheme.colors.onSurface)
         }
     }
 }
