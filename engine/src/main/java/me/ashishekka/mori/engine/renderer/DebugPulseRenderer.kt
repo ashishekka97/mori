@@ -7,8 +7,8 @@ import kotlin.math.sin
 import kotlin.random.Random
 
 /**
- * The Ultimate Phase 4 Smoke Test.
- * A "Living Core" that reacts to atmospheric signals.
+ * The Ultimate Phase 4/5 Smoke Test.
+ * A vibrant, fullscreen atmospheric "Aurora" that reacts to signals.
  */
 class DebugPulseRenderer : EffectRenderer {
 
@@ -37,53 +37,42 @@ class DebugPulseRenderer : EffectRenderer {
         val alpha = (50 + (state.atmosLightLevel * 205)).toInt()
         val rgbIntensity = (intensity * 255).toInt()
         
-        // We store alpha in high byte, and pulse intensity in next byte
         pulseIntensityValue = (alpha shl 24) or (rgbIntensity shl 16)
     }
 
     override fun render(canvas: EngineCanvas) {
-        // 3. UNIFIED PULSE: Modulate the theme color by the calculated intensity
-        val targetR = (state.dominantAccentColor shr 16) and 0xFF
-        val targetG = (state.dominantAccentColor shr 8) and 0xFF
-        val targetB = state.dominantAccentColor and 0xFF
+        // 3. FULLSCREEN ATMOSPHERIC AURORA
+        // We use the safe area but expand the "Glow" to fill the screen
+        val width = state.surfaceWidth.toFloat()
+        val height = state.surfaceHeight.toFloat()
         
-        val intensityFactor = pulseIntensity / 255f
-        
-        // MODULATION: Scale RGB components by the pulse intensity
-        val r = (targetR * intensityFactor).toInt()
-        val g = (targetG * intensityFactor).toInt()
-        val b = (targetB * intensityFactor).toInt()
-        
-        val baseColor = (colorAlpha shl 24) or (r shl 16) or (g shl 8) or b
+        val themeRgb = state.dominantAccentColor and 0x00FFFFFF
+        val baseColor = (colorAlpha shl 24) or themeRgb
 
-        // 4. Thermal Stress drives Jitter
+        // 4. DRAW VIBRANT BACKDROP BLOB
+        // This blob provides the "Color" that our glass blurs will pick up.
+        val centerX = width / 2f
+        val centerY = height / 2f
+        val pulseRadius = min(width, height) * (0.4f + (pulseIntensity / 255f) * 0.2f)
+        
+        canvas.drawCircle(centerX, centerY, pulseRadius, baseColor, isFilled = true)
+
+        // 5. THERMAL JITTER FOR THE CORE
         var offsetX = 0f
         var offsetY = 0f
         if (state.energyThermalStress > 0.3f) {
-            val shake = state.energyThermalStress * 10f
+            val shake = state.energyThermalStress * 15f
             offsetX = Random.nextFloat() * shake - (shake / 2)
             offsetY = Random.nextFloat() * shake - (shake / 2)
         }
 
-        val centerX = state.viewportSafeX + (state.viewportSafeWidth / 2f) + offsetX
-        val centerY = state.viewportSafeY + (state.viewportSafeHeight / 2f) + offsetY
+        val coreX = state.viewportSafeX + (state.viewportSafeWidth / 2f) + offsetX
+        val coreY = state.viewportSafeY + (state.viewportSafeHeight / 2f) + offsetY
+        val coreRadius = min(state.viewportSafeWidth, state.viewportSafeHeight) * 0.15f
 
-        val baseRadius = min(state.viewportSafeWidth, state.viewportSafeHeight) * 0.2f
-        val noiseRadius = state.zenSocialNoise * 50f
-        val coreRadius = baseRadius + noiseRadius
-        val borderThickness = 4f + (state.zenSocialNoise * 16f)
-
-        // Draw the "Living Core"
-        canvas.drawCircle(centerX, centerY, coreRadius, baseColor, isFilled = true)
-        canvas.drawCircle(centerX, centerY, coreRadius, 0xFFFFFFFF.toInt(), isFilled = false, thickness = borderThickness)
-
-        // 5. Vitality drives the External Ring
-        val vitalityRadius = coreRadius + 40f
-        val vitalityColor = (0x88 shl 24) or (0x00FF00)
-        canvas.drawCircle(centerX, centerY, vitalityRadius, 0x44FFFFFF.toInt(), isFilled = false, thickness = 2f)
-        if (state.vitalityStepsProgress > 0) {
-            canvas.drawCircle(centerX, centerY, vitalityRadius, vitalityColor, isFilled = false, thickness = 8f * state.vitalityStepsProgress)
-        }
+        // Draw the "Sharp Core" over the Aurora
+        canvas.drawCircle(coreX, coreY, coreRadius, 0xFFFFFFFF.toInt(), isFilled = true)
+        canvas.drawCircle(coreX, coreY, coreRadius + 10f, baseColor, isFilled = false, thickness = 4f)
     }
 
     private val colorAlpha: Int get() = pulseIntensityValue ushr 24

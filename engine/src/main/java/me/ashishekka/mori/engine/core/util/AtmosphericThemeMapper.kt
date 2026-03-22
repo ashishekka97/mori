@@ -12,15 +12,17 @@ object AtmosphericThemeMapper {
         state.isDarkState = !isDay
 
         if (isDay) {
-            state.dominantFoundationColor = 0xFFF5F5F5.toInt() // Day Foundation (Light)
-            state.dominantAccentColor = 0xFFFFB74D.toInt() // Day Accent (Amber)
-            state.dominantSurfaceColor = 0x44FFFFFF.toInt() // Day Surface (Translucent White)
-            state.dominantOnSurfaceColor = 0xFF333333.toInt() // Day OnSurface (Dark Grey)
+            // VIBRANT DAY: Crisp White & Amber
+            state.dominantFoundationColor = 0xFFFFFFFF.toInt() 
+            state.dominantAccentColor = 0xFFFF9800.toInt() // Vibrant Orange/Amber
+            state.dominantSurfaceColor = 0x66FFFFFF.toInt() // More visible glass
+            state.dominantOnSurfaceColor = 0xFF1A1A1A.toInt() // High-contrast black
         } else {
-            state.dominantFoundationColor = 0xFF121212.toInt() // Night Foundation (Dark)
-            state.dominantAccentColor = 0xFF9575CD.toInt() // Night Accent (Purple)
-            state.dominantSurfaceColor = 0x44000000.toInt() // Night Surface (Translucent Black)
-            state.dominantOnSurfaceColor = 0xFFF5F5F5.toInt() // Night OnSurface (Off White)
+            // VIBRANT NIGHT: Deep Navy & Violet
+            state.dominantFoundationColor = 0xFF0D1117.toInt() // GitHub Dark foundation
+            state.dominantAccentColor = 0xFFBB86FC.toInt() // Vibrant Light Purple
+            state.dominantSurfaceColor = 0x66000000.toInt() // More visible glass
+            state.dominantOnSurfaceColor = 0xFFF5F5F5.toInt() // High-contrast white
         }
     }
 }
