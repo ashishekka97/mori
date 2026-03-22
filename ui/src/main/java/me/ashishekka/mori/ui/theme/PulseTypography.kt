@@ -4,45 +4,60 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import me.ashishekka.mori.ui.R
 
 /**
- * The core typography system for the Pulse Design System.
- * Uses default system fonts for now, prioritizing legibility.
+ * Custom font family for the Pulse Design System.
+ * Uses Satoshi for a clean, modern, and atmospheric feel.
+ * Bundled locally in ui/src/main/res/font.
+ */
+val PulseFontFamily = FontFamily(
+    Font(R.font.satoshi_light, FontWeight.Light),
+    Font(R.font.satoshi_regular, FontWeight.Normal),
+    Font(R.font.satoshi_medium, FontWeight.Medium),
+    Font(R.font.satoshi_bold, FontWeight.Bold),
+    Font(R.font.satoshi_black, FontWeight.Black)
+)
+
+/**
+ * The core typography system for Mori.
+ * Prioritizes legibility while maintaining an atmospheric aesthetic.
  */
 val PulseTypography = Typography(
     headlineLarge = TextStyle(
-        fontFamily = FontFamily.Default,
+        fontFamily = PulseFontFamily,
         fontWeight = FontWeight.Bold,
         fontSize = 32.sp,
         lineHeight = 40.sp,
         letterSpacing = 0.sp
     ),
     headlineMedium = TextStyle(
-        fontFamily = FontFamily.Default,
+        fontFamily = PulseFontFamily,
         fontWeight = FontWeight.Bold,
         fontSize = 28.sp,
         lineHeight = 36.sp,
         letterSpacing = 0.sp
     ),
     titleLarge = TextStyle(
-        fontFamily = FontFamily.Default,
+        fontFamily = PulseFontFamily,
         fontWeight = FontWeight.Medium,
         fontSize = 22.sp,
         lineHeight = 28.sp,
         letterSpacing = 0.sp
     ),
     bodyLarge = TextStyle(
-        fontFamily = FontFamily.Default,
+        fontFamily = PulseFontFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.5.sp
     ),
     labelSmall = TextStyle(
-        fontFamily = FontFamily.Default,
+        fontFamily = PulseFontFamily,
         fontWeight = FontWeight.Medium,
         fontSize = 11.sp,
         lineHeight = 16.sp,
