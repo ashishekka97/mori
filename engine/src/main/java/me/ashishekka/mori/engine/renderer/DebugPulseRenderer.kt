@@ -9,6 +9,7 @@ import kotlin.random.Random
 /**
  * The Ultimate Phase 4/5 Smoke Test.
  * A vibrant, fullscreen atmospheric "Aurora" that reacts to signals.
+ * Pulls all color information from the centralized theme policy.
  */
 class DebugPulseRenderer : EffectRenderer {
 
@@ -41,21 +42,21 @@ class DebugPulseRenderer : EffectRenderer {
     }
 
     override fun render(canvas: EngineCanvas) {
-        // 3. FULLSCREEN ATMOSPHERIC AURORA
-        // We use the safe area but expand the "Glow" to fill the screen
+        // 3. PURE AGNOSTIC RENDERING
+        // All colors are derived from the state.dominantPalette
         val width = state.surfaceWidth.toFloat()
         val height = state.surfaceHeight.toFloat()
         
         val themeRgb = state.dominantAccentColor and 0x00FFFFFF
-        val baseColor = (colorAlpha shl 24) or themeRgb
+        val accentColor = (colorAlpha shl 24) or themeRgb
 
-        // 4. DRAW VIBRANT BACKDROP BLOB
-        // This blob provides the "Color" that our glass blurs will pick up.
+        // 4. DRAW VIBRANT ATMOSPHERIC GLOW
         val centerX = width / 2f
         val centerY = height / 2f
-        val pulseRadius = min(width, height) * (0.4f + (pulseIntensity / 255f) * 0.2f)
         
-        canvas.drawCircle(centerX, centerY, pulseRadius, baseColor, isFilled = true)
+        // The Aurora blob scales with pulse intensity
+        val auroraRadius = min(width, height) * (0.4f + (pulseIntensity / 255f) * 0.2f)
+        canvas.drawCircle(centerX, centerY, auroraRadius, accentColor, isFilled = true)
 
         // 5. THERMAL JITTER FOR THE CORE
         var offsetX = 0f
@@ -70,9 +71,9 @@ class DebugPulseRenderer : EffectRenderer {
         val coreY = state.viewportSafeY + (state.viewportSafeHeight / 2f) + offsetY
         val coreRadius = min(state.viewportSafeWidth, state.viewportSafeHeight) * 0.15f
 
-        // Draw the "Sharp Core" over the Aurora
+        // Draw the "Sharp Core" (White with accent border)
         canvas.drawCircle(coreX, coreY, coreRadius, 0xFFFFFFFF.toInt(), isFilled = true)
-        canvas.drawCircle(coreX, coreY, coreRadius + 10f, baseColor, isFilled = false, thickness = 4f)
+        canvas.drawCircle(coreX, coreY, coreRadius + 10f, accentColor, isFilled = false, thickness = 4f)
     }
 
     private val colorAlpha: Int get() = pulseIntensityValue ushr 24
