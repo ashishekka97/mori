@@ -1,7 +1,7 @@
 package me.ashishekka.mori.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -12,6 +12,7 @@ import androidx.compose.material3.SliderDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -40,36 +41,35 @@ fun MoriSlider(
         valueRange = valueRange,
         colors = SliderDefaults.colors(
             thumbColor = colors.accent,
-            activeTrackColor = colors.accent,
+            activeTrackColor = Color.Transparent, // We draw our own
             inactiveTrackColor = Color.Transparent
         ),
         track = { sliderState ->
-            val trackBaseColor = if (colors.isDark) {
-                Color.White.copy(alpha = 0.1f)
-            } else {
-                Color.Black.copy(alpha = 0.05f)
-            }
-
             Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(12.dp),
+                contentAlignment = Alignment.CenterStart
             ) {
-                // 1. LIQUID CORE GLASS: Taller glass for better frosting visibility
+                // 1. FULL GLASS TRACK (Background)
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(12.dp)
+                        .height(10.dp)
                         .moriGlassBackground(thermalStress, shape = CircleShape, borderAlpha = 0.2f)
                 )
+
+                // 2. ACTIVE FILAMENT (The glowing core)
+                // We calculate the width based on the current slider progress
+                val fraction = (value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
                 
-                // 2. GLOWING FILAMENT: Slimmer active track inside the glass
-                SliderDefaults.Track(
-                    sliderState = sliderState,
-                    colors = SliderDefaults.colors(
-                        activeTrackColor = colors.accent,
-                        inactiveTrackColor = trackBaseColor
-                    ),
-                    modifier = Modifier.height(4.dp) 
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(fraction.coerceIn(0f, 1f))
+                        .height(4.dp)
+                        .padding(horizontal = 2.dp)
+                        .clip(CircleShape)
+                        .background(colors.accent)
                 )
             }
         }
