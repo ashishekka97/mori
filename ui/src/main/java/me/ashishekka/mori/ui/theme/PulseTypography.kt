@@ -4,23 +4,19 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.font.Font
 import me.ashishekka.mori.ui.R
 
 /**
  * Custom font family for the Pulse Design System.
  * Uses Satoshi for a clean, modern, and atmospheric feel.
- * Bundled locally in ui/src/main/res/font and loaded via Compose-native Font resolver.
+ * Delegated to pulse_font_family.xml for robust weight mapping and system resolution.
  */
 val PulseFontFamily = FontFamily(
-    Font(R.font.satoshi_light, FontWeight.Light),
-    Font(R.font.satoshi_regular, FontWeight.Normal),
-    Font(R.font.satoshi_medium, FontWeight.Medium),
-    Font(R.font.satoshi_bold, FontWeight.Bold),
-    Font(R.font.satoshi_black, FontWeight.Black)
+    Font(R.font.pulse_font_family)
 )
 
 /**
