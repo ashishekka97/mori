@@ -1,6 +1,7 @@
 package me.ashishekka.mori.ui.components
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -9,6 +10,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
@@ -48,21 +50,28 @@ fun MoriSlider(
                 Color.Black.copy(alpha = 0.05f)
             }
 
-            // PIXEL PERFECT: Apply the glass effect directly to the M3 Track modifier.
-            // This ensures the Slider centers our glass perfectly with the thumb and ticks.
-            SliderDefaults.Track(
-                sliderState = sliderState,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(8.dp) // The glass track height
-                    .moriGlassBackground(thermalStress, shape = CircleShape, borderAlpha = 0.2f),
-                colors = SliderDefaults.colors(
-                    activeTrackColor = colors.accent,
-                    inactiveTrackColor = trackBaseColor
-                ),
-                // Internal M3 track drawing will happen on top of our glass modifier
-                drawStopIndicator = null // Optional: hide default dots if they clutter the glass
-            )
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                // 1. LIQUID CORE GLASS: Taller glass for better frosting visibility
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(12.dp)
+                        .moriGlassBackground(thermalStress, shape = CircleShape, borderAlpha = 0.2f)
+                )
+                
+                // 2. GLOWING FILAMENT: Slimmer active track inside the glass
+                SliderDefaults.Track(
+                    sliderState = sliderState,
+                    colors = SliderDefaults.colors(
+                        activeTrackColor = colors.accent,
+                        inactiveTrackColor = trackBaseColor
+                    ),
+                    modifier = Modifier.height(4.dp) 
+                )
+            }
         }
     )
 }

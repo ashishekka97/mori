@@ -43,7 +43,6 @@ fun MoriCard(
     val colors = MoriTheme.colors
     val interactionSource = remember { MutableInteractionSource() }
 
-    // RIPPLE FIX: Applying clip BEFORE clickable ensures the ripple is contained
     val interactionModifier = if (onClick != null) {
         Modifier
             .clip(shape)
@@ -61,7 +60,8 @@ fun MoriCard(
         thermalStress = thermalStress,
         shape = shape
     ) {
-        Box(modifier = Modifier.padding(16.dp)) {
+        // PREMIUM POLISH: Increased padding to 20dp for better "Glass Breath"
+        Box(modifier = Modifier.padding(20.dp)) {
             content()
         }
     }
