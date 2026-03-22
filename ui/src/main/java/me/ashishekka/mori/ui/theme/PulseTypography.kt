@@ -13,14 +13,10 @@ import me.ashishekka.mori.ui.R
 /**
  * Custom font family for the Pulse Design System.
  * Uses Satoshi for a clean, modern, and atmospheric feel.
- * Bundled locally in ui/src/main/res/font.
+ * Referenced via pulse_font_family.xml for correct system resolution.
  */
 val PulseFontFamily = FontFamily(
-    Font(R.font.satoshi_light, FontWeight.Light),
-    Font(R.font.satoshi_regular, FontWeight.Normal),
-    Font(R.font.satoshi_medium, FontWeight.Medium),
-    Font(R.font.satoshi_bold, FontWeight.Bold),
-    Font(R.font.satoshi_black, FontWeight.Black)
+    Font(R.font.pulse_font_family)
 )
 
 /**
