@@ -9,8 +9,6 @@ import kotlin.random.Random
 /**
  * The Ultimate Phase 4 Smoke Test.
  * A "Living Core" that reacts to atmospheric signals.
- * 
- * Note: Decoupled from theme policy. Uses dominantAccentColor from state.
  */
 class DebugPulseRenderer : EffectRenderer {
 
@@ -37,16 +35,26 @@ class DebugPulseRenderer : EffectRenderer {
 
         // 2. Visual Synthesis
         val alpha = (50 + (state.atmosLightLevel * 205)).toInt()
-        val rgbValue = (intensity * 255).toInt()
+        val rgbIntensity = (intensity * 255).toInt()
         
-        pulseIntensityValue = (alpha shl 24) or (rgbValue shl 16)
+        // We store alpha in high byte, and pulse intensity in next byte
+        pulseIntensityValue = (alpha shl 24) or (rgbIntensity shl 16)
     }
 
     override fun render(canvas: EngineCanvas) {
-        // 3. UNIFIED: Use dominantAccentColor from state (Calculated by ThemeMapper)
-        // We preserve the calculated alpha but use the Engine's theme RGB
-        val themeRgb = state.dominantAccentColor and 0x00FFFFFF
-        val baseColor = (colorAlpha shl 24) or themeRgb
+        // 3. UNIFIED PULSE: Modulate the theme color by the calculated intensity
+        val targetR = (state.dominantAccentColor shr 16) and 0xFF
+        val targetG = (state.dominantAccentColor shr 8) and 0xFF
+        val targetB = state.dominantAccentColor and 0xFF
+        
+        val intensityFactor = pulseIntensity / 255f
+        
+        // MODULATION: Scale RGB components by the pulse intensity
+        val r = (targetR * intensityFactor).toInt()
+        val g = (targetG * intensityFactor).toInt()
+        val b = (targetB * intensityFactor).toInt()
+        
+        val baseColor = (colorAlpha shl 24) or (r shl 16) or (g shl 8) or b
 
         // 4. Thermal Stress drives Jitter
         var offsetX = 0f
@@ -79,4 +87,5 @@ class DebugPulseRenderer : EffectRenderer {
     }
 
     private val colorAlpha: Int get() = pulseIntensityValue ushr 24
+    private val pulseIntensity: Int get() = (pulseIntensityValue shr 16) and 0xFF
 }
