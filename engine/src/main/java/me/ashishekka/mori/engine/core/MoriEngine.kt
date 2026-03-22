@@ -19,7 +19,7 @@ class MoriEngine(
     private val ticker: EngineTicker,
     private val renderSurface: RenderSurface,
     private val layerManager: LayerManager,
-    private val fallbackRenderer: EffectRenderer = StaticFallbackRenderer(0xFF121212.toInt())
+    private val fallbackRenderer: EffectRenderer = StaticFallbackRenderer()
 ) {
 
     private var isRunning = false
@@ -27,11 +27,14 @@ class MoriEngine(
 
     // Geometric Configuration
     var targetScaleMode: ScaleMode = ScaleMode.FIT
+    
+    // Opaque Foundation
+    private var baseBackgroundColor: Int = 0xFF000000.toInt()
 
     // FPS Control
     var targetFps: Int = 60
         set(value) {
-            field = value.coerceIn(1, 120) // Sanity check
+            field = value.coerceIn(1, 120)
             frameIntervalNanos = 1_000_000_000L / field
         }
 
@@ -47,6 +50,15 @@ class MoriEngine(
                 lastFrameTimeNanos = frameTimeNanos
             }
         }
+    }
+
+    /**
+     * Applies a complete wallpaper definition to the engine.
+     */
+    fun setWallpaper(wallpaper: MoriWallpaper) {
+        layerManager.clear()
+        this.baseBackgroundColor = wallpaper.baseBackgroundColor
+        wallpaper.layers.forEach { layerManager.addEffect(it) }
     }
 
     /**
@@ -80,17 +92,19 @@ class MoriEngine(
     fun onDrawFrame(frameTimeNanos: Long = System.nanoTime()) {
         state.currentTimeNanos = frameTimeNanos
         
-        // 1. Update Theme Policy (Centralized)
+        // 1. Update Theme Policy
         AtmosphericThemeMapper.updatePalette(state)
 
         val canvas = renderSurface.lockCanvas()
 
         canvas?.let {
             try {
-                // 2. Update and Draw layers
+                // 2. Draw Opaque Foundation FIRST (Ensures consistency)
+                it.drawColor(baseBackgroundColor)
+                
+                // 3. Update and Draw layers
                 layerManager.updateAndDraw(state, it)
             } catch (e: Throwable) {
-                // Failsafe: if the complex render loop fails, draw the fallback
                 fallbackRenderer.updateAndDraw(state, it)
             } finally {
                 renderSurface.unlockCanvasAndPost(it)
@@ -106,7 +120,6 @@ class MoriEngine(
         state.surfaceHeight = height
         state.surfaceDensity = density
 
-        // 1. Calculate Scale Factor (Shared Logic)
         val scaleX = width / state.referenceWidth
         val scaleY = height / state.referenceHeight
         val scale = when (targetScaleMode) {
@@ -114,36 +127,24 @@ class MoriEngine(
             ScaleMode.FILL -> max(scaleX, scaleY)
         }
 
-        // 2. Update Viewport Metrics (Geometry Handover)
         state.viewportReferenceScale = scale
         state.viewportSafeWidth = state.referenceWidth * scale
         state.viewportSafeHeight = state.referenceHeight * scale
         state.viewportSafeX = (width - state.viewportSafeWidth) / 2f
         state.viewportSafeY = (height - state.viewportSafeHeight) / 2f
 
-        // 3. Propagate to renderers
         layerManager.onSurfaceChanged(width, height, density)
         fallbackRenderer.onSurfaceChanged(width, height, density)
     }
 
-    /**
-     * Adds an effect layer to the engine.
-     */
     fun addEffect(renderer: EffectRenderer) {
         layerManager.addEffect(renderer)
     }
 
-    /**
-     * Removes an effect layer from the engine.
-     */
     fun removeEffect(renderer: EffectRenderer) {
         layerManager.removeEffect(renderer)
     }
 
-    /**
-     * Called when the engine is destroyed.
-     * Clean up resources and cancel any pending work.
-     */
     fun onDestroy() {
         stop()
     }

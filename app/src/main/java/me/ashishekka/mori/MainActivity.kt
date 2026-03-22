@@ -40,9 +40,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import me.ashishekka.mori.app.components.PulseBackdrop
-import me.ashishekka.mori.engine.renderer.DebugPulseRenderer
-import me.ashishekka.mori.engine.renderer.LayerManager
-import me.ashishekka.mori.engine.renderer.StaticFallbackRenderer
 import me.ashishekka.mori.persona.lifecycle.MoriLifecycleManager
 import me.ashishekka.mori.persona.state.StateManager
 import me.ashishekka.mori.ui.components.PulseButton
@@ -73,25 +70,15 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = Color.Black
                 ) {
-                    // PERSISTENT BACKDROP: Stays active during navigation for visual continuity
-                    PulseBackdrop(
-                        worldState = worldState,
-                        layerManager = remember { 
-                            LayerManager().apply { 
-                                addEffect(StaticFallbackRenderer(0xFF1A1A1A.toInt()))
-                                addEffect(DebugPulseRenderer()) 
-                            } 
-                        }
-                    ) {
+                    // PERSISTENT BACKDROP: Uses the unified wallpaper spec
+                    PulseBackdrop(worldState = worldState) {
                         AnimatedContent(
                             targetState = showGallery,
                             transitionSpec = {
                                 if (targetState) {
-                                    // Slide Design Lab IN from bottom
                                     (slideInVertically { height -> height } + fadeIn())
                                         .togetherWith(fadeOut(animationSpec = tween(200)))
                                 } else {
-                                    // Slide Design Lab OUT to bottom
                                     fadeIn(animationSpec = tween(300))
                                         .togetherWith(slideOutVertically { height -> height } + fadeOut())
                                 }
@@ -101,9 +88,7 @@ class MainActivity : ComponentActivity() {
                             if (isGalleryVisible) {
                                 Box(modifier = Modifier.fillMaxSize()) {
                                     BackHandler { showGallery = false }
-                                    
                                     PulseGallery(modifier = Modifier.fillMaxSize())
-                                    
                                     PulseButton(
                                         onClick = { showGallery = false },
                                         modifier = Modifier
@@ -144,14 +129,11 @@ class MainActivity : ComponentActivity() {
             Text(
                 text = "MORI",
                 style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.ExtraBold,
-                letterSpacing = 8.sp,
                 color = PulseTheme.colors.onSurface
             )
             Text(
                 text = "LIVING ATMOSPHERE",
                 style = MaterialTheme.typography.labelSmall,
-                letterSpacing = 2.sp,
                 color = PulseTheme.colors.accent
             )
 

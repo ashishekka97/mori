@@ -8,20 +8,21 @@ import me.ashishekka.mori.engine.core.interfaces.EngineCanvas
  * This is used as a safety fallback if complex renders fail.
  */
 class StaticFallbackRenderer(
-    private val color: Int
+    private val defaultColor: Int = 0xFF121212.toInt()
 ) : EffectRenderer {
 
     override val zOrder: Int = Int.MIN_VALUE
+    
+    private var currentColor: Int = defaultColor
 
-    override fun onSurfaceChanged(width: Int, height: Int, density: Float) {
-        // No pre-calculation needed for solid color
-    }
+    override fun onSurfaceChanged(width: Int, height: Int, density: Float) {}
 
     override fun update(state: MoriEngineState) {
-        // Static color, nothing to update
+        // UNIFIED: Pull the background color from the centralized theme policy
+        currentColor = state.dominantSurfaceColor
     }
 
     override fun render(canvas: EngineCanvas) {
-        canvas.drawColor(color)
+        canvas.drawColor(currentColor)
     }
 }

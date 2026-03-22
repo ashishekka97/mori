@@ -23,10 +23,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import me.ashishekka.mori.bridge.sync.StateHandover
 import me.ashishekka.mori.engine.core.MoriEngine
+import me.ashishekka.mori.engine.core.MoriWallpaper
 import me.ashishekka.mori.engine.core.models.ScaleMode
-import me.ashishekka.mori.engine.renderer.DebugPulseRenderer
 import me.ashishekka.mori.engine.renderer.LayerManager
-import me.ashishekka.mori.engine.renderer.StaticFallbackRenderer
 import me.ashishekka.mori.persona.state.WorldState
 import me.ashishekka.mori.ui.components.PulseHazeSource
 import me.ashishekka.mori.ui.components.LocalPulseHazeSource
@@ -40,7 +39,7 @@ import me.ashishekka.mori.ui.theme.PulseTheme
 fun PulseBackdrop(
     modifier: Modifier = Modifier,
     worldState: WorldState = WorldState(),
-    layerManager: LayerManager = remember { LayerManager().apply { addEffect(DebugPulseRenderer()) } },
+    wallpaper: MoriWallpaper = remember { MoriWallpaper.createDebugWallpaper() },
     scaleMode: ScaleMode = ScaleMode.FIT,
     referenceWidth: Float = 1000f,
     referenceHeight: Float = 1000f,
@@ -50,17 +49,17 @@ fun PulseBackdrop(
     val composeCanvas = remember { ComposeEngineCanvas() }
     val renderSurface = remember { ComposeRenderSurface(composeCanvas) }
     val moriEngine = remember { 
-        MoriEngine(ticker, renderSurface, layerManager).apply {
+        MoriEngine(ticker, renderSurface, LayerManager()).apply {
             this.targetScaleMode = scaleMode
             this.state.referenceWidth = referenceWidth
             this.state.referenceHeight = referenceHeight
+            this.setWallpaper(wallpaper) // Initialize with the provided spec
         } 
     }
     
     val graphicsLayer = rememberGraphicsLayer()
     val density = LocalDensity.current.density
     
-    // FORCED INVALIDATION
     var frameTick by remember { mutableIntStateOf(0) }
     var lastNanos by remember { mutableStateOf(0L) }
     
@@ -94,14 +93,12 @@ fun PulseBackdrop(
                 ticker.tick(time)
                 
                 val engineState = moriEngine.state
-                val newAccent = engineState.dominantAccentColor
+                val newAccent = Color(engineState.dominantAccentColor)
                 val newIsDark = engineState.isDarkState
 
-                if (enginePalette.accent.value.toLong() != newAccent.toLong().shl(32).ushr(32) || 
-                    enginePalette.isDark != newIsDark) {
-                    
+                if (enginePalette.accent != newAccent || enginePalette.isDark != newIsDark) {
                     enginePalette = PulseColors(
-                        accent = Color(newAccent),
+                        accent = newAccent,
                         surface = Color(engineState.dominantSurfaceColor),
                         onSurface = Color(engineState.dominantOnSurfaceColor),
                         isDark = newIsDark
@@ -130,7 +127,6 @@ fun PulseBackdrop(
                 moriEngine.onSurfaceChanged(width.toInt(), height.toInt(), density)
             }
 
-            // CORRECT RECORD: Pass size to record block
             graphicsLayer.record(intSize) {
                 composeCanvas.drawScope = this
                 moriEngine.onDrawFrame(lastNanos)
