@@ -20,10 +20,12 @@ import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
+import me.ashishekka.mori.bridge.sync.StateHandover
 import me.ashishekka.mori.engine.core.MoriEngine
 import me.ashishekka.mori.engine.core.models.ScaleMode
 import me.ashishekka.mori.engine.renderer.DebugPulseRenderer
 import me.ashishekka.mori.engine.renderer.LayerManager
+import me.ashishekka.mori.engine.renderer.StaticFallbackRenderer
 import me.ashishekka.mori.persona.state.WorldState
 import me.ashishekka.mori.ui.components.PulseHazeSource
 import me.ashishekka.mori.ui.components.LocalPulseHazeSource
@@ -32,8 +34,6 @@ import me.ashishekka.mori.ui.theme.PulseTheme
 
 /**
  * A Compose-native backdrop that renders the Mori Engine directly to a Canvas.
- * This component captures its output into a GraphicsLayer and shares it
- * via [LocalPulseHazeSource] for backdrop blur effects.
  */
 @Composable
 fun PulseBackdrop(
@@ -74,8 +74,9 @@ fun PulseBackdrop(
         )
     }
 
+    // UNIFIED: Use StateHandover from :bridge
     LaunchedEffect(worldState) {
-        syncWorldToEngine(worldState, moriEngine.state)
+        StateHandover.sync(worldState, moriEngine.state)
     }
 
     // 3. The Animation & Lifecycle Loop
@@ -102,11 +103,10 @@ fun PulseBackdrop(
         }
     }
 
-    // 3. Provide the layer to the hierarchy
+    // 4. Provide the layer to the hierarchy
     CompositionLocalProvider(
         LocalPulseHazeSource provides PulseHazeSource(graphicsLayer)
     ) {
-        // 4. The Muscle (Compose Surface)
         Canvas(
             modifier = modifier
                 .fillMaxSize()
@@ -122,51 +122,19 @@ fun PulseBackdrop(
                 moriEngine.onSurfaceChanged(width.toInt(), height.toInt(), density)
             }
 
-            // Record the Engine output into the shared GraphicsLayer
             graphicsLayer.record {
                 composeCanvas.drawScope = this
                 moriEngine.onDrawFrame(frameTime)
                 composeCanvas.drawScope = null
             }
 
-            // Draw the captured layer onto the main Canvas
             drawLayer(graphicsLayer)
         }
 
-        // 5. Inject the Pulse Theme into the UI content
         PulseTheme(worldState = worldState, paletteOverride = enginePalette) {
             content()
         }
     }
-}
-
-/**
- * Manual field-by-field sync.
- */
-private fun syncWorldToEngine(from: WorldState, to: me.ashishekka.mori.engine.core.MoriEngineState) {
-    to.chronosTimeProgress = from.chronosTimeProgress
-    to.chronosSunAltitude = from.chronosSunAltitude
-    to.chronosMoonPhase = from.chronosMoonPhase
-    to.chronosSeasonProgress = from.chronosSeasonProgress
-    to.chronosIsWeekend = from.chronosIsWeekend
-
-    to.vitalityStepsProgress = from.vitalityStepsProgress
-    to.vitalityActivityIntensity = from.vitalityActivityIntensity
-    to.vitalitySleepClarity = from.vitalitySleepClarity
-    to.vitalityStandGoalProgress = from.vitalityStandGoalProgress
-
-    to.zenDigitalCongestion = from.zenDigitalCongestion
-    to.zenSocialNoise = from.zenSocialNoise
-    to.zenContextSwitching = from.zenContextSwitching
-    to.zenIsDndActive = from.zenIsDndActive
-    to.zenLastInteractionAge = from.zenLastInteractionAge
-
-    to.energyBatteryLevel = from.energyBatteryLevel
-    to.energyIsCharging = from.energyIsCharging
-    to.energyThermalStress = from.energyThermalStress
-
-    to.atmosLightLevel = from.atmosLightLevel
-    to.atmosIsPocketed = from.atmosIsPocketed
 }
 
 @Preview(showBackground = true)

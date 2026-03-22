@@ -10,8 +10,7 @@ import kotlin.random.Random
  * The Ultimate Phase 4 Smoke Test.
  * A "Living Core" that reacts to atmospheric signals.
  * 
- * Note: Theme color calculation has been moved to AtmosphericThemeMapper
- * to ensure separation of concerns.
+ * Note: Decoupled from theme policy. Uses dominantAccentColor from state.
  */
 class DebugPulseRenderer : EffectRenderer {
 
@@ -44,14 +43,10 @@ class DebugPulseRenderer : EffectRenderer {
     }
 
     override fun render(canvas: EngineCanvas) {
-        // 3. Use state-driven colors (calculated by Mapper)
-        val baseColor = if (state.chronosSunAltitude > 0) {
-            // Day: Amber
-            (colorAlpha shl 24) or (pulseIntensity shl 16) or ((pulseIntensity * 0.8f).toInt() shl 8)
-        } else {
-            // Night: Purple
-            (colorAlpha shl 24) or (pulseIntensity shl 16) or (pulseIntensity)
-        }
+        // 3. UNIFIED: Use dominantAccentColor from state (Calculated by ThemeMapper)
+        // We preserve the calculated alpha but use the Engine's theme RGB
+        val themeRgb = state.dominantAccentColor and 0x00FFFFFF
+        val baseColor = (colorAlpha shl 24) or themeRgb
 
         // 4. Thermal Stress drives Jitter
         var offsetX = 0f
@@ -84,5 +79,4 @@ class DebugPulseRenderer : EffectRenderer {
     }
 
     private val colorAlpha: Int get() = pulseIntensityValue ushr 24
-    private val pulseIntensity: Int get() = (pulseIntensityValue shr 16) and 0xFF
 }

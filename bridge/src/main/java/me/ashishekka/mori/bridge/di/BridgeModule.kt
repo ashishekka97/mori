@@ -16,8 +16,7 @@ val bridgeModule = module {
     factory { (scope: CoroutineScope, engine: MoriEngine) ->
         StateSynchronizer(
             stateManager = get(),
-            moriEngine = engine,
-            metricCalculator = get(),
+            engine = engine,
             scope = scope
         )
     }
