@@ -4,19 +4,46 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontLoadingStrategy
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.text.font.Font
 import me.ashishekka.mori.ui.R
 
 /**
  * Custom font family for the Pulse Design System.
  * Uses Satoshi for a clean, modern, and atmospheric feel.
- * Delegated to pulse_font_family.xml for robust weight mapping and system resolution.
+ * 
+ * We use individual Font declarations with Async loading strategy to ensure 
+ * the app doesn't crash if there is a system-level resource resolution delay.
  */
 val PulseFontFamily = FontFamily(
-    Font(R.font.pulse_font_family)
+    Font(
+        resId = R.font.satoshi_light,
+        weight = FontWeight.Light,
+        loadingStrategy = FontLoadingStrategy.Async
+    ),
+    Font(
+        resId = R.font.satoshi_regular,
+        weight = FontWeight.Normal,
+        loadingStrategy = FontLoadingStrategy.Async
+    ),
+    Font(
+        resId = R.font.satoshi_medium,
+        weight = FontWeight.Medium,
+        loadingStrategy = FontLoadingStrategy.Async
+    ),
+    Font(
+        resId = R.font.satoshi_bold,
+        weight = FontWeight.Bold,
+        loadingStrategy = FontLoadingStrategy.Async
+    ),
+    Font(
+        resId = R.font.satoshi_black,
+        weight = FontWeight.Black,
+        loadingStrategy = FontLoadingStrategy.Async
+    )
 )
 
 /**
