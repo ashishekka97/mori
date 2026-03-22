@@ -3,13 +3,10 @@ package me.ashishekka.mori.ui.components
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -18,12 +15,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.ashishekka.mori.ui.theme.PulseTheme
 
 /**
- * A tactile glass button that correctly applies the Pulse Design System's theme to its content.
+ * A tactile glass button that correctly and safely applies the theme to its content.
  */
 @Composable
 fun PulseButton(
@@ -33,7 +29,7 @@ fun PulseButton(
     shape: Shape = RoundedCornerShape(12.dp),
     enabled: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
-    content: @Composable RowScope.() -> Unit
+    content: @Composable () -> Unit
 ) {
     val colors = PulseTheme.colors
     val interactionSource = remember { MutableInteractionSource() }
@@ -59,11 +55,7 @@ fun PulseButton(
                 modifier = Modifier.padding(contentPadding),
                 contentAlignment = Alignment.Center
             ) {
-                // This looks weird, but it's how we expose a RowScope to the content lambda
-                // so that users can arrange items horizontally if needed.
-                Column {
-                    (content as @Composable () -> Unit)()
-                }
+                content()
             }
         }
     }
