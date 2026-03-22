@@ -4,6 +4,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
@@ -77,8 +78,15 @@ fun PulseBackdrop(
         syncWorldToEngine(worldState, moriEngine.state)
     }
 
-    LaunchedEffect(Unit) {
+    // 3. The Animation & Lifecycle Loop
+    DisposableEffect(Unit) {
         moriEngine.start()
+        onDispose {
+            moriEngine.stop()
+        }
+    }
+
+    LaunchedEffect(Unit) {
         while (true) {
             withFrameNanos { time ->
                 frameTime = time
