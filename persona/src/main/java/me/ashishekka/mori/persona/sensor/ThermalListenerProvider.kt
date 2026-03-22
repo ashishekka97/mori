@@ -13,21 +13,23 @@ interface ThermalListenerProvider {
     fun getCurrentStatus(powerManager: PowerManager): Int
 }
 
-class DefaultThermalListenerProvider : ThermalListenerProvider {
+class DefaultThermalListenerProvider(
+    private val buildVersionProvider: BuildVersionProvider = DefaultBuildVersionProvider()
+) : ThermalListenerProvider {
     override fun register(powerManager: PowerManager, listener: PowerManager.OnThermalStatusChangedListener) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        if (buildVersionProvider.sdkInt >= Build.VERSION_CODES.Q) {
             powerManager.addThermalStatusListener(listener)
         }
     }
 
     override fun unregister(powerManager: PowerManager, listener: PowerManager.OnThermalStatusChangedListener) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        if (buildVersionProvider.sdkInt >= Build.VERSION_CODES.Q) {
             powerManager.removeThermalStatusListener(listener)
         }
     }
 
     override fun getCurrentStatus(powerManager: PowerManager): Int {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        return if (buildVersionProvider.sdkInt >= Build.VERSION_CODES.Q) {
             powerManager.currentThermalStatus
         } else {
             PowerManager.THERMAL_STATUS_NONE

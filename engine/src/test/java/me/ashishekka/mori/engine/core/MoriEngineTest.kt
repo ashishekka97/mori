@@ -1,13 +1,18 @@
 package me.ashishekka.mori.engine.core
 
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
+import me.ashishekka.mori.engine.core.interfaces.EngineCanvas
 import me.ashishekka.mori.engine.core.interfaces.EngineTicker
 import me.ashishekka.mori.engine.core.interfaces.RenderSurface
 import me.ashishekka.mori.engine.core.models.ScaleMode
 import me.ashishekka.mori.engine.renderer.EffectRenderer
 import me.ashishekka.mori.engine.renderer.LayerManager
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -16,6 +21,7 @@ class MoriEngineTest {
     private lateinit var ticker: EngineTicker
     private lateinit var renderSurface: RenderSurface
     private lateinit var layerManager: LayerManager
+    private lateinit var fallbackRenderer: EffectRenderer
     private lateinit var engine: MoriEngine
 
     @Before
@@ -23,7 +29,8 @@ class MoriEngineTest {
         ticker = mockk(relaxed = true)
         renderSurface = mockk(relaxed = true)
         layerManager = mockk(relaxed = true)
-        engine = MoriEngine(ticker, renderSurface, layerManager)
+        fallbackRenderer = mockk(relaxed = true)
+        engine = MoriEngine(ticker, renderSurface, layerManager, fallbackRenderer)
     }
 
     @Test
@@ -43,8 +50,62 @@ class MoriEngineTest {
     fun `onDrawFrame should update currentTimeNanos in state`() {
         val testTime = 123456789L
         engine.onDrawFrame(testTime)
-        
+
         assertEquals(testTime, engine.state.currentTimeNanos)
+    }
+
+    @Test
+    fun `onDrawFrame should follow update-then-draw cycle`() {
+        // Given
+        val mockCanvas = mockk<EngineCanvas>()
+        every { renderSurface.lockCanvas() } returns mockCanvas
+
+        // When
+        engine.onDrawFrame()
+
+        // Then
+        verify(exactly = 1) { layerManager.update(any()) }
+        verify(exactly = 1) { layerManager.draw(mockCanvas) }
+        verify(exactly = 1) { renderSurface.unlockCanvasAndPost(mockCanvas) }
+    }
+
+    @Test
+    fun `onDrawFrame should use fallback renderer if main draw fails`() {
+        // Given
+        val mockCanvas = mockk<EngineCanvas>()
+        every { renderSurface.lockCanvas() } returns mockCanvas
+        every { layerManager.draw(any()) } throws RuntimeException("GPU Crash")
+
+        // When
+        engine.onDrawFrame()
+
+        // Then
+        verify { fallbackRenderer.update(any()) }
+        verify { fallbackRenderer.render(mockCanvas) }
+        verify { renderSurface.unlockCanvasAndPost(mockCanvas) }
+    }
+
+    @Test
+    fun `ticker callback should respect target FPS`() {
+        // Capture the ticker callback
+        val tickCallbackSlot = slot<(Long) -> Unit>()
+        verify { ticker.setOnTickCallback(capture(tickCallbackSlot)) }
+        val tickCallback = tickCallbackSlot.captured
+
+        engine.targetFps = 30 // 33.33ms interval
+        engine.start()
+
+        // First tick (always draws)
+        tickCallback(100_000_000L)
+        verify(exactly = 1) { layerManager.update(any()) }
+
+        // Second tick too soon (10ms later)
+        tickCallback(110_000_000L)
+        verify(exactly = 1) { layerManager.update(any()) } // Still 1
+
+        // Third tick far enough (40ms later)
+        tickCallback(150_000_000L)
+        verify(exactly = 2) { layerManager.update(any()) }
     }
 
     @Test
@@ -53,9 +114,9 @@ class MoriEngineTest {
         engine.state.referenceWidth = 1000f
         engine.state.referenceHeight = 1000f
         engine.targetScaleMode = ScaleMode.FIT
-        
+
         engine.onSurfaceChanged(2000, 1000, 1.0f)
-        
+
         // Scale should be 1.0 (to fit the 1000 height)
         assertEquals(1.0f, engine.state.viewportReferenceScale)
         // Offset should be (2000 - 1000) / 2 = 500
@@ -69,9 +130,9 @@ class MoriEngineTest {
         engine.state.referenceWidth = 1000f
         engine.state.referenceHeight = 1000f
         engine.targetScaleMode = ScaleMode.FILL
-        
+
         engine.onSurfaceChanged(2000, 1000, 1.0f)
-        
+
         // Scale should be 2.0 (to fill the 2000 width)
         assertEquals(2.0f, engine.state.viewportReferenceScale)
         // Offset should be 0 for X, and (1000 - 2000) / 2 = -500 for Y

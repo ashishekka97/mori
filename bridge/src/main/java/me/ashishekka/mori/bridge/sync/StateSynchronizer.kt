@@ -4,9 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import me.ashishekka.mori.bridge.metrics.MetricCalculator
 import me.ashishekka.mori.engine.core.MoriEngine
-import me.ashishekka.mori.engine.core.MoriEngineState
 import me.ashishekka.mori.engine.core.models.ScaleMode
 import me.ashishekka.mori.persona.state.StateManager
 import me.ashishekka.mori.persona.state.WorldState
@@ -31,6 +29,7 @@ class StateSynchronizer(
         syncJob = stateManager.state
             .onEach { worldState ->
                 StateHandover.sync(worldState, engine.state)
+                engine.requestFrame()
             }
             .launchIn(scope)
     }
