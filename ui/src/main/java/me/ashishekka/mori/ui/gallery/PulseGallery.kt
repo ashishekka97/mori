@@ -33,8 +33,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.rememberGraphicsLayer
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import me.ashishekka.mori.persona.state.WorldState
@@ -65,19 +67,24 @@ fun PulseGallery(
     }
 
     val galleryHazeLayer = rememberGraphicsLayer()
+    var gallerySize by remember { mutableStateOf(IntSize.Zero) }
 
     PulseTheme(simulatedState) {
         Box(
             modifier = modifier
                 .fillMaxSize()
+                .onSizeChanged { gallerySize = it }
                 .drawBehind {
-                    galleryHazeLayer.record {
-                        val skyColor = lerp(Color(0xFF1A237E), Color(0xFF81D4FA), ((sunAltitude + 1f) / 2f).coerceIn(0f, 1f))
-                        val accentGlow = lerp(Color(0xFF4A148C), Color(0xFFFFB74D), ((sunAltitude + 1f) / 2f).coerceIn(0f, 1f))
-                        drawRect(brush = Brush.verticalGradient(colors = listOf(skyColor, accentGlow, skyColor)))
-                        drawCircle(color = accentGlow.copy(alpha = 0.5f), radius = size.minDimension / 2, center = center)
+                    if (gallerySize != IntSize.Zero) {
+                        // CORRECT RECORD: Size must be passed here
+                        galleryHazeLayer.record(gallerySize) {
+                            val skyColor = lerp(Color(0xFF1A237E), Color(0xFF81D4FA), ((sunAltitude + 1f) / 2f).coerceIn(0f, 1f))
+                            val accentGlow = lerp(Color(0xFF4A148C), Color(0xFFFFB74D), ((sunAltitude + 1f) / 2f).coerceIn(0f, 1f))
+                            drawRect(brush = Brush.verticalGradient(colors = listOf(skyColor, accentGlow, skyColor)))
+                            drawCircle(color = accentGlow.copy(alpha = 0.5f), radius = size.minDimension / 2, center = center)
+                        }
+                        drawLayer(galleryHazeLayer)
                     }
-                    drawLayer(galleryHazeLayer)
                 }
         ) {
             CompositionLocalProvider(

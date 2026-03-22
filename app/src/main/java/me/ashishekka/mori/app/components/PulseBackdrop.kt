@@ -7,7 +7,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntSize
 import me.ashishekka.mori.bridge.sync.StateHandover
 import me.ashishekka.mori.engine.core.MoriEngine
 import me.ashishekka.mori.engine.core.models.ScaleMode
@@ -59,10 +60,10 @@ fun PulseBackdrop(
     val graphicsLayer = rememberGraphicsLayer()
     val density = LocalDensity.current.density
     
-    // MOTION STATE: Always updated at 60fps to drive rendering
-    var frameTime by remember { mutableLongStateOf(0L) }
+    // FORCED INVALIDATION
+    var frameTick by remember { mutableIntStateOf(0) }
+    var lastNanos by remember { mutableStateOf(0L) }
     
-    // VIBE STATE: Only updated when the engine's theme policy shifts (Memory Efficient)
     var enginePalette by remember { 
         mutableStateOf(
             PulseColors(
@@ -88,16 +89,14 @@ fun PulseBackdrop(
     LaunchedEffect(Unit) {
         while (true) {
             withFrameNanos { time ->
-                // 1. MOTION: Drive the engine and trigger recomposition (Mandatory)
-                frameTime = time
+                lastNanos = time
+                frameTick++
                 ticker.tick(time)
                 
-                // 2. VIBE: Update theme state only on change (Zero-Allocation)
                 val engineState = moriEngine.state
                 val newAccent = engineState.dominantAccentColor
                 val newIsDark = engineState.isDarkState
 
-                // Guard: Only allocate new PulseColors if something changed
                 if (enginePalette.accent.value.toLong() != newAccent.toLong().shl(32).ushr(32) || 
                     enginePalette.isDark != newIsDark) {
                     
@@ -120,20 +119,21 @@ fun PulseBackdrop(
                 .fillMaxSize()
                 .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
         ) {
-            // Read frameTime here to ensure this block redraws at 60fps
             @Suppress("UNUSED_VARIABLE")
-            val invalidate = frameTime
+            val tick = frameTick
 
             val width = size.width
             val height = size.height
-            
+            val intSize = IntSize(width.toInt(), height.toInt())
+
             if (moriEngine.state.surfaceWidth != width.toInt() || moriEngine.state.surfaceHeight != height.toInt()) {
                 moriEngine.onSurfaceChanged(width.toInt(), height.toInt(), density)
             }
 
-            graphicsLayer.record {
+            // CORRECT RECORD: Pass size to record block
+            graphicsLayer.record(intSize) {
                 composeCanvas.drawScope = this
-                moriEngine.onDrawFrame(frameTime)
+                moriEngine.onDrawFrame(lastNanos)
                 composeCanvas.drawScope = null
             }
 
