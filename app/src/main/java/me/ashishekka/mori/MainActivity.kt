@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -35,7 +34,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -67,46 +65,39 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            PulseTheme(worldState) {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = Color.Black
-                ) {
-                    // PERSISTENT BACKDROP: Uses the unified wallpaper spec
-                    PulseBackdrop(worldState = worldState) {
-                        AnimatedContent(
-                            targetState = showGallery,
-                            transitionSpec = {
-                                if (targetState) {
-                                    (slideInVertically { height -> height } + fadeIn())
-                                        .togetherWith(fadeOut(animationSpec = tween(200)))
-                                } else {
-                                    fadeIn(animationSpec = tween(300))
-                                        .togetherWith(slideOutVertically { height -> height } + fadeOut())
-                                }
-                            },
-                            label = "NavigationTransition"
-                        ) { isGalleryVisible ->
-                            if (isGalleryVisible) {
-                                Box(modifier = Modifier.fillMaxSize()) {
-                                    BackHandler { showGallery = false }
-                                    PulseGallery(modifier = Modifier.fillMaxSize())
-                                    PulseButton(
-                                        onClick = { showGallery = false },
-                                        modifier = Modifier
-                                            .align(Alignment.BottomEnd)
-                                            .padding(24.dp)
-                                    ) {
-                                        Text("BACK", fontWeight = FontWeight.Bold)
-                                    }
-                                }
-                            } else {
-                                LauncherContent(
-                                    thermalStress = worldState.energyThermalStress,
-                                    onOpenGallery = { showGallery = true }
-                                )
+            // A single PulseBackdrop now owns the theme for the entire screen.
+            PulseBackdrop(worldState = worldState) {
+                AnimatedContent(
+                    targetState = showGallery,
+                    transitionSpec = {
+                        if (targetState) {
+                            (slideInVertically { height -> height } + fadeIn())
+                                .togetherWith(fadeOut(animationSpec = tween(200)))
+                        } else {
+                            fadeIn(animationSpec = tween(300))
+                                .togetherWith(slideOutVertically { height -> height } + fadeOut())
+                        }
+                    },
+                    label = "NavigationTransition"
+                ) { isGalleryVisible ->
+                    if (isGalleryVisible) {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            BackHandler { showGallery = false }
+                            PulseGallery(modifier = Modifier.fillMaxSize())
+                            PulseButton(
+                                onClick = { showGallery = false },
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .padding(24.dp)
+                            ) {
+                                Text("BACK", fontWeight = FontWeight.Bold)
                             }
                         }
+                    } else {
+                        LauncherContent(
+                            thermalStress = worldState.energyThermalStress,
+                            onOpenGallery = { showGallery = true }
+                        )
                     }
                 }
             }
