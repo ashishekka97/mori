@@ -45,7 +45,6 @@ fun PulseBackdrop(
     referenceHeight: Float = 1000f,
     content: @Composable () -> Unit = {}
 ) {
-    // 1. Prepare the Core Engine Orchestrator
     val ticker = remember { ComposeEngineTicker() }
     val composeCanvas = remember { ComposeEngineCanvas() }
     val renderSurface = remember { ComposeRenderSurface(composeCanvas) }
@@ -57,12 +56,12 @@ fun PulseBackdrop(
         } 
     }
     
-    // 2. Prepare the Capture Layer
     val graphicsLayer = rememberGraphicsLayer()
     val density = LocalDensity.current.density
     
-    // REACTIVE PALETTE
     var frameTime by remember { mutableLongStateOf(0L) }
+    
+    // HARDENING: Start with a stable initial palette
     var enginePalette by remember { 
         mutableStateOf(
             PulseColors(
@@ -74,12 +73,10 @@ fun PulseBackdrop(
         )
     }
 
-    // UNIFIED: Use StateHandover from :bridge
     LaunchedEffect(worldState) {
         StateHandover.sync(worldState, moriEngine.state)
     }
 
-    // 3. The Animation & Lifecycle Loop
     DisposableEffect(Unit) {
         moriEngine.start()
         onDispose {
@@ -93,17 +90,29 @@ fun PulseBackdrop(
                 frameTime = time
                 ticker.tick(time)
                 
-                enginePalette = PulseColors(
-                    accent = Color(moriEngine.state.dominantAccentColor),
-                    surface = Color(moriEngine.state.dominantSurfaceColor),
-                    onSurface = Color(moriEngine.state.dominantOnSurfaceColor),
-                    isDark = moriEngine.state.isDarkState
-                )
+                // HARDENING: Zero-Allocation Guard. 
+                // Only update the state (and allocate a new PulseColors object) 
+                // if the engine palette has actually changed.
+                val engineState = moriEngine.state
+                val newAccent = engineState.dominantAccentColor
+                val newSurface = engineState.dominantSurfaceColor
+                val newOnSurface = engineState.dominantOnSurfaceColor
+                val newIsDark = engineState.isDarkState
+
+                if (enginePalette.accent.value.toLong() != newAccent.toLong().shl(32).ushr(32) || 
+                    enginePalette.isDark != newIsDark) {
+                    
+                    enginePalette = PulseColors(
+                        accent = Color(newAccent),
+                        surface = Color(newSurface),
+                        onSurface = Color(newOnSurface),
+                        isDark = newIsDark
+                    )
+                }
             }
         }
     }
 
-    // 4. Provide the layer to the hierarchy
     CompositionLocalProvider(
         LocalPulseHazeSource provides PulseHazeSource(graphicsLayer)
     ) {
