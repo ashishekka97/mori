@@ -8,11 +8,11 @@ import androidx.compose.ui.graphics.layer.GraphicsLayer
  * Carries the captured wallpaper texture and its metadata.
  */
 @Immutable
-data class HazeSource(
+data class PulseHazeSource(
     val layer: GraphicsLayer? = null
 )
 
 /**
- * CompositionLocal used to provide the [HazeSource] to any glassmorphic component.
+ * CompositionLocal used to provide the [PulseHazeSource] to any glassmorphic component.
  */
-val LocalHazeSource = staticCompositionLocalOf { HazeSource() }
+val LocalPulseHazeSource = staticCompositionLocalOf { PulseHazeSource() }

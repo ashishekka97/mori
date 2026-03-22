@@ -14,17 +14,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.ashishekka.mori.persona.state.WorldState
-import me.ashishekka.mori.ui.theme.MoriTheme
+import me.ashishekka.mori.ui.theme.PulseTheme
 
 /**
- * A tactile glass button that uses Mori's glassmorphic effect.
+ * A tactile glass button that uses the Pulse Design System's glassmorphic effect.
  */
 @Composable
-fun MoriButton(
+fun PulseButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     thermalStress: Float = 0f,
@@ -32,16 +33,18 @@ fun MoriButton(
     enabled: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val colors = MoriTheme.colors
+    val colors = PulseTheme.colors
     val interactionSource = remember { MutableInteractionSource() }
 
-    MoriGlassBox(
-        modifier = modifier.clickable(
-            interactionSource = interactionSource,
-            indication = ripple(color = colors.accent),
-            enabled = enabled,
-            onClick = onClick
-        ),
+    PulseGlassBox(
+        modifier = modifier
+            .clip(shape)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = ripple(color = colors.accent),
+                enabled = enabled,
+                onClick = onClick
+            ),
         thermalStress = thermalStress,
         shape = shape,
         borderAlpha = 0.6f
@@ -57,21 +60,21 @@ fun MoriButton(
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewMoriButton() {
+fun PreviewPulseButton() {
     Column(modifier = Modifier.padding(16.dp)) {
         val goldenHour = WorldState(chronosSunAltitude = 0.5f)
-        MoriTheme(goldenHour) {
-            MoriButton(onClick = {}) {
-                Text("Golden Button", color = MoriTheme.colors.onSurface)
+        PulseTheme(goldenHour) {
+            PulseButton(onClick = {}) {
+                Text("Golden Button", color = PulseTheme.colors.onSurface)
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         val midnight = WorldState(chronosSunAltitude = -1.0f)
-        MoriTheme(midnight) {
-            MoriButton(onClick = {}) {
-                Text("Midnight Button", color = MoriTheme.colors.onSurface)
+        PulseTheme(midnight) {
+            PulseButton(onClick = {}) {
+                Text("Midnight Button", color = PulseTheme.colors.onSurface)
             }
         }
     }

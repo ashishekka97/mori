@@ -1,5 +1,6 @@
 package me.ashishekka.mori.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,18 +11,20 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import me.ashishekka.mori.ui.theme.MoriTheme
+import me.ashishekka.mori.ui.theme.PulseTheme
 
 /**
  * A slider with a glassmorphic track and a themed thumb.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MoriSlider(
+fun PulseSlider(
     value: Float,
     onValueChange: (Float) -> Unit,
     modifier: Modifier = Modifier,
@@ -29,7 +32,7 @@ fun MoriSlider(
     enabled: Boolean = true,
     valueRange: ClosedFloatingPointRange<Float> = 0f..1f
 ) {
-    val colors = MoriTheme.colors
+    val colors = PulseTheme.colors
 
     Slider(
         value = value,
@@ -39,11 +42,10 @@ fun MoriSlider(
         valueRange = valueRange,
         colors = SliderDefaults.colors(
             thumbColor = colors.accent,
-            activeTrackColor = colors.accent.copy(alpha = 0.5f),
+            activeTrackColor = Color.Transparent,
             inactiveTrackColor = Color.Transparent
         ),
         track = { sliderState ->
-            // Use a slight tint for the base track to ensure it's visible on dark backgrounds
             val trackBaseColor = if (colors.isDark) {
                 Color.White.copy(alpha = 0.1f)
             } else {
@@ -53,26 +55,39 @@ fun MoriSlider(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(8.dp)
-                    .moriGlassBackground(thermalStress, shape = CircleShape, borderAlpha = 0.2f)
-            )
-            SliderDefaults.Track(
-                sliderState = sliderState,
-                colors = SliderDefaults.colors(
-                    activeTrackColor = colors.accent,
-                    inactiveTrackColor = trackBaseColor
+                    .height(12.dp),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                // 1. FULL GLASS TRACK
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(10.dp)
+                        .pulseGlassBackground(thermalStress, shape = CircleShape, borderAlpha = 0.2f)
                 )
-            )
+
+                // 2. ACTIVE FILAMENT
+                val fraction = (value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
+                
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(fraction.coerceIn(0f, 1f))
+                        .height(4.dp)
+                        .padding(horizontal = 2.dp)
+                        .clip(CircleShape)
+                        .background(colors.accent)
+                )
+            }
         }
     )
 }
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewMoriSlider() {
-    MoriTheme {
+fun PreviewPulseSlider() {
+    PulseTheme {
         Box(modifier = Modifier.padding(16.dp)) {
-            MoriSlider(value = 0.5f, onValueChange = {})
+            PulseSlider(value = 0.5f, onValueChange = {})
         }
     }
 }

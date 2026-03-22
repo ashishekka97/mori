@@ -17,24 +17,18 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import me.ashishekka.mori.ui.theme.MoriTheme
+import me.ashishekka.mori.ui.theme.PulseTheme
 
 /**
- * A high-performance graph component that visualizes a list of data points.
- * 
- * @param data Points normalized between 0.0 and 1.0.
- * @param modifier The modifier to be applied to the canvas.
- * @param lineColor The color of the graph line. Defaults to the theme accent.
- * @param showFill Whether to draw a gradient fill under the line.
+ * A premium, glowing graph component from the Pulse Design System.
  */
 @Composable
-fun MetricGraph(
+fun PulseGraph(
     data: List<Float>,
     modifier: Modifier = Modifier,
-    lineColor: Color = MoriTheme.colors.accent,
+    lineColor: Color = PulseTheme.colors.accent,
     showFill: Boolean = true
 ) {
-    // Reusable path objects to avoid allocations during draw passes
     val path = remember { Path() }
     val fillPath = remember { Path() }
 
@@ -48,22 +42,18 @@ fun MetricGraph(
         path.reset()
         fillPath.reset()
 
-        // Starting point
         val startX = 0f
         val startY = height - (data[0] * height)
         path.moveTo(startX, startY)
-        
         fillPath.moveTo(startX, height)
         fillPath.lineTo(startX, startY)
 
-        // Draw segments with Cubic Bezier smoothing
         for (i in 1 until data.size) {
             val x1 = (i - 1) * spacing
             val y1 = height - (data[i - 1] * height)
             val x2 = i * spacing
             val y2 = height - (data[i] * height)
 
-            // Smooth interpolation between points
             val controlX1 = x1 + (x2 - x1) / 2f
             val controlY1 = y1
             val controlX2 = x1 + (x2 - x1) / 2f
@@ -73,51 +63,51 @@ fun MetricGraph(
             fillPath.cubicTo(controlX1, controlY1, controlX2, controlY2, x2, y2)
         }
 
-        // Close the fill path to create a closed shape for the gradient
         fillPath.lineTo(width, height)
         fillPath.close()
 
-        // 1. Draw the Atmospheric Fill
+        // 1. ATMOSPHERIC FILL
         if (showFill) {
             drawPath(
                 path = fillPath,
                 brush = Brush.verticalGradient(
-                    colors = listOf(
-                        lineColor.copy(alpha = 0.3f),
-                        Color.Transparent
-                    ),
+                    colors = listOf(lineColor.copy(alpha = 0.2f), Color.Transparent),
                     startY = 0f,
                     endY = height
                 )
             )
         }
 
-        // 2. Draw the Glowing Line
+        // 2. THE GLOW
+        drawPath(
+            path = path,
+            color = lineColor.copy(alpha = 0.15f),
+            style = Stroke(width = 12.dp.toPx(), cap = StrokeCap.Round)
+        )
+        drawPath(
+            path = path,
+            color = lineColor.copy(alpha = 0.4f),
+            style = Stroke(width = 6.dp.toPx(), cap = StrokeCap.Round)
+        )
         drawPath(
             path = path,
             color = lineColor,
-            style = Stroke(
-                width = 2.dp.toPx(),
-                cap = StrokeCap.Round
-            )
+            style = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round)
         )
     }
 }
 
-@Preview(showBackground = true, name = "Metric Graph - Sample")
+@Preview(showBackground = true)
 @Composable
-fun PreviewMetricGraph() {
+fun PreviewPulseGraph() {
     val sampleData = listOf(0.2f, 0.5f, 0.4f, 0.8f, 0.3f, 0.9f, 0.6f)
-    MoriTheme {
-        MoriCard(modifier = Modifier.padding(16.dp).fillMaxWidth()) {
+    PulseTheme {
+        PulseCard(modifier = Modifier.padding(16.dp).fillMaxWidth()) {
             Column {
-                Text("Pulse History", color = MoriTheme.colors.onSurface)
-                MetricGraph(
+                Text("Glow Verification", color = PulseTheme.colors.onSurface)
+                PulseGraph(
                     data = sampleData,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(100.dp)
-                        .padding(top = 16.dp)
+                    modifier = Modifier.fillMaxWidth().height(100.dp).padding(top = 16.dp)
                 )
             }
         }

@@ -7,11 +7,14 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.platform.LocalDensity
@@ -21,19 +24,18 @@ import me.ashishekka.mori.engine.core.models.ScaleMode
 import me.ashishekka.mori.engine.renderer.DebugPulseRenderer
 import me.ashishekka.mori.engine.renderer.LayerManager
 import me.ashishekka.mori.persona.state.WorldState
-import me.ashishekka.mori.ui.components.HazeSource
-import me.ashishekka.mori.ui.components.LocalHazeSource
-import me.ashishekka.mori.ui.theme.MoriTheme
+import me.ashishekka.mori.ui.components.PulseHazeSource
+import me.ashishekka.mori.ui.components.LocalPulseHazeSource
+import me.ashishekka.mori.ui.theme.PulseColors
+import me.ashishekka.mori.ui.theme.PulseTheme
 
 /**
  * A Compose-native backdrop that renders the Mori Engine directly to a Canvas.
  * This component captures its output into a GraphicsLayer and shares it
- * via [LocalHazeSource] for backdrop blur effects.
- * 
- * @param content The UI content to be displayed on top of the backdrop.
+ * via [LocalPulseHazeSource] for backdrop blur effects.
  */
 @Composable
-fun EngineBackdrop(
+fun PulseBackdrop(
     modifier: Modifier = Modifier,
     worldState: WorldState = WorldState(),
     layerManager: LayerManager = remember { LayerManager().apply { addEffect(DebugPulseRenderer()) } },
@@ -54,14 +56,21 @@ fun EngineBackdrop(
         } 
     }
     
-    // 2. Prepare the Capture Layer (The source for glassmorphism)
+    // 2. Prepare the Capture Layer
     val graphicsLayer = rememberGraphicsLayer()
     val density = LocalDensity.current.density
     
-    // Engine State extraction for UI Theme sync
+    // REACTIVE PALETTE
     var frameTime by remember { mutableLongStateOf(0L) }
-    val dominantAccent = remember(moriEngine.state.dominantAccentColor) { 
-        Color(moriEngine.state.dominantAccentColor) 
+    var enginePalette by remember { 
+        mutableStateOf(
+            PulseColors(
+                accent = Color(moriEngine.state.dominantAccentColor),
+                surface = Color(moriEngine.state.dominantSurfaceColor),
+                onSurface = Color(moriEngine.state.dominantOnSurfaceColor),
+                isDark = moriEngine.state.isDarkState
+            )
+        )
     }
 
     LaunchedEffect(worldState) {
@@ -74,17 +83,26 @@ fun EngineBackdrop(
             withFrameNanos { time ->
                 frameTime = time
                 ticker.tick(time)
+                
+                enginePalette = PulseColors(
+                    accent = Color(moriEngine.state.dominantAccentColor),
+                    surface = Color(moriEngine.state.dominantSurfaceColor),
+                    onSurface = Color(moriEngine.state.dominantOnSurfaceColor),
+                    isDark = moriEngine.state.isDarkState
+                )
             }
         }
     }
 
     // 3. Provide the layer to the hierarchy
     CompositionLocalProvider(
-        LocalHazeSource provides HazeSource(graphicsLayer)
+        LocalPulseHazeSource provides PulseHazeSource(graphicsLayer)
     ) {
         // 4. The Muscle (Compose Surface)
         Canvas(
-            modifier = modifier.fillMaxSize()
+            modifier = modifier
+                .fillMaxSize()
+                .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
         ) {
             @Suppress("UNUSED_VARIABLE")
             val invalidate = frameTime
@@ -107,9 +125,8 @@ fun EngineBackdrop(
             drawLayer(graphicsLayer)
         }
 
-        // 5. Inject the Living Palette into the UI content
-        // We re-wrap the content in a MoriTheme that uses the engine's accent
-        MoriTheme(worldState = worldState, accentOverride = dominantAccent) {
+        // 5. Inject the Pulse Theme into the UI content
+        PulseTheme(worldState = worldState, paletteOverride = enginePalette) {
             content()
         }
     }
@@ -146,9 +163,9 @@ private fun syncWorldToEngine(from: WorldState, to: me.ashishekka.mori.engine.co
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewEngineBackdrop() {
-    MoriTheme {
-        EngineBackdrop(
+fun PreviewPulseBackdrop() {
+    PulseTheme {
+        PulseBackdrop(
             worldState = WorldState(
                 energyBatteryLevel = 0.8f,
                 chronosSunAltitude = 0.5f

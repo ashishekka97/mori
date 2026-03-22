@@ -14,32 +14,33 @@ import androidx.core.view.WindowCompat
 import me.ashishekka.mori.persona.state.WorldState
 
 /**
- * The main theme wrapper for Mori.
- * Injects [AtmosphereColors] and [PulseTypography] into the composition.
+ * The main theme wrapper for the Pulse Design System.
+ * Injects [PulseColors] and [PulseTypography] into the composition.
  * 
  * @param worldState The current state of the world used to drive the dynamic palette.
- * @param accentOverride An optional color to override the base accent (e.g., from the Engine).
+ * @param paletteOverride An optional full palette to override the base logic.
  */
 @Composable
-fun MoriTheme(
+fun PulseTheme(
     worldState: WorldState = WorldState(),
-    accentOverride: Color? = null,
+    paletteOverride: PulseColors? = null,
     content: @Composable () -> Unit
 ) {
-    val atmosphereColors = rememberAtmosphereColors(worldState, accentOverride)
+    // Use the override if provided, otherwise calculate based on worldState
+    val pulseColors = paletteOverride ?: rememberPulseColors(worldState)
     
     // Map our dynamic tokens to standard Material 3 slots
-    val colorScheme = if (atmosphereColors.isDark) {
+    val colorScheme = if (pulseColors.isDark) {
         darkColorScheme(
-            primary = atmosphereColors.accent,
-            surface = atmosphereColors.surface,
-            onSurface = atmosphereColors.onSurface
+            primary = pulseColors.accent,
+            surface = pulseColors.surface,
+            onSurface = pulseColors.onSurface
         )
     } else {
         lightColorScheme(
-            primary = atmosphereColors.accent,
-            surface = atmosphereColors.surface,
-            onSurface = atmosphereColors.onSurface
+            primary = pulseColors.accent,
+            surface = pulseColors.surface,
+            onSurface = pulseColors.onSurface
         )
     }
 
@@ -47,13 +48,13 @@ fun MoriTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = atmosphereColors.surface.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !atmosphereColors.isDark
+            window.statusBarColor = pulseColors.surface.toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !pulseColors.isDark
         }
     }
 
     CompositionLocalProvider(
-        LocalAtmosphereColors provides atmosphereColors
+        LocalPulseColors provides pulseColors
     ) {
         MaterialTheme(
             colorScheme = colorScheme,
