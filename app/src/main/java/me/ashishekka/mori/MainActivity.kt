@@ -32,6 +32,7 @@ import me.ashishekka.mori.engine.renderer.LayerManager
 import me.ashishekka.mori.engine.renderer.StaticFallbackRenderer
 import me.ashishekka.mori.persona.lifecycle.MoriLifecycleManager
 import me.ashishekka.mori.persona.state.StateManager
+import me.ashishekka.mori.ui.components.MetricGraph
 import me.ashishekka.mori.ui.components.MoriButton
 import me.ashishekka.mori.ui.components.MoriCard
 import me.ashishekka.mori.ui.components.MoriSlider
@@ -51,6 +52,9 @@ class MainActivity : ComponentActivity() {
             val worldState by stateManager.state.collectAsState()
             var pulseEnabled by remember { mutableStateOf(true) }
             var dummyIntensity by remember { mutableFloatStateOf(0.7f) }
+            
+            // Dummy data for visualizer
+            val dummyTrend = remember { listOf(0.2f, 0.5f, 0.4f, 0.8f, 0.3f, 0.9f, 0.6f, 0.4f, 0.2f, 0.5f) }
             
             DisposableEffect(lifecycleManager) {
                 lifecycleManager.onStart()
@@ -82,17 +86,27 @@ class MainActivity : ComponentActivity() {
                         ) {
                             Spacer(modifier = Modifier.height(48.dp))
 
-                            // 1. SYSTEM STATUS CARD
+                            // 1. SYSTEM STATUS CARD (WITH GRAPH)
                             MoriCard(modifier = Modifier.fillMaxWidth()) {
-                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                                     Text(
                                         text = "Environment",
                                         style = MaterialTheme.typography.labelLarge,
                                         color = MoriTheme.colors.accent
                                     )
-                                    StatusRow("Battery", "${(worldState.energyBatteryLevel * 100).roundToInt()}%")
-                                    StatusRow("Sun Altitude", String.format("%.2f", worldState.chronosSunAltitude))
-                                    StatusRow("Thermal Stress", String.format("%.2f", worldState.energyThermalStress))
+                                    
+                                    MetricGraph(
+                                        data = dummyTrend,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(60.dp)
+                                    )
+
+                                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        StatusRow("Battery", "${(worldState.energyBatteryLevel * 100).roundToInt()}%")
+                                        StatusRow("Sun Altitude", String.format("%.2f", worldState.chronosSunAltitude))
+                                        StatusRow("Thermal Stress", String.format("%.2f", worldState.energyThermalStress))
+                                    }
                                 }
                             }
 
