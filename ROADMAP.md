@@ -108,7 +108,7 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 
 ### 5.3 Phase 5 Finalization
 - [x] **5.3.1 Component Gallery:** Build an internal screen to verify all Pulse components.
-- [ ] **5.3.2 Phase 5 Finalization:** Documentation, Retrospective, and Tagging.
+- [x] **5.3.2 Phase 5 Finalization:** Documentation, Retrospective, and Tagging.
 
 ---
 
