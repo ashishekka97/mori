@@ -7,6 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.luminance
 import me.ashishekka.mori.persona.state.WorldState
 
 /**
@@ -43,38 +44,38 @@ object MoriTheme {
 }
 
 /**
- * Calculates and animates the current atmospheric palette based on the WorldState.
- * 
- * @param worldState The current device state.
+ * Calculates and animates the current atmospheric palette using perceptually accurate contrast.
  */
 @Composable
 fun rememberAtmosphereColors(
     worldState: WorldState
 ): AtmosphereColors {
     return remember(worldState.chronosSunAltitude, worldState.energyThermalStress) {
-        // 1. Calculate Time Factor (Normalize -1..1 to 0..1)
+        // 1. Base Interpolation (The "Vibe")
         val timeFactor = ((worldState.chronosSunAltitude + 1f) / 2f).coerceIn(0f, 1f)
-
-        // 2. Interpolate base tokens
         val baseAccent = lerp(NightAccent, DayAccent, timeFactor)
         val baseSurface = lerp(NightSurface, DaySurface, timeFactor)
         
-        // 3. READABILITY FIX: Dawn/Dusk High-Contrast Guard
-        val sunAltitude = worldState.chronosSunAltitude
-        val baseOnSurface = when {
-            sunAltitude > 0.2f -> DayOnSurface
-            sunAltitude < -0.2f -> NightOnSurface
-            else -> if (sunAltitude > 0) DayOnSurface else NightOnSurface
+        // 2. APPLY PERCEPTUAL LUMINANCE (The "Monet" Principle)
+        // We calculate how "bright" the current surface is to the human eye.
+        val surfaceLuminance = baseSurface.luminance()
+        
+        // If surface is bright (> 0.5), we need Dark text. 
+        // If surface is dark (<= 0.5), we need Light text.
+        // We use slightly off-white/black for better atmospheric feel.
+        val highContrastText = if (surfaceLuminance > 0.5f) {
+            Color(0xFF1A1A1A) // Deep Grey
+        } else {
+            Color(0xFFF5F5F5) // Off White
         }
 
-        // 4. THERMAL STRESS REFINEMENT:
-        // We desaturate the accent color for UI elements (thumbs, tracks), 
-        // but we keep it legible. We use a darker/lighter grey depending on theme mode
-        // rather than a generic neutral grey that might blend with the surface.
-        val stressTarget = if (sunAltitude > 0) {
-            Color.Black.copy(alpha = 0.6f) // Dark grey for light mode
+        // 3. THERMAL STRESS REFINEMENT:
+        // We desaturate the accent elements (toggles, sliders) 
+        // while ensuring the target grey still contrasts with the surface.
+        val stressTarget = if (surfaceLuminance > 0.5f) {
+            Color.Black.copy(alpha = 0.6f)
         } else {
-            Color.White.copy(alpha = 0.6f) // Light grey for dark mode
+            Color.White.copy(alpha = 0.6f)
         }
 
         val finalAccent = if (worldState.energyThermalStress > 0.5f) {
@@ -86,8 +87,8 @@ fun rememberAtmosphereColors(
         AtmosphereColors(
             accent = finalAccent,
             surface = baseSurface,
-            onSurface = baseOnSurface,
-            isDark = sunAltitude <= 0f
+            onSurface = highContrastText,
+            isDark = surfaceLuminance <= 0.5f
         )
     }
 }
