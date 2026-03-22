@@ -16,10 +16,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import me.ashishekka.mori.bridge.sync.StateHandover
 import me.ashishekka.mori.engine.core.MoriEngine
@@ -27,14 +27,11 @@ import me.ashishekka.mori.engine.core.MoriWallpaper
 import me.ashishekka.mori.engine.core.models.ScaleMode
 import me.ashishekka.mori.engine.renderer.LayerManager
 import me.ashishekka.mori.persona.state.WorldState
-import me.ashishekka.mori.ui.components.PulseHazeSource
 import me.ashishekka.mori.ui.components.LocalPulseHazeSource
+import me.ashishekka.mori.ui.components.PulseHazeSource
 import me.ashishekka.mori.ui.theme.PulseColors
 import me.ashishekka.mori.ui.theme.PulseTheme
 
-/**
- * A Compose-native backdrop that renders the Mori Engine directly to a Canvas.
- */
 @Composable
 fun PulseBackdrop(
     modifier: Modifier = Modifier,
@@ -42,7 +39,7 @@ fun PulseBackdrop(
     wallpaper: MoriWallpaper = remember { MoriWallpaper.createDebugWallpaper() },
     scaleMode: ScaleMode = ScaleMode.FIT,
     referenceWidth: Float = 1000f,
-    referenceHeight: Float = 1000f,
+    referenceHeight: Float = 1100f,
     content: @Composable () -> Unit = {}
 ) {
     val ticker = remember { ComposeEngineTicker() }
@@ -53,7 +50,7 @@ fun PulseBackdrop(
             this.targetScaleMode = scaleMode
             this.state.referenceWidth = referenceWidth
             this.state.referenceHeight = referenceHeight
-            this.setWallpaper(wallpaper) // Initialize with the provided spec
+            this.setWallpaper(wallpaper)
         } 
     }
     
@@ -66,10 +63,8 @@ fun PulseBackdrop(
     var enginePalette by remember { 
         mutableStateOf(
             PulseColors(
-                accent = Color(moriEngine.state.dominantAccentColor),
-                surface = Color(moriEngine.state.dominantSurfaceColor),
-                onSurface = Color(moriEngine.state.dominantOnSurfaceColor),
-                isDark = moriEngine.state.isDarkState
+                accent = Color.Transparent, surface = Color.Transparent, 
+                onSurface = Color.Transparent, isDark = false
             )
         )
     }
@@ -85,6 +80,10 @@ fun PulseBackdrop(
         }
     }
 
+    // UI INTEGRITY SMOKE TEST:
+    // This bypasses the engine and forces the UI to cycle colors.
+    // If this works, the UI recomposition is correct.
+    // If it fails, the Compose UI layer has a flaw.
     LaunchedEffect(Unit) {
         while (true) {
             withFrameNanos { time ->
@@ -92,18 +91,13 @@ fun PulseBackdrop(
                 frameTick++
                 ticker.tick(time)
                 
-                val engineState = moriEngine.state
-                val newAccent = Color(engineState.dominantAccentColor)
-                val newIsDark = engineState.isDarkState
-
-                if (enginePalette.accent != newAccent || enginePalette.isDark != newIsDark) {
-                    enginePalette = PulseColors(
-                        accent = newAccent,
-                        surface = Color(engineState.dominantSurfaceColor),
-                        onSurface = Color(engineState.dominantOnSurfaceColor),
-                        isDark = newIsDark
-                    )
+                val seconds = (time / 1_000_000_000L)
+                val testPalette = when (seconds % 3) {
+                    0L -> PulseColors(accent = Color.Magenta, surface = Color.Red, onSurface = Color.White, isDark = true)
+                    1L -> PulseColors(accent = Color.Yellow, surface = Color.Green, onSurface = Color.Black, isDark = false)
+                    else -> PulseColors(accent = Color.Cyan, surface = Color.Blue, onSurface = Color.White, isDark = true)
                 }
+                enginePalette = testPalette
             }
         }
     }
@@ -139,18 +133,5 @@ fun PulseBackdrop(
         PulseTheme(worldState = worldState, paletteOverride = enginePalette) {
             content()
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewPulseBackdrop() {
-    PulseTheme {
-        PulseBackdrop(
-            worldState = WorldState(
-                energyBatteryLevel = 0.8f,
-                chronosSunAltitude = 0.5f
-            )
-        )
     }
 }

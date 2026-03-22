@@ -3,7 +3,6 @@ package me.ashishekka.mori.engine.core
 import me.ashishekka.mori.engine.core.interfaces.EngineTicker
 import me.ashishekka.mori.engine.core.interfaces.RenderSurface
 import me.ashishekka.mori.engine.core.models.ScaleMode
-import me.ashishekka.mori.engine.core.util.AtmosphericThemeMapper
 import me.ashishekka.mori.engine.renderer.EffectRenderer
 import me.ashishekka.mori.engine.renderer.LayerManager
 import me.ashishekka.mori.engine.renderer.StaticFallbackRenderer
@@ -12,6 +11,7 @@ import kotlin.math.min
 
 /**
  * The core rendering engine for Mori.
+ * A platform-agnostic orchestrator that delegates visual responsibility to [MoriWallpaper].
  */
 class MoriEngine(
     private val ticker: EngineTicker,
@@ -23,10 +23,10 @@ class MoriEngine(
     private var isRunning = false
     val state = MoriEngineState()
 
-    // Geometric Configuration
     var targetScaleMode: ScaleMode = ScaleMode.FIT
+    var currentWallpaper: MoriWallpaper? = null
+        private set
 
-    // FPS Control
     var targetFps: Int = 60
         set(value) {
             field = value.coerceIn(1, 120)
@@ -47,70 +47,55 @@ class MoriEngine(
         }
     }
 
-    /**
-     * Applies a complete wallpaper definition to the engine.
-     */
     fun setWallpaper(wallpaper: MoriWallpaper) {
+        this.currentWallpaper = wallpaper
         layerManager.clear()
-        // We use the spec's base color as the initial foundation
-        state.dominantFoundationColor = wallpaper.baseBackgroundColor
         wallpaper.layers.forEach { layerManager.addEffect(it) }
     }
 
-    /**
-     * Starts the rendering loop.
-     */
     fun start() {
         if (isRunning) return
         isRunning = true
         ticker.start()
     }
 
-    /**
-     * Stops the rendering loop.
-     */
     fun stop() {
         if (!isRunning) return
         isRunning = false
         ticker.stop()
     }
 
-    /**
-     * Manually requests a single frame tick.
-     */
     fun requestFrame() {
         ticker.requestTick()
     }
 
     /**
-     * Triggers the rendering of a single frame.
+     * Triggers the rendering of a single frame using a stable Update-then-Draw cycle.
      */
     fun onDrawFrame(frameTimeNanos: Long = System.nanoTime()) {
         state.currentTimeNanos = frameTimeNanos
         
-        // 1. Update Theme Policy (Sets the foundation color)
-        AtmosphericThemeMapper.updatePalette(state)
+        // 1. UPDATE: Propagate the latest state to all layers first.
+        layerManager.update(state)
+        
+        // 2. SYNTHESIZE: Let the wallpaper derive its theme from the now-updated layers.
+        currentWallpaper?.synthesizePalette(state)
 
         val canvas = renderSurface.lockCanvas()
 
         canvas?.let {
             try {
-                // 2. Draw Opaque Foundation FIRST
-                it.drawColor(state.dominantFoundationColor)
-                
-                // 3. Update and Draw layers
-                layerManager.updateAndDraw(state, it)
+                // 3. DRAW: Render all layers onto the canvas.
+                layerManager.draw(it)
             } catch (e: Throwable) {
-                fallbackRenderer.updateAndDraw(state, it)
+                fallbackRenderer.update(state)
+                fallbackRenderer.render(it)
             } finally {
                 renderSurface.unlockCanvasAndPost(it)
             }
         }
     }
 
-    /**
-     * Updates the surface dimensions and density.
-     */
     fun onSurfaceChanged(width: Int, height: Int, density: Float) {
         state.surfaceWidth = width
         state.surfaceHeight = height

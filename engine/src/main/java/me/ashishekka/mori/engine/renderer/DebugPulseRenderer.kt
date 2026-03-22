@@ -7,73 +7,90 @@ import kotlin.math.sin
 import kotlin.random.Random
 
 /**
- * The Ultimate Phase 4/5 Smoke Test.
  * A vibrant, fullscreen atmospheric "Aurora" that reacts to signals.
- * Pulls all color information from the centralized theme policy.
  */
 class DebugPulseRenderer : EffectRenderer {
 
-    override val zOrder: Int = 0
+    override val zOrder: Int = 1
 
     private var pulseIntensityValue = 0
     private lateinit var state: MoriEngineState
+
+    // ZERO-ALLOCATION: Cache the palette contribution
+    private var cachedPalette: RendererPalette? = null
+    private var lastAccentColor: Int = 0
 
     override fun onSurfaceChanged(width: Int, height: Int, density: Float) {}
 
     override fun update(state: MoriEngineState) {
         this.state = state
 
-        // 1. Calculate Pulse Phase based on GLOBAL TIME
+        // 1. Base Motion Clock
         val timeSeconds = state.currentTimeNanos / 1_000_000_000.0
         val frequency = 0.5 + (state.energyBatteryLevel * 2.0)
         val multiplier = if (state.energyIsCharging) 2.0 else 1.0
         
-        val intensity = if (state.zenIsDndActive) {
-            0.5f 
-        } else {
+        val intensity = if (state.zenIsDndActive) 0.5f else {
             ((sin(timeSeconds * frequency * multiplier * Math.PI) + 1.0) / 2.0).toFloat()
         }
 
-        // 2. Visual Synthesis
-        val alpha = (50 + (state.atmosLightLevel * 205)).toInt()
+        val alpha = (100 + (state.atmosLightLevel * 155)).toInt()
         val rgbIntensity = (intensity * 255).toInt()
-        
         pulseIntensityValue = (alpha shl 24) or (rgbIntensity shl 16)
+        
+        // Invalidate cache if the underlying accent color has changed.
+        val currentAccent = state.dominantAccentColor
+        if (currentAccent != lastAccentColor) {
+            cachedPalette = null
+            lastAccentColor = currentAccent
+        }
+    }
+
+    override fun getPaletteContribution(): RendererPalette? {
+        if (cachedPalette == null) {
+            val themeRgb = state.dominantAccentColor and 0x00FFFFFF
+            val accentColor = (colorAlpha shl 24) or themeRgb
+            cachedPalette = RendererPalette(accent = accentColor)
+        }
+        return cachedPalette
     }
 
     override fun render(canvas: EngineCanvas) {
-        // 3. PURE AGNOSTIC RENDERING
-        // All colors are derived from the state.dominantPalette
         val width = state.surfaceWidth.toFloat()
         val height = state.surfaceHeight.toFloat()
+        val timeSeconds = state.currentTimeNanos / 1_000_000_000.0
         
         val themeRgb = state.dominantAccentColor and 0x00FFFFFF
-        val accentColor = (colorAlpha shl 24) or themeRgb
+        val pulseFactor = pulseIntensity / 255f
 
-        // 4. DRAW VIBRANT ATMOSPHERIC GLOW
-        val centerX = width / 2f
-        val centerY = height / 2f
-        
-        // The Aurora blob scales with pulse intensity
-        val auroraRadius = min(width, height) * (0.4f + (pulseIntensity / 255f) * 0.2f)
-        canvas.drawCircle(centerX, centerY, auroraRadius, accentColor, isFilled = true)
+        // 2. ATMOSPHERIC BLOBS (Vibrant Fullscreen Depth)
+        val alpha1 = (colorAlpha * 0.4f).toInt()
+        canvas.drawCircle(width / 2f, height / 2f, min(width, height) * 0.8f, (alpha1 shl 24) or themeRgb, true)
 
-        // 5. THERMAL JITTER FOR THE CORE
-        var offsetX = 0f
-        var offsetY = 0f
+        val driftX = sin(timeSeconds * 0.5) * 100f
+        val driftY = sin(timeSeconds * 0.3) * 100f
+        val alpha2 = (colorAlpha * 0.3f * pulseFactor).toInt()
+        canvas.drawCircle(width * 0.2f + driftX.toFloat(), height * 0.2f + driftY.toFloat(), min(width, height) * 0.5f, (alpha2 shl 24) or themeRgb, true)
+
+        val alpha3 = (colorAlpha * 0.2f * (1f - pulseFactor)).toInt()
+        canvas.drawCircle(width * 0.8f - driftX.toFloat(), height * 0.8f - driftY.toFloat(), min(width, height) * 0.6f, (alpha3 shl 24) or themeRgb, true)
+
+        // 3. THE SHARP CORE (Safe Area)
+        var jitterX = 0f
+        var jitterY = 0f
         if (state.energyThermalStress > 0.3f) {
-            val shake = state.energyThermalStress * 15f
-            offsetX = Random.nextFloat() * shake - (shake / 2)
-            offsetY = Random.nextFloat() * shake - (shake / 2)
+            val shake = state.energyThermalStress * 20f
+            jitterX = Random.nextFloat() * shake - (shake / 2)
+            jitterY = Random.nextFloat() * shake - (shake / 2)
         }
 
-        val coreX = state.viewportSafeX + (state.viewportSafeWidth / 2f) + offsetX
-        val coreY = state.viewportSafeY + (state.viewportSafeHeight / 2f) + offsetY
-        val coreRadius = min(state.viewportSafeWidth, state.viewportSafeHeight) * 0.15f
+        val coreX = state.viewportSafeX + (state.viewportSafeWidth / 2f) + jitterX
+        val coreY = state.viewportSafeY + (state.viewportSafeHeight / 2f) + jitterY
+        val coreRadius = min(state.viewportSafeWidth, state.viewportSafeHeight) * 0.12f
 
-        // Draw the "Sharp Core" (White with accent border)
-        canvas.drawCircle(coreX, coreY, coreRadius, 0xFFFFFFFF.toInt(), isFilled = true)
-        canvas.drawCircle(coreX, coreY, coreRadius + 10f, accentColor, isFilled = false, thickness = 4f)
+        // Draw Core
+        canvas.drawCircle(coreX, coreY, coreRadius, 0xFFFFFFFF.toInt(), true)
+        canvas.drawCircle(coreX, coreY, coreRadius + 15f, (colorAlpha shl 24) or themeRgb, false, 6f)
     }
 
     private val colorAlpha: Int get() = pulseIntensityValue ushr 24
