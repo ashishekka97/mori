@@ -69,6 +69,8 @@ class MoriEngineState {
     var currentTimeNanos: Long = 0L
 
     // === PALETTE (Atmospheric) ===
+    /** The opaque foundation color currently being rendered. */
+    var dominantFoundationColor: Int = 0xFF121212.toInt()
     /** The primary accent color currently being rendered. */
     var dominantAccentColor: Int = 0xFF9575CD.toInt()
     /** The primary surface color currently being rendered. */

@@ -11,31 +11,30 @@ import kotlin.math.min
 
 /**
  * The core rendering engine for Mori.
- * This class is a platform-agnostic orchestrator that delegates timing to [EngineTicker]
- * and drawing to [RenderSurface].
+ * A platform-agnostic orchestrator that delegates visual responsibility to [MoriWallpaper].
  */
 class MoriEngine(
     private val ticker: EngineTicker,
     private val renderSurface: RenderSurface,
     private val layerManager: LayerManager,
-    private val fallbackRenderer: EffectRenderer = StaticFallbackRenderer(0xFF121212.toInt())
+    private val fallbackRenderer: EffectRenderer = StaticFallbackRenderer()
 ) {
 
     private var isRunning = false
     val state = MoriEngineState()
 
-    // Geometric Configuration
     var targetScaleMode: ScaleMode = ScaleMode.FIT
+    var currentWallpaper: MoriWallpaper? = null
+        private set
 
-    // FPS Control
     var targetFps: Int = 60
         set(value) {
-            field = value.coerceIn(1, 120) // Sanity check
+            field = value.coerceIn(1, 120)
             frameIntervalNanos = 1_000_000_000L / field
         }
 
+    private var frameIntervalNanos: Long = 1_000_000_000L / 60
     private var lastFrameTimeNanos: Long = 0L
-    private var frameIntervalNanos: Long = 1_000_000_000L / targetFps
 
     init {
         ticker.setOnTickCallback { frameTimeNanos ->
@@ -48,22 +47,60 @@ class MoriEngine(
         }
     }
 
-    /**
-     * Adds an effect to the rendering stack.
-     */
-    fun addEffect(effect: EffectRenderer): Boolean {
-        return layerManager.addEffect(effect)
+    fun setWallpaper(wallpaper: MoriWallpaper) {
+        this.currentWallpaper = wallpaper
+        layerManager.clear()
+        wallpaper.layers.forEach { layerManager.addEffect(it) }
+    }
+
+    fun start() {
+        if (isRunning) return
+        isRunning = true
+        ticker.start()
+    }
+
+    fun stop() {
+        if (!isRunning) return
+        isRunning = false
+        ticker.stop()
+    }
+
+    fun requestFrame() {
+        ticker.requestTick()
     }
 
     /**
-     * Updates the surface dimensions and density.
+     * Triggers the rendering of a single frame using a stable Update-then-Draw cycle.
      */
+    fun onDrawFrame(frameTimeNanos: Long = System.nanoTime()) {
+        state.currentTimeNanos = frameTimeNanos
+        
+        // 1. UPDATE: Propagate the latest state to all layers first.
+        layerManager.update(state)
+        
+        // 2. SYNTHESIZE: Let the wallpaper derive its theme from the now-updated layers.
+        currentWallpaper?.synthesizePalette(state)
+
+        val canvas = renderSurface.lockCanvas()
+
+        canvas?.let {
+            try {
+                // 3. DRAW: Render all layers onto the canvas.
+                layerManager.draw(it)
+            } catch (e: Throwable) {
+                fallbackRenderer.update(state)
+                fallbackRenderer.render(it)
+            } finally {
+                renderSurface.unlockCanvasAndPost(it)
+            }
+        }
+    }
+
     fun onSurfaceChanged(width: Int, height: Int, density: Float) {
         state.surfaceWidth = width
         state.surfaceHeight = height
         state.surfaceDensity = density
 
-        // 1. Calculate Scale Factor (Shared Logic)
         val scaleX = width / state.referenceWidth
         val scaleY = height / state.referenceHeight
         val scale = when (targetScaleMode) {
@@ -71,77 +108,24 @@ class MoriEngine(
             ScaleMode.FILL -> max(scaleX, scaleY)
         }
 
-        // 2. Update Viewport Metrics (Geometry Handover)
         state.viewportReferenceScale = scale
         state.viewportSafeWidth = state.referenceWidth * scale
         state.viewportSafeHeight = state.referenceHeight * scale
         state.viewportSafeX = (width - state.viewportSafeWidth) / 2f
         state.viewportSafeY = (height - state.viewportSafeHeight) / 2f
 
-        // 3. Propagate to renderers
         layerManager.onSurfaceChanged(width, height, density)
         fallbackRenderer.onSurfaceChanged(width, height, density)
     }
 
-    /**
-     * Starts the engine and begins rendering.
-     */
-    fun start() {
-        if (!isRunning) {
-            isRunning = true
-            lastFrameTimeNanos = 0L // Reset to trigger immediate draw
-            ticker.start()
-        }
+    fun addEffect(renderer: EffectRenderer) {
+        layerManager.addEffect(renderer)
     }
 
-    /**
-     * Stops the engine.
-     */
-    fun stop() {
-        if (isRunning) {
-            isRunning = false
-            ticker.stop()
-        }
+    fun removeEffect(renderer: EffectRenderer) {
+        layerManager.removeEffect(renderer)
     }
 
-    /**
-     * Toggles whether the engine continuously renders frames (e.g., 60 FPS) 
-     * or only renders when a frame is explicitly requested.
-     */
-    fun setContinuousRendering(enabled: Boolean) {
-        ticker.setContinuous(enabled)
-    }
-
-    /**
-     * Requests a single frame to be rendered.
-     */
-    fun requestFrame() {
-        ticker.requestTick()
-    }
-
-    /**
-     * Triggers the rendering of a single frame.
-     */
-    fun onDrawFrame(frameTimeNanos: Long = System.nanoTime()) {
-        state.currentTimeNanos = frameTimeNanos
-        val canvas = renderSurface.lockCanvas()
-
-        canvas?.let {
-            try {
-                layerManager.updateAndDraw(state, it)
-            } catch (e: Throwable) {
-                // Failsafe: if the complex render loop fails, draw the fallback
-                fallbackRenderer.updateAndDraw(state, it)
-            } finally {
-                renderSurface.unlockCanvasAndPost(it)
-            }
-        }
-    }
-
-    /**
-     * Called when the engine is destroyed.
-     * Clean up resources and cancel any pending work.
-     */
     fun onDestroy() {
         stop()
     }

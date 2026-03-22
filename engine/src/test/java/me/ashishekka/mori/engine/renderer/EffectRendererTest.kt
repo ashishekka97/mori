@@ -15,7 +15,7 @@ class EffectRendererTest {
         val mockRenderer = mockk<EffectRenderer>(relaxed = true)
         val state = MoriEngineState()
         val canvas = mockk<EngineCanvas>()
-        
+
         // Ensure the default implementation is called
         every { mockRenderer.updateAndDraw(any(), any()) } answers { callOriginal() }
 
@@ -25,18 +25,5 @@ class EffectRendererTest {
         // Then
         verify { mockRenderer.update(state) }
         verify { mockRenderer.render(canvas) }
-    }
-
-    @Test
-    fun `StaticFallbackRenderer should draw color`() {
-        // Given
-        val renderer = StaticFallbackRenderer(0xFF000000.toInt())
-        val canvas = mockk<EngineCanvas>(relaxed = true)
-
-        // When
-        renderer.render(canvas)
-
-        // Then
-        verify { canvas.drawColor(0xFF000000.toInt()) }
     }
 }

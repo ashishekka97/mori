@@ -7,90 +7,96 @@ import kotlin.math.sin
 import kotlin.random.Random
 
 /**
- * The Ultimate Phase 4 Smoke Test.
- * A "Living Core" that reacts to atmospheric signals and drives the UI Theme.
+ * A vibrant, fullscreen atmospheric "Aurora" that reacts to signals.
+ * This is a pure visual effect and does not contribute to the global theme.
  */
 class DebugPulseRenderer : EffectRenderer {
 
-    override val zOrder: Int = 0
+    override val zOrder: Int = 1
 
     private var pulseIntensityValue = 0
     private lateinit var state: MoriEngineState
+    
+    // STARDUST
+    private val maxParticles = 200
+    private val particleX = FloatArray(maxParticles)
+    private val particleY = FloatArray(maxParticles)
+    private val particlePhase = FloatArray(maxParticles)
 
-    override fun onSurfaceChanged(width: Int, height: Int, density: Float) {}
+    // JITTER (ZERO-ALLOCATION)
+    private var jitterX = 0f
+    private var jitterY = 0f
+
+    override fun onSurfaceChanged(width: Int, height: Int, density: Float) {
+        for (i in 0 until maxParticles) {
+            particleX[i] = Random.nextFloat() * width
+            particleY[i] = Random.nextFloat() * height
+            particlePhase[i] = Random.nextFloat() * 2f * Math.PI.toFloat()
+        }
+    }
 
     override fun update(state: MoriEngineState) {
         this.state = state
 
-        // 1. Calculate Pulse Phase based on GLOBAL TIME
         val timeSeconds = state.currentTimeNanos / 1_000_000_000.0
         val frequency = 0.5 + (state.energyBatteryLevel * 2.0)
         val multiplier = if (state.energyIsCharging) 2.0 else 1.0
-        
-        val intensity = if (state.zenIsDndActive) {
-            0.5f 
-        } else {
+        val intensity = if (state.zenIsDndActive) 0.5f else {
             ((sin(timeSeconds * frequency * multiplier * Math.PI) + 1.0) / 2.0).toFloat()
         }
 
-        // 2. Atmospheric Data Handover (Living Palette)
-        val isDay = state.chronosSunAltitude > 0
-        state.isDarkState = !isDay
+        val alpha = (100 + (state.atmosLightLevel * 155)).toInt()
+        val rgbIntensity = (intensity * 255).toInt()
+        pulseIntensityValue = (alpha shl 24) or (rgbIntensity shl 16)
 
-        if (isDay) {
-            state.dominantAccentColor = 0xFFFFB74D.toInt() // Day Accent (Amber)
-            state.dominantSurfaceColor = 0x44FFFFFF.toInt() // Day Surface
-            state.dominantOnSurfaceColor = 0xFF333333.toInt() // Day OnSurface (Dark Grey)
+        // Pre-calculate jitter in the update phase
+        if (state.energyThermalStress > 0.3f) {
+            val shake = state.energyThermalStress * 20f
+            jitterX = Random.nextFloat() * shake - (shake / 2)
+            jitterY = Random.nextFloat() * shake - (shake / 2)
         } else {
-            state.dominantAccentColor = 0xFF9575CD.toInt() // Night Accent (Purple)
-            state.dominantSurfaceColor = 0x44000000.toInt() // Night Surface
-            state.dominantOnSurfaceColor = 0xFFF5F5F5.toInt() // Night OnSurface (Off White)
+            jitterX = 0f
+            jitterY = 0f
         }
-
-        val alpha = (50 + (state.atmosLightLevel * 205)).toInt()
-        val rgbValue = (intensity * 255).toInt()
-        
-        pulseIntensityValue = (alpha shl 24) or (rgbValue shl 16)
     }
 
+    // This renderer is purely decorative and should not influence the theme.
+    override fun getPaletteContribution(): RendererPalette? = null
+
     override fun render(canvas: EngineCanvas) {
-        // 3. Solar Altitude drives Color Hue
-        val baseColor = if (state.chronosSunAltitude > 0) {
-            // Day: Amber
-            (colorAlpha shl 24) or (pulseIntensity shl 16) or ((pulseIntensity * 0.8f).toInt() shl 8)
-        } else {
-            // Night: Purple
-            (colorAlpha shl 24) or (pulseIntensity shl 16) or (pulseIntensity)
+        val width = state.surfaceWidth.toFloat()
+        val height = state.surfaceHeight.toFloat()
+        val timeSeconds = state.currentTimeNanos / 1_000_000_000.0
+        
+        // Read the pure, opaque accent color from the state.
+        val themeRgb = state.dominantAccentColor and 0x00FFFFFF
+        val pulseFactor = pulseIntensity / 255f
+
+        // Atmospheric Blobs
+        val alpha1 = (colorAlpha * 0.4f).toInt()
+        canvas.drawCircle(width / 2f, height / 2f, min(width, height) * 0.8f, (alpha1 shl 24) or themeRgb, true)
+        val driftX = sin(timeSeconds * 0.5) * 100f
+        val driftY = sin(timeSeconds * 0.3) * 100f
+        val alpha2 = (colorAlpha * 0.3f * pulseFactor).toInt()
+        canvas.drawCircle(width * 0.2f + driftX.toFloat(), height * 0.2f + driftY.toFloat(), min(width, height) * 0.5f, (alpha2 shl 24) or themeRgb, true)
+        val alpha3 = (colorAlpha * 0.2f * (1f - pulseFactor)).toInt()
+        canvas.drawCircle(width * 0.8f - driftX.toFloat(), height * 0.8f - driftY.toFloat(), min(width, height) * 0.6f, (alpha3 shl 24) or themeRgb, true)
+
+        // Stardust
+        val numActiveParticles = (state.vitalityStepsProgress * maxParticles).toInt()
+        val stardustColor = 0xFFFFFFFF.toInt()
+        for (i in 0 until numActiveParticles) {
+            val particleAlpha = (128 + sin(timeSeconds * 2.0 + particlePhase[i]) * 127).toInt()
+            val finalColor = (particleAlpha shl 24) or (stardustColor and 0x00FFFFFF)
+            canvas.drawCircle(particleX[i], particleY[i], 3f, finalColor, true)
         }
 
-        // 4. Thermal Stress drives Jitter
-        var offsetX = 0f
-        var offsetY = 0f
-        if (state.energyThermalStress > 0.3f) {
-            val shake = state.energyThermalStress * 10f
-            offsetX = Random.nextFloat() * shake - (shake / 2)
-            offsetY = Random.nextFloat() * shake - (shake / 2)
-        }
-
-        val centerX = state.viewportSafeX + (state.viewportSafeWidth / 2f) + offsetX
-        val centerY = state.viewportSafeY + (state.viewportSafeHeight / 2f) + offsetY
-
-        val baseRadius = min(state.viewportSafeWidth, state.viewportSafeHeight) * 0.2f
-        val noiseRadius = state.zenSocialNoise * 50f
-        val coreRadius = baseRadius + noiseRadius
-        val borderThickness = 4f + (state.zenSocialNoise * 16f)
-
-        // Draw the "Living Core"
-        canvas.drawCircle(centerX, centerY, coreRadius, baseColor, isFilled = true)
-        canvas.drawCircle(centerX, centerY, coreRadius, 0xFFFFFFFF.toInt(), isFilled = false, thickness = borderThickness)
-
-        // 5. Vitality drives the External Ring
-        val vitalityRadius = coreRadius + 40f
-        val vitalityColor = (0x88 shl 24) or (0x00FF00)
-        canvas.drawCircle(centerX, centerY, vitalityRadius, 0x44FFFFFF.toInt(), isFilled = false, thickness = 2f)
-        if (state.vitalityStepsProgress > 0) {
-            canvas.drawCircle(centerX, centerY, vitalityRadius, vitalityColor, isFilled = false, thickness = 8f * state.vitalityStepsProgress)
-        }
+        // Core
+        val coreX = state.viewportSafeX + (state.viewportSafeWidth / 2f) + jitterX
+        val coreY = state.viewportSafeY + (state.viewportSafeHeight / 2f) + jitterY
+        val coreRadius = min(state.viewportSafeWidth, state.viewportSafeHeight) * 0.12f
+        canvas.drawCircle(coreX, coreY, coreRadius, 0xFFFFFFFF.toInt(), true)
+        canvas.drawCircle(coreX, coreY, coreRadius + 15f, (colorAlpha shl 24) or themeRgb, false, 6f)
     }
 
     private val colorAlpha: Int get() = pulseIntensityValue ushr 24

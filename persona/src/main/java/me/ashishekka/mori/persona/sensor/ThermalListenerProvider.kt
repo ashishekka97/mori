@@ -1,5 +1,6 @@
 package me.ashishekka.mori.persona.sensor
 
+import android.annotation.SuppressLint
 import android.os.Build
 import android.os.PowerManager
 
@@ -13,21 +14,27 @@ interface ThermalListenerProvider {
     fun getCurrentStatus(powerManager: PowerManager): Int
 }
 
-class DefaultThermalListenerProvider : ThermalListenerProvider {
+class DefaultThermalListenerProvider(
+    private val buildVersionProvider: BuildVersionProvider = DefaultBuildVersionProvider()
+) : ThermalListenerProvider {
+    
+    @SuppressLint("NewApi")
     override fun register(powerManager: PowerManager, listener: PowerManager.OnThermalStatusChangedListener) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        if (buildVersionProvider.sdkInt >= Build.VERSION_CODES.Q) {
             powerManager.addThermalStatusListener(listener)
         }
     }
 
+    @SuppressLint("NewApi")
     override fun unregister(powerManager: PowerManager, listener: PowerManager.OnThermalStatusChangedListener) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        if (buildVersionProvider.sdkInt >= Build.VERSION_CODES.Q) {
             powerManager.removeThermalStatusListener(listener)
         }
     }
 
+    @SuppressLint("NewApi")
     override fun getCurrentStatus(powerManager: PowerManager): Int {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        return if (buildVersionProvider.sdkInt >= Build.VERSION_CODES.Q) {
             powerManager.currentThermalStatus
         } else {
             PowerManager.THERMAL_STATUS_NONE

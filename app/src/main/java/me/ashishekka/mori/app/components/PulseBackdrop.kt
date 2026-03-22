@@ -4,9 +4,10 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -18,158 +19,124 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntSize
+import me.ashishekka.mori.bridge.sync.StateHandover
 import me.ashishekka.mori.engine.core.MoriEngine
+import me.ashishekka.mori.engine.core.MoriWallpaper
 import me.ashishekka.mori.engine.core.models.ScaleMode
-import me.ashishekka.mori.engine.renderer.DebugPulseRenderer
 import me.ashishekka.mori.engine.renderer.LayerManager
 import me.ashishekka.mori.persona.state.WorldState
-import me.ashishekka.mori.ui.components.PulseHazeSource
 import me.ashishekka.mori.ui.components.LocalPulseHazeSource
+import me.ashishekka.mori.ui.components.PulseHazeSource
 import me.ashishekka.mori.ui.theme.PulseColors
 import me.ashishekka.mori.ui.theme.PulseTheme
 
-/**
- * A Compose-native backdrop that renders the Mori Engine directly to a Canvas.
- * This component captures its output into a GraphicsLayer and shares it
- * via [LocalPulseHazeSource] for backdrop blur effects.
- */
 @Composable
 fun PulseBackdrop(
     modifier: Modifier = Modifier,
     worldState: WorldState = WorldState(),
-    layerManager: LayerManager = remember { LayerManager().apply { addEffect(DebugPulseRenderer()) } },
+    wallpaper: MoriWallpaper = remember { MoriWallpaper.createDebugWallpaper() },
     scaleMode: ScaleMode = ScaleMode.FIT,
     referenceWidth: Float = 1000f,
-    referenceHeight: Float = 1000f,
+    referenceHeight: Float = 1100f,
     content: @Composable () -> Unit = {}
 ) {
-    // 1. Prepare the Core Engine Orchestrator
     val ticker = remember { ComposeEngineTicker() }
     val composeCanvas = remember { ComposeEngineCanvas() }
     val renderSurface = remember { ComposeRenderSurface(composeCanvas) }
     val moriEngine = remember { 
-        MoriEngine(ticker, renderSurface, layerManager).apply {
+        MoriEngine(ticker, renderSurface, LayerManager()).apply {
             this.targetScaleMode = scaleMode
             this.state.referenceWidth = referenceWidth
             this.state.referenceHeight = referenceHeight
+            this.setWallpaper(wallpaper)
         } 
     }
     
-    // 2. Prepare the Capture Layer
     val graphicsLayer = rememberGraphicsLayer()
     val density = LocalDensity.current.density
     
-    // REACTIVE PALETTE
-    var frameTime by remember { mutableLongStateOf(0L) }
+    var frameTick by remember { mutableIntStateOf(0) }
+    var lastNanos by remember { mutableStateOf(0L) }
+    
     var enginePalette by remember { 
         mutableStateOf(
             PulseColors(
-                accent = Color(moriEngine.state.dominantAccentColor),
-                surface = Color(moriEngine.state.dominantSurfaceColor),
-                onSurface = Color(moriEngine.state.dominantOnSurfaceColor),
-                isDark = moriEngine.state.isDarkState
+                accent = Color.Transparent, surface = Color.Transparent, 
+                onSurface = Color.Transparent, isDark = false
             )
         )
     }
 
     LaunchedEffect(worldState) {
-        syncWorldToEngine(worldState, moriEngine.state)
+        StateHandover.sync(worldState, moriEngine.state)
+    }
+
+    DisposableEffect(Unit) {
+        moriEngine.start()
+        onDispose {
+            moriEngine.stop()
+        }
     }
 
     LaunchedEffect(Unit) {
-        moriEngine.start()
         while (true) {
             withFrameNanos { time ->
-                frameTime = time
+                lastNanos = time
+                frameTick++
                 ticker.tick(time)
                 
-                enginePalette = PulseColors(
-                    accent = Color(moriEngine.state.dominantAccentColor),
-                    surface = Color(moriEngine.state.dominantSurfaceColor),
-                    onSurface = Color(moriEngine.state.dominantOnSurfaceColor),
-                    isDark = moriEngine.state.isDarkState
-                )
+                val engineState = moriEngine.state
+                val newAccent = Color(engineState.dominantAccentColor)
+                val newSurface = Color(engineState.dominantSurfaceColor)
+                val newOnSurface = Color(engineState.dominantOnSurfaceColor)
+                val newIsDark = engineState.isDarkState
+
+                // COMPREHENSIVE GUARD: Check all palette colors for changes.
+                if (enginePalette.accent != newAccent || enginePalette.surface != newSurface ||
+                    enginePalette.onSurface != newOnSurface || enginePalette.isDark != newIsDark) {
+                    
+                    enginePalette = PulseColors(
+                        accent = newAccent,
+                        surface = newSurface,
+                        onSurface = newOnSurface,
+                        isDark = newIsDark
+                    )
+                }
             }
         }
     }
 
-    // 3. Provide the layer to the hierarchy
     CompositionLocalProvider(
         LocalPulseHazeSource provides PulseHazeSource(graphicsLayer)
     ) {
-        // 4. The Muscle (Compose Surface)
         Canvas(
             modifier = modifier
                 .fillMaxSize()
                 .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
         ) {
             @Suppress("UNUSED_VARIABLE")
-            val invalidate = frameTime
+            val tick = frameTick
 
             val width = size.width
             val height = size.height
-            
+            val intSize = IntSize(width.toInt(), height.toInt())
+
             if (moriEngine.state.surfaceWidth != width.toInt() || moriEngine.state.surfaceHeight != height.toInt()) {
                 moriEngine.onSurfaceChanged(width.toInt(), height.toInt(), density)
             }
 
-            // Record the Engine output into the shared GraphicsLayer
-            graphicsLayer.record {
+            graphicsLayer.record(intSize) {
                 composeCanvas.drawScope = this
-                moriEngine.onDrawFrame(frameTime)
+                moriEngine.onDrawFrame(lastNanos)
                 composeCanvas.drawScope = null
             }
 
-            // Draw the captured layer onto the main Canvas
             drawLayer(graphicsLayer)
         }
 
-        // 5. Inject the Pulse Theme into the UI content
         PulseTheme(worldState = worldState, paletteOverride = enginePalette) {
             content()
         }
-    }
-}
-
-/**
- * Manual field-by-field sync.
- */
-private fun syncWorldToEngine(from: WorldState, to: me.ashishekka.mori.engine.core.MoriEngineState) {
-    to.chronosTimeProgress = from.chronosTimeProgress
-    to.chronosSunAltitude = from.chronosSunAltitude
-    to.chronosMoonPhase = from.chronosMoonPhase
-    to.chronosSeasonProgress = from.chronosSeasonProgress
-    to.chronosIsWeekend = from.chronosIsWeekend
-
-    to.vitalityStepsProgress = from.vitalityStepsProgress
-    to.vitalityActivityIntensity = from.vitalityActivityIntensity
-    to.vitalitySleepClarity = from.vitalitySleepClarity
-    to.vitalityStandGoalProgress = from.vitalityStandGoalProgress
-
-    to.zenDigitalCongestion = from.zenDigitalCongestion
-    to.zenSocialNoise = from.zenSocialNoise
-    to.zenContextSwitching = from.zenContextSwitching
-    to.zenIsDndActive = from.zenIsDndActive
-    to.zenLastInteractionAge = from.zenLastInteractionAge
-
-    to.energyBatteryLevel = from.energyBatteryLevel
-    to.energyIsCharging = from.energyIsCharging
-    to.energyThermalStress = from.energyThermalStress
-
-    to.atmosLightLevel = from.atmosLightLevel
-    to.atmosIsPocketed = from.atmosIsPocketed
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewPulseBackdrop() {
-    PulseTheme {
-        PulseBackdrop(
-            worldState = WorldState(
-                energyBatteryLevel = 0.8f,
-                chronosSunAltitude = 0.5f
-            )
-        )
     }
 }

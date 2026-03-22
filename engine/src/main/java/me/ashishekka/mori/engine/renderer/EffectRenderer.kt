@@ -4,36 +4,45 @@ import me.ashishekka.mori.engine.core.MoriEngineState
 import me.ashishekka.mori.engine.core.interfaces.EngineCanvas
 
 /**
+ * A container for color tokens contributed by a renderer.
+ * Now includes all themeable color aspects.
+ */
+data class RendererPalette(
+    val accent: Int? = null,
+    val foundation: Int? = null,
+    val surface: Int? = null,
+    val onSurface: Int? = null
+)
+
+/**
  * The strict contract for any visual element rendered by Mori.
- * All implementations MUST adhere to zero-allocation rules inside update and render.
  */
 interface EffectRenderer {
 
     /**
-     * Determines the drawing order. Lower values are drawn first (Background).
+     * Higher Z-Order layers are drawn on top.
      */
     val zOrder: Int
 
     /**
-     * Called when the drawing surface size or density changes.
-     * This is the place to pre-calculate geometry or coordinates
-     * based on the surface dimensions.
+     * Reports the colors this renderer is currently using.
+     * This method MUST be allocation-free during steady-state rendering.
+     * It should return a cached or pre-allocated object.
+     */
+    fun getPaletteContribution(): RendererPalette? = null
+
+    /**
+     * Called when the drawing surface changes.
      */
     fun onSurfaceChanged(width: Int, height: Int, density: Float)
 
     /**
-     * Phase 1: Update. Use this to prepare visual state for drawing.
-     * MUST NOT perform any memory allocations.
-     * 
-     * @param state The current engine state snapshot (Mirror).
+     * Updates the internal simulation state based on the provided [state].
      */
     fun update(state: MoriEngineState)
 
     /**
-     * Phase 2: Render. Use this to draw on the provided canvas.
-     * MUST NOT perform any memory allocations.
-     *
-     * @param canvas The platform-agnostic canvas.
+     * Draws the effect onto the provided platform-agnostic [canvas].
      */
     fun render(canvas: EngineCanvas)
 

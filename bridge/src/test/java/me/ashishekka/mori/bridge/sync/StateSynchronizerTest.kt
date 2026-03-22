@@ -8,9 +8,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import me.ashishekka.mori.bridge.metrics.MetricCalculator
 import me.ashishekka.mori.engine.core.MoriEngine
 import me.ashishekka.mori.engine.core.MoriEngineState
+import me.ashishekka.mori.engine.core.models.ScaleMode
 import me.ashishekka.mori.persona.state.StateManager
 import me.ashishekka.mori.persona.state.WorldState
 import org.junit.Assert.assertEquals
@@ -23,9 +23,8 @@ class StateSynchronizerTest {
     private lateinit var mockStateManager: StateManager
     private lateinit var mockEngine: MoriEngine
     private lateinit var engineState: MoriEngineState
-    private lateinit var metricCalculator: MetricCalculator
     private lateinit var testScope: TestScope
-    
+
     private val stateFlow = MutableStateFlow(WorldState())
 
     @Before
@@ -37,14 +36,13 @@ class StateSynchronizerTest {
         mockEngine = mockk(relaxed = true) {
             every { state } returns engineState
         }
-        metricCalculator = MetricCalculator()
         testScope = TestScope(UnconfinedTestDispatcher())
     }
 
     @Test
     fun `start should collect state and sync fields to engine mirror`() = testScope.runTest {
         // Given
-        val synchronizer = StateSynchronizer(mockStateManager, mockEngine, metricCalculator, testScope)
+        val synchronizer = StateSynchronizer(mockStateManager, mockEngine, testScope)
         val newState = WorldState(
             chronosTimeProgress = 0.5f,
             energyBatteryLevel = 0.8f,
@@ -59,33 +57,31 @@ class StateSynchronizerTest {
         assertEquals(0.5f, engineState.chronosTimeProgress)
         assertEquals(0.8f, engineState.energyBatteryLevel)
         assertEquals(true, engineState.zenIsDndActive)
-        
+
         verify { mockEngine.requestFrame() }
-        
+
         synchronizer.stop()
     }
 
     @Test
-    fun `updateViewport should calculate and sync stage metrics`() {
-        // Given a 1080x2400 screen
-        metricCalculator.updateMetrics(1080, 2400, 1.0f)
-        val synchronizer = StateSynchronizer(mockStateManager, mockEngine, metricCalculator, testScope)
+    fun `updateViewport should update engine state reference values`() {
+        // Given
+        val synchronizer = StateSynchronizer(mockStateManager, mockEngine, testScope)
 
-        // When (1000x1000 reference)
-        synchronizer.updateViewport(1000f, 1000f)
+        // When
+        synchronizer.updateViewport(1200f, 1200f, ScaleMode.FILL)
 
-        // Then (2400/1000 = 2.4 scale for FILL mode)
-        assertEquals(2.4f, engineState.viewportReferenceScale, 0.01f)
-        assertEquals(2400f, engineState.viewportSafeWidth, 0.01f)
-        // Offset X should be (1080 - 2400) / 2 = -660
-        assertEquals(-660f, engineState.viewportSafeX, 0.01f)
+        // Then
+        assertEquals(1200f, engineState.referenceWidth)
+        assertEquals(1200f, engineState.referenceHeight)
+        verify { mockEngine.targetScaleMode = ScaleMode.FILL }
     }
 
     @Test
     fun `stop should cancel sync job`() = testScope.runTest {
         // Given
-        val synchronizer = StateSynchronizer(mockStateManager, mockEngine, metricCalculator, testScope)
-        
+        val synchronizer = StateSynchronizer(mockStateManager, mockEngine, testScope)
+
         // When
         synchronizer.start()
         synchronizer.stop()

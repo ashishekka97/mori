@@ -6,11 +6,10 @@ import kotlinx.coroutines.CoroutineScope
 import me.ashishekka.mori.bridge.metrics.MetricCalculator
 import me.ashishekka.mori.bridge.sync.StateSynchronizer
 import me.ashishekka.mori.engine.core.MoriEngine
+import me.ashishekka.mori.engine.core.MoriWallpaper
 import me.ashishekka.mori.engine.core.interfaces.EngineTicker
 import me.ashishekka.mori.engine.core.interfaces.RenderSurface
 import me.ashishekka.mori.engine.core.models.ScaleMode
-import me.ashishekka.mori.engine.renderer.DebugPulseRenderer
-import me.ashishekka.mori.engine.renderer.StaticFallbackRenderer
 import me.ashishekka.mori.persona.lifecycle.MoriLifecycleManager
 import me.ashishekka.mori.persona.state.StateManager
 import org.koin.android.ext.android.inject
@@ -19,8 +18,6 @@ import org.koin.core.qualifier.named
 
 /**
  * The system entry point for the Mori Live Wallpaper.
- * Located in the :app module to orchestrate the [MoriLifecycleManager]
- * and the [MoriEngine].
  */
 class MoriWallpaperService : WallpaperService() {
 
@@ -51,16 +48,12 @@ class MoriWallpaperService : WallpaperService() {
                     isLifecycleStarted = true
                 }
                 
-                // Ensure effects are added (Safe for multiple calls)
-                moriEngine.addEffect(StaticFallbackRenderer(0xFF1A1A1A.toInt()))
-                moriEngine.addEffect(DebugPulseRenderer())
+                // UNIFIED: Use the formal Wallpaper Spec
+                moriEngine.setWallpaper(MoriWallpaper.createDebugWallpaper())
                 
                 moriEngine.start()
                 stateSynchronizer.start()
             } else {
-                // We stop the engine immediately on hide for battery,
-                // but we keep the lifecycle count until destroyed or truly idle.
-                // However, for Mori, "Hidden" = "Stop Sensors" if no one else is using them.
                 if (isLifecycleStarted) {
                     lifecycleManager.onStop()
                     isLifecycleStarted = false

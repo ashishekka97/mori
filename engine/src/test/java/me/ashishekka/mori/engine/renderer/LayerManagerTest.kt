@@ -18,7 +18,7 @@ class LayerManagerTest {
         val background = mockk<EffectRenderer>(relaxed = true) { every { zOrder } returns 0 }
         val midground = mockk<EffectRenderer>(relaxed = true) { every { zOrder } returns 10 }
         val foreground = mockk<EffectRenderer>(relaxed = true) { every { zOrder } returns 20 }
-        
+
         val state = MoriEngineState()
         val canvas = mockk<EngineCanvas>()
 
@@ -27,13 +27,19 @@ class LayerManagerTest {
         layerManager.addEffect(foreground)
         layerManager.addEffect(background)
 
-        layerManager.updateAndDraw(state, canvas)
+        // *** FIX: Calling update and draw separately ***
+        layerManager.update(state)
+        layerManager.draw(canvas)
 
         // Then (Verify draw order: background -> midground -> foreground)
         verifyOrder {
-            background.updateAndDraw(state, canvas)
-            midground.updateAndDraw(state, canvas)
-            foreground.updateAndDraw(state, canvas)
+            background.update(state)
+            midground.update(state)
+            foreground.update(state)
+
+            background.render(canvas)
+            midground.render(canvas)
+            foreground.render(canvas)
         }
     }
 

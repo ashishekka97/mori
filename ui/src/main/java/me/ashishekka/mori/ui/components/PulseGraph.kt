@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.ashishekka.mori.ui.theme.PulseTheme
@@ -31,6 +32,18 @@ fun PulseGraph(
 ) {
     val path = remember { Path() }
     val fillPath = remember { Path() }
+    
+    // HARDENING: Pre-allocate Stroke objects to avoid per-frame allocations
+    val density = LocalDensity.current
+    val filamentStroke = remember(density) {
+        Stroke(width = with(density) { 2.dp.toPx() }, cap = StrokeCap.Round)
+    }
+    val auraStroke = remember(density) {
+        Stroke(width = with(density) { 6.dp.toPx() }, cap = StrokeCap.Round)
+    }
+    val haloStroke = remember(density) {
+        Stroke(width = with(density) { 12.dp.toPx() }, cap = StrokeCap.Round)
+    }
 
     Canvas(modifier = modifier) {
         if (data.size < 2) return@Canvas
@@ -78,22 +91,10 @@ fun PulseGraph(
             )
         }
 
-        // 2. THE GLOW
-        drawPath(
-            path = path,
-            color = lineColor.copy(alpha = 0.15f),
-            style = Stroke(width = 12.dp.toPx(), cap = StrokeCap.Round)
-        )
-        drawPath(
-            path = path,
-            color = lineColor.copy(alpha = 0.4f),
-            style = Stroke(width = 6.dp.toPx(), cap = StrokeCap.Round)
-        )
-        drawPath(
-            path = path,
-            color = lineColor,
-            style = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round)
-        )
+        // 2. THE GLOW (Triple-layer)
+        drawPath(path = path, color = lineColor.copy(alpha = 0.15f), style = haloStroke)
+        drawPath(path = path, color = lineColor.copy(alpha = 0.4f), style = auraStroke)
+        drawPath(path = path, color = lineColor, style = filamentStroke)
     }
 }
 
