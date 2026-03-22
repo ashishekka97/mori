@@ -1,5 +1,8 @@
 package me.ashishekka.mori
 
+import android.app.WallpaperManager
+import android.content.ComponentName
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -19,13 +22,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -35,15 +38,11 @@ import me.ashishekka.mori.engine.renderer.LayerManager
 import me.ashishekka.mori.engine.renderer.StaticFallbackRenderer
 import me.ashishekka.mori.persona.lifecycle.MoriLifecycleManager
 import me.ashishekka.mori.persona.state.StateManager
-import me.ashishekka.mori.ui.components.PulseGraph
 import me.ashishekka.mori.ui.components.PulseButton
 import me.ashishekka.mori.ui.components.PulseCard
-import me.ashishekka.mori.ui.components.PulseSlider
-import me.ashishekka.mori.ui.components.PulseToggle
 import me.ashishekka.mori.ui.gallery.PulseGallery
 import me.ashishekka.mori.ui.theme.PulseTheme
 import org.koin.android.ext.android.inject
-import kotlin.math.roundToInt
 
 class MainActivity : ComponentActivity() {
 
@@ -65,20 +64,18 @@ class MainActivity : ComponentActivity() {
 
             if (showGallery) {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    PulseGallery(
-                        modifier = Modifier.fillMaxSize()
-                    )
+                    PulseGallery(modifier = Modifier.fillMaxSize())
                     PulseButton(
                         onClick = { showGallery = false },
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
                             .padding(24.dp)
                     ) {
-                        Text("BACK", color = PulseTheme.colors.onSurface, fontWeight = FontWeight.Bold)
+                        Text("BACK", fontWeight = FontWeight.Bold)
                     }
                 }
             } else {
-                DashboardScreen(
+                LauncherScreen(
                     worldState = worldState,
                     onOpenGallery = { showGallery = true }
                 )
@@ -87,13 +84,11 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    private fun DashboardScreen(
+    private fun LauncherScreen(
         worldState: me.ashishekka.mori.persona.state.WorldState,
         onOpenGallery: () -> Unit
     ) {
-        var pulseEnabled by remember { mutableStateOf(true) }
-        var dummyIntensity by remember { mutableFloatStateOf(0.7f) }
-        val dummyTrend = remember { listOf(0.2f, 0.5f, 0.4f, 0.8f, 0.3f, 0.9f, 0.6f, 0.4f, 0.2f, 0.5f) }
+        val context = LocalContext.current
 
         PulseTheme(worldState) {
             Surface(
@@ -112,107 +107,61 @@ class MainActivity : ComponentActivity() {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(horizontal = 24.dp),
-                        verticalArrangement = Arrangement.spacedBy(20.dp),
+                            .padding(24.dp),
+                        verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+                        Text(
+                            text = "MORI",
+                            style = MaterialTheme.typography.headlineLarge,
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 8.sp,
+                            color = PulseTheme.colors.onSurface
+                        )
+                        Text(
+                            text = "LIVING ATMOSPHERE",
+                            style = MaterialTheme.typography.labelSmall,
+                            letterSpacing = 2.sp,
+                            color = PulseTheme.colors.accent
+                        )
+
                         Spacer(modifier = Modifier.height(64.dp))
 
-                        // 1. SYSTEM STATUS CARD
-                        PulseCard(modifier = Modifier.fillMaxWidth()) {
-                            Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-                                Text(
-                                    text = "ENVIRONMENT",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    letterSpacing = 1.sp,
-                                    color = PulseTheme.colors.accent
-                                )
-                                
-                                PulseGraph(
-                                    data = dummyTrend,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(100.dp)
-                                )
-
-                                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                                    StatusRow("Battery", "${(worldState.energyBatteryLevel * 100).roundToInt()}%")
-                                    StatusRow("Sun", String.format("%.2f", worldState.chronosSunAltitude))
-                                    StatusRow("Thermal", String.format("%.2f", worldState.energyThermalStress))
-                                }
-                            }
-                        }
-
-                        // 2. INTERACTIVE ROW
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        PulseCard(
+                            modifier = Modifier.fillMaxWidth(0.8f)
                         ) {
-                            PulseCard(modifier = Modifier.weight(1f)) {
-                                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                    Text("PULSE", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = PulseTheme.colors.onSurface.copy(alpha = 0.6f))
-                                    PulseToggle(
-                                        checked = pulseEnabled,
-                                        onCheckedChange = { pulseEnabled = it },
-                                        thermalStress = worldState.energyThermalStress
-                                    )
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                PulseButton(
+                                    onClick = {
+                                        val intent = Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER).apply {
+                                            putExtra(
+                                                WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
+                                                ComponentName(context, MoriWallpaperService::class.java)
+                                            )
+                                        }
+                                        context.startActivity(intent)
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    thermalStress = worldState.energyThermalStress
+                                ) {
+                                    Text("SET WALLPAPER", fontWeight = FontWeight.Bold)
                                 }
-                            }
 
-                            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                                 PulseButton(
                                     onClick = onOpenGallery,
                                     modifier = Modifier.fillMaxWidth(),
                                     thermalStress = worldState.energyThermalStress
                                 ) {
-                                    Text("GALLERY", color = PulseTheme.colors.onSurface, fontWeight = FontWeight.Bold)
-                                }
-                                
-                                PulseButton(
-                                    onClick = { /* Action */ },
-                                    modifier = Modifier.fillMaxWidth(),
-                                    thermalStress = worldState.energyThermalStress
-                                ) {
-                                    Text("SYNC", color = PulseTheme.colors.onSurface, fontWeight = FontWeight.Bold)
+                                    Text("DESIGN LAB", fontWeight = FontWeight.Bold)
                                 }
                             }
                         }
-
-                        // 3. INTENSITY CARD
-                        PulseCard(modifier = Modifier.fillMaxWidth()) {
-                            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                Text("INTENSITY", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = PulseTheme.colors.onSurface.copy(alpha = 0.6f))
-                                PulseSlider(
-                                    value = dummyIntensity,
-                                    onValueChange = { dummyIntensity = it },
-                                    thermalStress = worldState.energyThermalStress
-                                )
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.weight(1f))
-
-                        Text(
-                            text = "MORI PULSE SYSTEM v1.2",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = PulseTheme.colors.onSurface.copy(alpha = 0.3f),
-                            modifier = Modifier.padding(bottom = 24.dp)
-                        )
                     }
                 }
             }
-        }
-    }
-
-    @Composable
-    private fun StatusRow(label: String, value: String) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(text = label, style = MaterialTheme.typography.bodyMedium, color = PulseTheme.colors.onSurface.copy(alpha = 0.7f))
-            Text(text = value, style = MaterialTheme.typography.bodyMedium, color = PulseTheme.colors.onSurface, fontWeight = FontWeight.Medium)
         }
     }
 }
