@@ -39,40 +39,35 @@ fun MoriSlider(
         valueRange = valueRange,
         colors = SliderDefaults.colors(
             thumbColor = colors.accent,
-            activeTrackColor = colors.accent.copy(alpha = 0.5f),
+            activeTrackColor = colors.accent,
             inactiveTrackColor = Color.Transparent
         ),
         track = { sliderState ->
-            // Use a slight tint for the base track to ensure it's visible on dark backgrounds
             val trackBaseColor = if (colors.isDark) {
                 Color.White.copy(alpha = 0.1f)
             } else {
                 Color.Black.copy(alpha = 0.05f)
             }
 
-            // Wrap in a Box to provide Alignment and Scope
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(44.dp), // Standard touch target height for Slider
+                modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
-                // 1. Background Glass Track (The "Atmospheric" Foundation)
+                // 1. Background Glass Track
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(8.dp) // Tactile height for the glass
+                        .height(10.dp)
                         .moriGlassBackground(thermalStress, shape = CircleShape, borderAlpha = 0.2f)
                 )
                 
-                // 2. M3 Visual Track (The "Active" indication)
+                // 2. Standard M3 Track
                 SliderDefaults.Track(
-                    sliderState = sliderState,
+                    sliderState = sliderState, // Corrected parameter name
                     colors = SliderDefaults.colors(
                         activeTrackColor = colors.accent,
                         inactiveTrackColor = trackBaseColor
                     ),
-                    // We make the M3 track slightly smaller than our glass to create a "Glow" effect
                     modifier = Modifier.height(4.dp) 
                 )
             }
