@@ -14,7 +14,7 @@ import me.ashishekka.mori.persona.state.WorldState
  * A reactive set of color tokens that shift based on the [WorldState].
  */
 @Immutable
-data class AtmosphereColors(
+data class PulseColors(
     val accent: Color,
     val surface: Color,
     val onSurface: Color,
@@ -22,10 +22,10 @@ data class AtmosphereColors(
 )
 
 /**
- * CompositionLocal used to provide [AtmosphereColors] throughout the UI tree.
+ * CompositionLocal used to provide [PulseColors] throughout the UI tree.
  */
-val LocalAtmosphereColors = staticCompositionLocalOf {
-    AtmosphereColors(
+val LocalPulseColors = staticCompositionLocalOf {
+    PulseColors(
         accent = DayAccent,
         surface = DaySurface,
         onSurface = DayOnSurface,
@@ -36,42 +36,35 @@ val LocalAtmosphereColors = staticCompositionLocalOf {
 /**
  * Global access point for Mori's atmospheric tokens.
  */
-object MoriTheme {
-    val colors: AtmosphereColors
+object PulseTheme {
+    val colors: PulseColors
         @Composable
         @ReadOnlyComposable
-        get() = LocalAtmosphereColors.current
+        get() = LocalPulseColors.current
 }
 
 /**
  * Calculates and animates the current atmospheric palette using perceptually accurate contrast.
  */
 @Composable
-fun rememberAtmosphereColors(
+fun rememberPulseColors(
     worldState: WorldState
-): AtmosphereColors {
+): PulseColors {
     return remember(worldState.chronosSunAltitude, worldState.energyThermalStress) {
         // 1. Base Interpolation (The "Vibe")
         val timeFactor = ((worldState.chronosSunAltitude + 1f) / 2f).coerceIn(0f, 1f)
         val baseAccent = lerp(NightAccent, DayAccent, timeFactor)
         val baseSurface = lerp(NightSurface, DaySurface, timeFactor)
         
-        // 2. APPLY PERCEPTUAL LUMINANCE (The "Monet" Principle)
-        // We calculate how "bright" the current surface is to the human eye.
+        // 2. APPLY PERCEPTUAL LUMINANCE
         val surfaceLuminance = baseSurface.luminance()
-        
-        // If surface is bright (> 0.5), we need Dark text. 
-        // If surface is dark (<= 0.5), we need Light text.
-        // We use slightly off-white/black for better atmospheric feel.
         val highContrastText = if (surfaceLuminance > 0.5f) {
-            Color(0xFF1A1A1A) // Deep Grey
+            Color(0xFF1A1A1A)
         } else {
-            Color(0xFFF5F5F5) // Off White
+            Color(0xFFF5F5F5)
         }
 
-        // 3. THERMAL STRESS REFINEMENT:
-        // We desaturate the accent elements (toggles, sliders) 
-        // while ensuring the target grey still contrasts with the surface.
+        // 3. THERMAL STRESS REFINEMENT
         val stressTarget = if (surfaceLuminance > 0.5f) {
             Color.Black.copy(alpha = 0.6f)
         } else {
@@ -84,7 +77,7 @@ fun rememberAtmosphereColors(
             baseAccent
         }
 
-        AtmosphereColors(
+        PulseColors(
             accent = finalAccent,
             surface = baseSurface,
             onSurface = highContrastText,

@@ -29,19 +29,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import me.ashishekka.mori.app.components.EngineBackdrop
+import me.ashishekka.mori.app.components.PulseBackdrop
 import me.ashishekka.mori.engine.renderer.DebugPulseRenderer
 import me.ashishekka.mori.engine.renderer.LayerManager
 import me.ashishekka.mori.engine.renderer.StaticFallbackRenderer
 import me.ashishekka.mori.persona.lifecycle.MoriLifecycleManager
 import me.ashishekka.mori.persona.state.StateManager
-import me.ashishekka.mori.ui.components.MetricGraph
-import me.ashishekka.mori.ui.components.MoriButton
-import me.ashishekka.mori.ui.components.MoriCard
-import me.ashishekka.mori.ui.components.MoriSlider
+import me.ashishekka.mori.ui.components.PulseGraph
+import me.ashishekka.mori.ui.components.PulseButton
+import me.ashishekka.mori.ui.components.PulseCard
+import me.ashishekka.mori.ui.components.PulseSlider
 import me.ashishekka.mori.ui.components.PulseToggle
-import me.ashishekka.mori.ui.gallery.ComponentGallery
-import me.ashishekka.mori.ui.theme.MoriTheme
+import me.ashishekka.mori.ui.gallery.PulseGallery
+import me.ashishekka.mori.ui.theme.PulseTheme
 import org.koin.android.ext.android.inject
 import kotlin.math.roundToInt
 
@@ -65,16 +65,16 @@ class MainActivity : ComponentActivity() {
 
             if (showGallery) {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    ComponentGallery(
+                    PulseGallery(
                         modifier = Modifier.fillMaxSize()
                     )
-                    MoriButton(
+                    PulseButton(
                         onClick = { showGallery = false },
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
                             .padding(24.dp)
                     ) {
-                        Text("BACK", color = MoriTheme.colors.onSurface, fontWeight = FontWeight.Bold)
+                        Text("BACK", color = PulseTheme.colors.onSurface, fontWeight = FontWeight.Bold)
                     }
                 }
             } else {
@@ -95,12 +95,12 @@ class MainActivity : ComponentActivity() {
         var dummyIntensity by remember { mutableFloatStateOf(0.7f) }
         val dummyTrend = remember { listOf(0.2f, 0.5f, 0.4f, 0.8f, 0.3f, 0.9f, 0.6f, 0.4f, 0.2f, 0.5f) }
 
-        MoriTheme(worldState) {
+        PulseTheme(worldState) {
             Surface(
                 modifier = Modifier.fillMaxSize(),
                 color = Color.Black
             ) {
-                EngineBackdrop(
+                PulseBackdrop(
                     worldState = worldState,
                     layerManager = remember { 
                         LayerManager().apply { 
@@ -119,17 +119,17 @@ class MainActivity : ComponentActivity() {
                         Spacer(modifier = Modifier.height(64.dp))
 
                         // 1. SYSTEM STATUS CARD
-                        MoriCard(modifier = Modifier.fillMaxWidth()) {
+                        PulseCard(modifier = Modifier.fillMaxWidth()) {
                             Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
                                 Text(
                                     text = "ENVIRONMENT",
                                     style = MaterialTheme.typography.labelLarge,
                                     fontWeight = FontWeight.Bold,
                                     letterSpacing = 1.sp,
-                                    color = MoriTheme.colors.accent
+                                    color = PulseTheme.colors.accent
                                 )
                                 
-                                MetricGraph(
+                                PulseGraph(
                                     data = dummyTrend,
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -138,8 +138,8 @@ class MainActivity : ComponentActivity() {
 
                                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                                     StatusRow("Battery", "${(worldState.energyBatteryLevel * 100).roundToInt()}%")
-                                    StatusRow("Sun Altitude", String.format("%.2f", worldState.chronosSunAltitude))
-                                    StatusRow("Thermal Stress", String.format("%.2f", worldState.energyThermalStress))
+                                    StatusRow("Sun", String.format("%.2f", worldState.chronosSunAltitude))
+                                    StatusRow("Thermal", String.format("%.2f", worldState.energyThermalStress))
                                 }
                             }
                         }
@@ -149,9 +149,9 @@ class MainActivity : ComponentActivity() {
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            MoriCard(modifier = Modifier.weight(1f)) {
+                            PulseCard(modifier = Modifier.weight(1f)) {
                                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                    Text("PULSE", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MoriTheme.colors.onSurface.copy(alpha = 0.6f))
+                                    Text("PULSE", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = PulseTheme.colors.onSurface.copy(alpha = 0.6f))
                                     PulseToggle(
                                         checked = pulseEnabled,
                                         onCheckedChange = { pulseEnabled = it },
@@ -161,29 +161,29 @@ class MainActivity : ComponentActivity() {
                             }
 
                             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                                MoriButton(
+                                PulseButton(
                                     onClick = onOpenGallery,
                                     modifier = Modifier.fillMaxWidth(),
                                     thermalStress = worldState.energyThermalStress
                                 ) {
-                                    Text("GALLERY", color = MoriTheme.colors.onSurface, fontWeight = FontWeight.Bold)
+                                    Text("GALLERY", color = PulseTheme.colors.onSurface, fontWeight = FontWeight.Bold)
                                 }
                                 
-                                MoriButton(
+                                PulseButton(
                                     onClick = { /* Action */ },
                                     modifier = Modifier.fillMaxWidth(),
                                     thermalStress = worldState.energyThermalStress
                                 ) {
-                                    Text("SYNC", color = MoriTheme.colors.onSurface, fontWeight = FontWeight.Bold)
+                                    Text("SYNC", color = PulseTheme.colors.onSurface, fontWeight = FontWeight.Bold)
                                 }
                             }
                         }
 
                         // 3. INTENSITY CARD
-                        MoriCard(modifier = Modifier.fillMaxWidth()) {
+                        PulseCard(modifier = Modifier.fillMaxWidth()) {
                             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                Text("INTENSITY", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MoriTheme.colors.onSurface.copy(alpha = 0.6f))
-                                MoriSlider(
+                                Text("INTENSITY", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = PulseTheme.colors.onSurface.copy(alpha = 0.6f))
+                                PulseSlider(
                                     value = dummyIntensity,
                                     onValueChange = { dummyIntensity = it },
                                     thermalStress = worldState.energyThermalStress
@@ -194,9 +194,9 @@ class MainActivity : ComponentActivity() {
                         Spacer(modifier = Modifier.weight(1f))
 
                         Text(
-                            text = "MORI GLASS SYSTEM v1.2",
+                            text = "MORI PULSE SYSTEM v1.2",
                             style = MaterialTheme.typography.labelSmall,
-                            color = MoriTheme.colors.onSurface.copy(alpha = 0.3f),
+                            color = PulseTheme.colors.onSurface.copy(alpha = 0.3f),
                             modifier = Modifier.padding(bottom = 24.dp)
                         )
                     }
@@ -211,8 +211,8 @@ class MainActivity : ComponentActivity() {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(text = label, style = MaterialTheme.typography.bodyMedium, color = MoriTheme.colors.onSurface.copy(alpha = 0.7f))
-            Text(text = value, style = MaterialTheme.typography.bodyMedium, color = MoriTheme.colors.onSurface, fontWeight = FontWeight.Medium)
+            Text(text = label, style = MaterialTheme.typography.bodyMedium, color = PulseTheme.colors.onSurface.copy(alpha = 0.7f))
+            Text(text = value, style = MaterialTheme.typography.bodyMedium, color = PulseTheme.colors.onSurface, fontWeight = FontWeight.Medium)
         }
     }
 }

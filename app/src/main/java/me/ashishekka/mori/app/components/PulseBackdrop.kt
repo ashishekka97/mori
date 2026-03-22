@@ -24,20 +24,18 @@ import me.ashishekka.mori.engine.core.models.ScaleMode
 import me.ashishekka.mori.engine.renderer.DebugPulseRenderer
 import me.ashishekka.mori.engine.renderer.LayerManager
 import me.ashishekka.mori.persona.state.WorldState
-import me.ashishekka.mori.ui.components.HazeSource
-import me.ashishekka.mori.ui.components.LocalHazeSource
-import me.ashishekka.mori.ui.theme.AtmosphereColors
-import me.ashishekka.mori.ui.theme.MoriTheme
+import me.ashishekka.mori.ui.components.PulseHazeSource
+import me.ashishekka.mori.ui.components.LocalPulseHazeSource
+import me.ashishekka.mori.ui.theme.PulseColors
+import me.ashishekka.mori.ui.theme.PulseTheme
 
 /**
  * A Compose-native backdrop that renders the Mori Engine directly to a Canvas.
  * This component captures its output into a GraphicsLayer and shares it
- * via [LocalHazeSource] for backdrop blur effects.
- * 
- * @param content The UI content to be displayed on top of the backdrop.
+ * via [LocalPulseHazeSource] for backdrop blur effects.
  */
 @Composable
-fun EngineBackdrop(
+fun PulseBackdrop(
     modifier: Modifier = Modifier,
     worldState: WorldState = WorldState(),
     layerManager: LayerManager = remember { LayerManager().apply { addEffect(DebugPulseRenderer()) } },
@@ -58,15 +56,15 @@ fun EngineBackdrop(
         } 
     }
     
-    // 2. Prepare the Capture Layer (The source for glassmorphism)
+    // 2. Prepare the Capture Layer
     val graphicsLayer = rememberGraphicsLayer()
     val density = LocalDensity.current.density
     
-    // REACTIVE PALETTE: Sync the full engine-calculated palette to Compose State
+    // REACTIVE PALETTE
     var frameTime by remember { mutableLongStateOf(0L) }
     var enginePalette by remember { 
         mutableStateOf(
-            AtmosphereColors(
+            PulseColors(
                 accent = Color(moriEngine.state.dominantAccentColor),
                 surface = Color(moriEngine.state.dominantSurfaceColor),
                 onSurface = Color(moriEngine.state.dominantOnSurfaceColor),
@@ -86,8 +84,7 @@ fun EngineBackdrop(
                 frameTime = time
                 ticker.tick(time)
                 
-                // Update the palette state from the engine state every frame
-                enginePalette = AtmosphereColors(
+                enginePalette = PulseColors(
                     accent = Color(moriEngine.state.dominantAccentColor),
                     surface = Color(moriEngine.state.dominantSurfaceColor),
                     onSurface = Color(moriEngine.state.dominantOnSurfaceColor),
@@ -99,13 +96,12 @@ fun EngineBackdrop(
 
     // 3. Provide the layer to the hierarchy
     CompositionLocalProvider(
-        LocalHazeSource provides HazeSource(graphicsLayer)
+        LocalPulseHazeSource provides PulseHazeSource(graphicsLayer)
     ) {
         // 4. The Muscle (Compose Surface)
         Canvas(
             modifier = modifier
                 .fillMaxSize()
-                // Use Offscreen strategy to ensure proper alpha blending and brightness
                 .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
         ) {
             @Suppress("UNUSED_VARIABLE")
@@ -129,8 +125,8 @@ fun EngineBackdrop(
             drawLayer(graphicsLayer)
         }
 
-        // 5. Inject the Living Palette into the UI content
-        MoriTheme(worldState = worldState, paletteOverride = enginePalette) {
+        // 5. Inject the Pulse Theme into the UI content
+        PulseTheme(worldState = worldState, paletteOverride = enginePalette) {
             content()
         }
     }
@@ -167,9 +163,9 @@ private fun syncWorldToEngine(from: WorldState, to: me.ashishekka.mori.engine.co
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewEngineBackdrop() {
-    MoriTheme {
-        EngineBackdrop(
+fun PreviewPulseBackdrop() {
+    PulseTheme {
+        PulseBackdrop(
             worldState = WorldState(
                 energyBatteryLevel = 0.8f,
                 chronosSunAltitude = 0.5f

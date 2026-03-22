@@ -27,11 +27,11 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import me.ashishekka.mori.ui.theme.MoriTheme
+import me.ashishekka.mori.ui.theme.PulseTheme
 
 /**
  * A custom switch with a glassmorphic track and an accent-colored thumb.
- * Uses [MoriGlassBox] to ensure the thumb remains sharp while the track is blurred.
+ * Uses [PulseGlassBox] to ensure the thumb remains sharp while the track is blurred.
  */
 @Composable
 fun PulseToggle(
@@ -41,7 +41,7 @@ fun PulseToggle(
     thermalStress: Float = 0f,
     enabled: Boolean = true
 ) {
-    val accentColor = MoriTheme.colors.accent
+    val accentColor = PulseTheme.colors.accent
     val interactionSource = remember { MutableInteractionSource() }
 
     // Animations
@@ -63,13 +63,13 @@ fun PulseToggle(
         label = "thumbScale"
     )
 
-    MoriGlassBox(
+    PulseGlassBox(
         modifier = modifier
             .width(52.dp)
             .height(28.dp)
             .clickable(
                 interactionSource = interactionSource,
-                indication = ripple(bounded = false, radius = 24.dp), // Added tactile ripple
+                indication = ripple(bounded = false, radius = 24.dp),
                 enabled = enabled,
                 onClick = { onCheckedChange(!checked) }
             ),
@@ -94,7 +94,7 @@ fun PulseToggle(
 @Composable
 fun PreviewPulseToggle() {
     Column(modifier = Modifier.padding(16.dp)) {
-        MoriTheme {
+        PulseTheme {
             PulseToggle(checked = true, onCheckedChange = {})
             Spacer(modifier = Modifier.height(16.dp))
             PulseToggle(checked = false, onCheckedChange = {})

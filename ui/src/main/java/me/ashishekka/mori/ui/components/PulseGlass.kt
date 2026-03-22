@@ -26,7 +26,7 @@ import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.unit.dp
-import me.ashishekka.mori.ui.theme.MoriTheme
+import me.ashishekka.mori.ui.theme.PulseTheme
 
 /**
  * AGSL Shader for advanced "frosting" effect.
@@ -51,15 +51,15 @@ private const val FROST_SHADER = """
  * Uses a two-layer strategy to prevent content from being blurred.
  */
 @Composable
-fun MoriGlassBox(
+fun PulseGlassBox(
     modifier: Modifier = Modifier,
     thermalStress: Float = 0f,
     shape: Shape,
     borderAlpha: Float = 0.4f,
     content: @Composable BoxScope.() -> Unit
 ) {
-    val hazeSource = LocalHazeSource.current
-    val colors = MoriTheme.colors
+    val hazeSource = LocalPulseHazeSource.current
+    val colors = PulseTheme.colors
     var positionInRoot by remember { mutableStateOf(Offset.Zero) }
 
     // Tiered Rendering Logic
@@ -110,7 +110,6 @@ fun MoriGlassBox(
             )
     ) {
         // LAYER 1: The Blurred Background
-        // Fills the area defined by the parent (which is defined by LAYER 2)
         Box(
             modifier = Modifier
                 .matchParentSize()
@@ -119,7 +118,6 @@ fun MoriGlassBox(
                     // MIRROR DRAW
                     hazeSource.layer?.let { layer ->
                         drawContext.canvas.save()
-                        // Offset the draw to match the wallpaper's root position
                         drawContext.canvas.translate(-positionInRoot.x, -positionInRoot.y)
                         drawLayer(layer)
                         drawContext.canvas.restore()
@@ -130,7 +128,6 @@ fun MoriGlassBox(
         )
 
         // LAYER 2: The Sharp Content
-        // No matchParentSize() here, allowing the content to define the size of the parent Box.
         Box {
             content()
         }
@@ -140,13 +137,13 @@ fun MoriGlassBox(
 /**
  * A background-only modifier for decorative elements (like tracks) where children are not present.
  */
-fun Modifier.moriGlassBackground(
+fun Modifier.pulseGlassBackground(
     thermalStress: Float = 0f,
     shape: Shape,
     borderAlpha: Float = 0.2f
 ): Modifier = composed {
-    val hazeSource = LocalHazeSource.current
-    val colors = MoriTheme.colors
+    val hazeSource = LocalPulseHazeSource.current
+    val colors = PulseTheme.colors
     var positionInRoot by remember { mutableStateOf(Offset.Zero) }
 
     val isBlurEnabled = thermalStress < 0.8f && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S

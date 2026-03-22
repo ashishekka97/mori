@@ -38,20 +38,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import me.ashishekka.mori.persona.state.WorldState
-import me.ashishekka.mori.ui.components.HazeSource
-import me.ashishekka.mori.ui.components.LocalHazeSource
-import me.ashishekka.mori.ui.components.MetricGraph
-import me.ashishekka.mori.ui.components.MoriButton
-import me.ashishekka.mori.ui.components.MoriCard
-import me.ashishekka.mori.ui.components.MoriSlider
+import me.ashishekka.mori.ui.components.PulseHazeSource
+import me.ashishekka.mori.ui.components.LocalPulseHazeSource
+import me.ashishekka.mori.ui.components.PulseGraph
+import me.ashishekka.mori.ui.components.PulseButton
+import me.ashishekka.mori.ui.components.PulseCard
+import me.ashishekka.mori.ui.components.PulseSlider
 import me.ashishekka.mori.ui.components.PulseToggle
-import me.ashishekka.mori.ui.theme.MoriTheme
+import me.ashishekka.mori.ui.theme.PulseTheme
 
 /**
- * A dedicated screen to verify and showcase all components of the Mori Pulse Design System.
+ * A dedicated screen to verify and showcase all components of the Pulse Design System.
  */
 @Composable
-fun ComponentGallery(
+fun PulseGallery(
     modifier: Modifier = Modifier
 ) {
     var sunAltitude by remember { mutableFloatStateOf(0.5f) }
@@ -66,22 +66,14 @@ fun ComponentGallery(
 
     val galleryHazeLayer = rememberGraphicsLayer()
 
-    MoriTheme(simulatedState) {
+    PulseTheme(simulatedState) {
         Box(
             modifier = modifier
                 .fillMaxSize()
                 .drawBehind {
                     galleryHazeLayer.record {
-                        val skyColor = lerp(
-                            Color(0xFF1A237E), 
-                            Color(0xFF81D4FA), 
-                            ((sunAltitude + 1f) / 2f).coerceIn(0f, 1f)
-                        )
-                        val accentGlow = lerp(
-                            Color(0xFF4A148C), 
-                            Color(0xFFFFB74D), 
-                            ((sunAltitude + 1f) / 2f).coerceIn(0f, 1f)
-                        )
+                        val skyColor = lerp(Color(0xFF1A237E), Color(0xFF81D4FA), ((sunAltitude + 1f) / 2f).coerceIn(0f, 1f))
+                        val accentGlow = lerp(Color(0xFF4A148C), Color(0xFFFFB74D), ((sunAltitude + 1f) / 2f).coerceIn(0f, 1f))
                         drawRect(brush = Brush.verticalGradient(colors = listOf(skyColor, accentGlow, skyColor)))
                         drawCircle(color = accentGlow.copy(alpha = 0.5f), radius = size.minDimension / 2, center = center)
                     }
@@ -89,7 +81,7 @@ fun ComponentGallery(
                 }
         ) {
             CompositionLocalProvider(
-                LocalHazeSource provides HazeSource(galleryHazeLayer)
+                LocalPulseHazeSource provides PulseHazeSource(galleryHazeLayer)
             ) {
                 Column(
                     modifier = Modifier
@@ -105,12 +97,12 @@ fun ComponentGallery(
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 2.sp,
-                        color = MoriTheme.colors.onSurface
+                        color = PulseTheme.colors.onSurface
                     )
 
-                    // SECTION: STATE SIMULATOR
+                    // SECTION: SIMULATOR
                     GallerySection(title = "Simulator") {
-                        MoriCard(thermalStress = thermalStress) {
+                        PulseCard(thermalStress = thermalStress) {
                             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                                 SimulatorControl(
                                     label = "Sun Altitude",
@@ -130,11 +122,11 @@ fun ComponentGallery(
 
                     // SECTION: PALETTE
                     GallerySection(title = "Living Palette") {
-                        MoriCard(thermalStress = thermalStress) {
+                        PulseCard(thermalStress = thermalStress) {
                             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                                ColorToken("Accent", MoriTheme.colors.accent)
-                                ColorToken("Surface", MoriTheme.colors.surface)
-                                ColorToken("Text", MoriTheme.colors.onSurface)
+                                ColorToken("Accent", PulseTheme.colors.accent)
+                                ColorToken("Surface", PulseTheme.colors.surface)
+                                ColorToken("Text", PulseTheme.colors.onSurface)
                             }
                         }
                     }
@@ -145,22 +137,22 @@ fun ComponentGallery(
                         var toggleChecked by remember { mutableStateOf(true) }
                         
                         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                            MoriCard(
+                            PulseCard(
                                 onClick = { clickCount++ },
                                 thermalStress = thermalStress,
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-                                    Text("CLICKABLE CARD", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MoriTheme.colors.accent)
+                                    Text("CLICKABLE CARD", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = PulseTheme.colors.accent)
                                     Spacer(Modifier.height(8.dp))
-                                    Text("Interaction Count: $clickCount", style = MaterialTheme.typography.titleMedium, color = MoriTheme.colors.onSurface)
+                                    Text("Interaction Count: $clickCount", style = MaterialTheme.typography.titleMedium, color = PulseTheme.colors.onSurface)
                                 }
                             }
 
                             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                                MoriCard(modifier = Modifier.weight(1f), thermalStress = thermalStress) {
+                                PulseCard(modifier = Modifier.weight(1f), thermalStress = thermalStress) {
                                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                        Text("PULSE", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MoriTheme.colors.onSurface.copy(alpha = 0.6f))
+                                        Text("PULSE", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = PulseTheme.colors.onSurface.copy(alpha = 0.6f))
                                         Spacer(Modifier.height(12.dp))
                                         PulseToggle(
                                             checked = toggleChecked,
@@ -169,12 +161,12 @@ fun ComponentGallery(
                                         )
                                     }
                                 }
-                                MoriButton(
+                                PulseButton(
                                     onClick = {},
                                     modifier = Modifier.weight(1f),
                                     thermalStress = thermalStress
                                 ) {
-                                    Text("ACTION", color = MoriTheme.colors.onSurface, fontWeight = FontWeight.Bold)
+                                    Text("ACTION", color = PulseTheme.colors.onSurface, fontWeight = FontWeight.Bold)
                                 }
                             }
                         }
@@ -183,10 +175,10 @@ fun ComponentGallery(
                     // SECTION: VISUALIZERS
                     GallerySection(title = "Visualization") {
                         val dummyTrend = remember { listOf(0.2f, 0.5f, 0.4f, 0.8f, 0.3f, 0.9f, 0.6f) }
-                        MoriCard(thermalStress = thermalStress) {
+                        PulseCard(thermalStress = thermalStress) {
                             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                Text("GLOWING METRIC", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MoriTheme.colors.onSurface.copy(alpha = 0.6f))
-                                MetricGraph(
+                                Text("GLOWING METRIC", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = PulseTheme.colors.onSurface.copy(alpha = 0.6f))
+                                PulseGraph(
                                     data = dummyTrend,
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -214,7 +206,7 @@ private fun GallerySection(
             style = MaterialTheme.typography.labelLarge,
             fontWeight = FontWeight.ExtraBold,
             letterSpacing = 1.5.sp,
-            color = MoriTheme.colors.accent
+            color = PulseTheme.colors.accent
         )
         content()
     }
@@ -224,7 +216,7 @@ private fun GallerySection(
 private fun ColorToken(label: String, color: Color) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Box(modifier = Modifier.size(40.dp).clip(CircleShape).background(color))
-        Text(text = label, style = MaterialTheme.typography.labelSmall, color = MoriTheme.colors.onSurface.copy(alpha = 0.6f))
+        Text(text = label, style = MaterialTheme.typography.labelSmall, color = PulseTheme.colors.onSurface.copy(alpha = 0.6f))
     }
 }
 
@@ -240,10 +232,10 @@ private fun SimulatorControl(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(text = label, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium, color = MoriTheme.colors.onSurface)
-            Text(text = String.format("%.2f", value), style = MaterialTheme.typography.labelMedium, color = MoriTheme.colors.onSurface)
+            Text(text = label, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium, color = PulseTheme.colors.onSurface)
+            Text(text = String.format("%.2f", value), style = MaterialTheme.typography.labelMedium, color = PulseTheme.colors.onSurface)
         }
-        MoriSlider(
+        PulseSlider(
             value = value,
             onValueChange = onValueChange,
             valueRange = range
@@ -253,6 +245,6 @@ private fun SimulatorControl(
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewComponentGallery() {
-    ComponentGallery()
+fun PreviewPulseGallery() {
+    PulseGallery()
 }

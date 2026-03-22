@@ -2,6 +2,7 @@ package me.ashishekka.mori.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -16,14 +17,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import me.ashishekka.mori.ui.theme.MoriTheme
+import me.ashishekka.mori.ui.theme.PulseTheme
 
 /**
  * A slider with a glassmorphic track and a themed thumb.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MoriSlider(
+fun PulseSlider(
     value: Float,
     onValueChange: (Float) -> Unit,
     modifier: Modifier = Modifier,
@@ -31,7 +32,7 @@ fun MoriSlider(
     enabled: Boolean = true,
     valueRange: ClosedFloatingPointRange<Float> = 0f..1f
 ) {
-    val colors = MoriTheme.colors
+    val colors = PulseTheme.colors
 
     Slider(
         value = value,
@@ -41,26 +42,31 @@ fun MoriSlider(
         valueRange = valueRange,
         colors = SliderDefaults.colors(
             thumbColor = colors.accent,
-            activeTrackColor = Color.Transparent, // We draw our own
+            activeTrackColor = Color.Transparent,
             inactiveTrackColor = Color.Transparent
         ),
         track = { sliderState ->
+            val trackBaseColor = if (colors.isDark) {
+                Color.White.copy(alpha = 0.1f)
+            } else {
+                Color.Black.copy(alpha = 0.05f)
+            }
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(12.dp),
                 contentAlignment = Alignment.CenterStart
             ) {
-                // 1. FULL GLASS TRACK (Background)
+                // 1. FULL GLASS TRACK
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(10.dp)
-                        .moriGlassBackground(thermalStress, shape = CircleShape, borderAlpha = 0.2f)
+                        .pulseGlassBackground(thermalStress, shape = CircleShape, borderAlpha = 0.2f)
                 )
 
-                // 2. ACTIVE FILAMENT (The glowing core)
-                // We calculate the width based on the current slider progress
+                // 2. ACTIVE FILAMENT
                 val fraction = (value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
                 
                 Box(
@@ -78,10 +84,10 @@ fun MoriSlider(
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewMoriSlider() {
-    MoriTheme {
+fun PreviewPulseSlider() {
+    PulseTheme {
         Box(modifier = Modifier.padding(16.dp)) {
-            MoriSlider(value = 0.5f, onValueChange = {})
+            PulseSlider(value = 0.5f, onValueChange = {})
         }
     }
 }

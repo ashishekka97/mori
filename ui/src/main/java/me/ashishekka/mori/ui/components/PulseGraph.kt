@@ -17,16 +17,16 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import me.ashishekka.mori.ui.theme.MoriTheme
+import me.ashishekka.mori.ui.theme.PulseTheme
 
 /**
- * A premium, glowing graph component.
+ * A premium, glowing graph component from the Pulse Design System.
  */
 @Composable
-fun MetricGraph(
+fun PulseGraph(
     data: List<Float>,
     modifier: Modifier = Modifier,
-    lineColor: Color = MoriTheme.colors.accent,
+    lineColor: Color = PulseTheme.colors.accent,
     showFill: Boolean = true
 ) {
     val path = remember { Path() }
@@ -78,22 +78,17 @@ fun MetricGraph(
             )
         }
 
-        // 2. THE GLOW (Triple-layer for light emission feel)
-        // Layer A: The "Halo" (Broad, faint)
+        // 2. THE GLOW
         drawPath(
             path = path,
             color = lineColor.copy(alpha = 0.15f),
             style = Stroke(width = 12.dp.toPx(), cap = StrokeCap.Round)
         )
-        
-        // Layer B: The "Aura" (Medium, semi-bright)
         drawPath(
             path = path,
             color = lineColor.copy(alpha = 0.4f),
             style = Stroke(width = 6.dp.toPx(), cap = StrokeCap.Round)
         )
-
-        // Layer C: The "Filament" (Sharp, bright)
         drawPath(
             path = path,
             color = lineColor,
@@ -104,13 +99,13 @@ fun MetricGraph(
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewMetricGraph() {
+fun PreviewPulseGraph() {
     val sampleData = listOf(0.2f, 0.5f, 0.4f, 0.8f, 0.3f, 0.9f, 0.6f)
-    MoriTheme {
-        MoriCard(modifier = Modifier.padding(16.dp).fillMaxWidth()) {
+    PulseTheme {
+        PulseCard(modifier = Modifier.padding(16.dp).fillMaxWidth()) {
             Column {
-                Text("Glow Verification", color = MoriTheme.colors.onSurface)
-                MetricGraph(
+                Text("Glow Verification", color = PulseTheme.colors.onSurface)
+                PulseGraph(
                     data = sampleData,
                     modifier = Modifier.fillMaxWidth().height(100.dp).padding(top = 16.dp)
                 )
