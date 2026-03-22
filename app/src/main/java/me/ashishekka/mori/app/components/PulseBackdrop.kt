@@ -59,9 +59,10 @@ fun PulseBackdrop(
     val graphicsLayer = rememberGraphicsLayer()
     val density = LocalDensity.current.density
     
+    // MOTION STATE: Always updated at 60fps to drive rendering
     var frameTime by remember { mutableLongStateOf(0L) }
     
-    // HARDENING: Start with a stable initial palette
+    // VIBE STATE: Only updated when the engine's theme policy shifts (Memory Efficient)
     var enginePalette by remember { 
         mutableStateOf(
             PulseColors(
@@ -87,25 +88,23 @@ fun PulseBackdrop(
     LaunchedEffect(Unit) {
         while (true) {
             withFrameNanos { time ->
+                // 1. MOTION: Drive the engine and trigger recomposition (Mandatory)
                 frameTime = time
                 ticker.tick(time)
                 
-                // HARDENING: Zero-Allocation Guard. 
-                // Only update the state (and allocate a new PulseColors object) 
-                // if the engine palette has actually changed.
+                // 2. VIBE: Update theme state only on change (Zero-Allocation)
                 val engineState = moriEngine.state
                 val newAccent = engineState.dominantAccentColor
-                val newSurface = engineState.dominantSurfaceColor
-                val newOnSurface = engineState.dominantOnSurfaceColor
                 val newIsDark = engineState.isDarkState
 
+                // Guard: Only allocate new PulseColors if something changed
                 if (enginePalette.accent.value.toLong() != newAccent.toLong().shl(32).ushr(32) || 
                     enginePalette.isDark != newIsDark) {
                     
                     enginePalette = PulseColors(
                         accent = Color(newAccent),
-                        surface = Color(newSurface),
-                        onSurface = Color(newOnSurface),
+                        surface = Color(engineState.dominantSurfaceColor),
+                        onSurface = Color(engineState.dominantOnSurfaceColor),
                         isDark = newIsDark
                     )
                 }
@@ -121,6 +120,7 @@ fun PulseBackdrop(
                 .fillMaxSize()
                 .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
         ) {
+            // Read frameTime here to ensure this block redraws at 60fps
             @Suppress("UNUSED_VARIABLE")
             val invalidate = frameTime
 
