@@ -7,15 +7,11 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import me.ashishekka.mori.persona.state.WorldState
 
-/**
- * The main theme wrapper for the Pulse Design System.
- */
 @Composable
 fun PulseTheme(
     worldState: WorldState = WorldState(),
@@ -28,13 +24,17 @@ fun PulseTheme(
         darkColorScheme(
             primary = pulseColors.accent,
             surface = pulseColors.surface,
-            onSurface = pulseColors.onSurface
+            onSurface = pulseColors.onSurface,
+            // THEME SPEC FIX: Buttons and other primary components use this for their content color.
+            onPrimary = pulseColors.onSurface 
         )
     } else {
         lightColorScheme(
             primary = pulseColors.accent,
             surface = pulseColors.surface,
-            onSurface = pulseColors.onSurface
+            onSurface = pulseColors.onSurface,
+            // THEME SPEC FIX: Buttons and other primary components use this for their content color.
+            onPrimary = pulseColors.onSurface
         )
     }
 
@@ -42,15 +42,10 @@ fun PulseTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            
-            // SYSTEM BAR SYNC:
             window.statusBarColor = android.graphics.Color.TRANSPARENT
             window.navigationBarColor = android.graphics.Color.TRANSPARENT
             
             val controller = WindowCompat.getInsetsController(window, view)
-            
-            // If the environment is DARK, we need LIGHT icons (AppearanceLight = false)
-            // If the environment is LIGHT, we need DARK icons (AppearanceLight = true)
             controller.isAppearanceLightStatusBars = !pulseColors.isDark
             controller.isAppearanceLightNavigationBars = !pulseColors.isDark
         }

@@ -16,7 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.platform.LocalDensity
@@ -80,10 +79,6 @@ fun PulseBackdrop(
         }
     }
 
-    // UI INTEGRITY SMOKE TEST:
-    // This bypasses the engine and forces the UI to cycle colors.
-    // If this works, the UI recomposition is correct.
-    // If it fails, the Compose UI layer has a flaw.
     LaunchedEffect(Unit) {
         while (true) {
             withFrameNanos { time ->
@@ -91,13 +86,23 @@ fun PulseBackdrop(
                 frameTick++
                 ticker.tick(time)
                 
-                val seconds = (time / 1_000_000_000L)
-                val testPalette = when (seconds % 3) {
-                    0L -> PulseColors(accent = Color.Magenta, surface = Color.Red, onSurface = Color.White, isDark = true)
-                    1L -> PulseColors(accent = Color.Yellow, surface = Color.Green, onSurface = Color.Black, isDark = false)
-                    else -> PulseColors(accent = Color.Cyan, surface = Color.Blue, onSurface = Color.White, isDark = true)
+                val engineState = moriEngine.state
+                val newAccent = Color(engineState.dominantAccentColor)
+                val newSurface = Color(engineState.dominantSurfaceColor)
+                val newOnSurface = Color(engineState.dominantOnSurfaceColor)
+                val newIsDark = engineState.isDarkState
+
+                // COMPREHENSIVE GUARD: Check all palette colors for changes.
+                if (enginePalette.accent != newAccent || enginePalette.surface != newSurface ||
+                    enginePalette.onSurface != newOnSurface || enginePalette.isDark != newIsDark) {
+                    
+                    enginePalette = PulseColors(
+                        accent = newAccent,
+                        surface = newSurface,
+                        onSurface = newOnSurface,
+                        isDark = newIsDark
+                    )
                 }
-                enginePalette = testPalette
             }
         }
     }
