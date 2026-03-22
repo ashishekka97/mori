@@ -8,7 +8,6 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import me.ashishekka.mori.persona.state.WorldState
-import kotlin.math.abs
 
 /**
  * A reactive set of color tokens that shift based on the [WorldState].
@@ -60,22 +59,26 @@ fun rememberAtmosphereColors(
         val baseAccent = lerp(NightAccent, DayAccent, timeFactor)
         val baseSurface = lerp(NightSurface, DaySurface, timeFactor)
         
-        // READABILITY FIX: Dawn/Dusk (Altitude ~ 0.0) usually creates low-contrast grey-on-grey.
-        // We force a high-contrast shift when the sun is near the horizon.
+        // 3. READABILITY FIX: Dawn/Dusk High-Contrast Guard
         val sunAltitude = worldState.chronosSunAltitude
         val baseOnSurface = when {
-            sunAltitude > 0.2f -> DayOnSurface // Broad daylight
-            sunAltitude < -0.2f -> NightOnSurface // Deep night
-            else -> {
-                // Transition zone: lerp between black and white based on slight altitude
-                // to avoid the "muddy grey" middle ground.
-                if (sunAltitude > 0) DayOnSurface else NightOnSurface
-            }
+            sunAltitude > 0.2f -> DayOnSurface
+            sunAltitude < -0.2f -> NightOnSurface
+            else -> if (sunAltitude > 0) DayOnSurface else NightOnSurface
         }
 
-        // 3. Apply Thermal Stress (Desaturation)
+        // 4. THERMAL STRESS REFINEMENT:
+        // We desaturate the accent color for UI elements (thumbs, tracks), 
+        // but we keep it legible. We use a darker/lighter grey depending on theme mode
+        // rather than a generic neutral grey that might blend with the surface.
+        val stressTarget = if (sunAltitude > 0) {
+            Color.Black.copy(alpha = 0.6f) // Dark grey for light mode
+        } else {
+            Color.White.copy(alpha = 0.6f) // Light grey for dark mode
+        }
+
         val finalAccent = if (worldState.energyThermalStress > 0.5f) {
-            lerp(baseAccent, StressMuted, (worldState.energyThermalStress - 0.5f) * 2f)
+            lerp(baseAccent, stressTarget, (worldState.energyThermalStress - 0.5f) * 2f)
         } else {
             baseAccent
         }
