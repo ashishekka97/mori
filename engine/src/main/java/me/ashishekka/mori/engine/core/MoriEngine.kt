@@ -12,8 +12,6 @@ import kotlin.math.min
 
 /**
  * The core rendering engine for Mori.
- * This class is a platform-agnostic orchestrator that delegates timing to [EngineTicker]
- * and drawing to [RenderSurface].
  */
 class MoriEngine(
     private val ticker: EngineTicker,
@@ -27,9 +25,6 @@ class MoriEngine(
 
     // Geometric Configuration
     var targetScaleMode: ScaleMode = ScaleMode.FIT
-    
-    // Opaque Foundation
-    private var baseBackgroundColor: Int = 0xFF000000.toInt()
 
     // FPS Control
     var targetFps: Int = 60
@@ -57,7 +52,8 @@ class MoriEngine(
      */
     fun setWallpaper(wallpaper: MoriWallpaper) {
         layerManager.clear()
-        this.baseBackgroundColor = wallpaper.baseBackgroundColor
+        // We use the spec's base color as the initial foundation
+        state.dominantFoundationColor = wallpaper.baseBackgroundColor
         wallpaper.layers.forEach { layerManager.addEffect(it) }
     }
 
@@ -92,15 +88,15 @@ class MoriEngine(
     fun onDrawFrame(frameTimeNanos: Long = System.nanoTime()) {
         state.currentTimeNanos = frameTimeNanos
         
-        // 1. Update Theme Policy
+        // 1. Update Theme Policy (Sets the foundation color)
         AtmosphericThemeMapper.updatePalette(state)
 
         val canvas = renderSurface.lockCanvas()
 
         canvas?.let {
             try {
-                // 2. Draw Opaque Foundation FIRST (Ensures consistency)
-                it.drawColor(baseBackgroundColor)
+                // 2. Draw Opaque Foundation FIRST
+                it.drawColor(state.dominantFoundationColor)
                 
                 // 3. Update and Draw layers
                 layerManager.updateAndDraw(state, it)

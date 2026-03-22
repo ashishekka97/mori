@@ -44,12 +44,13 @@ fun PulseTheme(
             val window = (view.context as Activity).window
             
             // SYSTEM BAR SYNC:
-            // 1. Transparent status bar to let the backdrop shine through
             window.statusBarColor = android.graphics.Color.TRANSPARENT
             window.navigationBarColor = android.graphics.Color.TRANSPARENT
             
-            // 2. Adjust icon color based on perceptual brightness (isDark)
             val controller = WindowCompat.getInsetsController(window, view)
+            
+            // If the environment is DARK, we need LIGHT icons (AppearanceLight = false)
+            // If the environment is LIGHT, we need DARK icons (AppearanceLight = true)
             controller.isAppearanceLightStatusBars = !pulseColors.isDark
             controller.isAppearanceLightNavigationBars = !pulseColors.isDark
         }
