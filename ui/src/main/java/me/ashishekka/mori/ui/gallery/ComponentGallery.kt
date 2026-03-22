@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -24,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -33,6 +36,7 @@ import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import me.ashishekka.mori.persona.state.WorldState
 import me.ashishekka.mori.ui.components.HazeSource
 import me.ashishekka.mori.ui.components.LocalHazeSource
@@ -91,19 +95,23 @@ fun ComponentGallery(
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
-                        .padding(24.dp),
+                        .padding(horizontal = 24.dp),
                     verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
+                    Spacer(Modifier.height(64.dp))
+
                     Text(
-                        text = "Pulse Design Gallery",
+                        text = "DESIGN LAB",
                         style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 2.sp,
                         color = MoriTheme.colors.onSurface
                     )
 
                     // SECTION: STATE SIMULATOR
-                    GallerySection(title = "State Simulator") {
+                    GallerySection(title = "Simulator") {
                         MoriCard(thermalStress = thermalStress) {
-                            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                                 SimulatorControl(
                                     label = "Sun Altitude",
                                     value = sunAltitude,
@@ -120,61 +128,75 @@ fun ComponentGallery(
                         }
                     }
 
-                    // SECTION: INTERACTIVE CARDS (New!)
-                    GallerySection(title = "Interactive Containers") {
-                        var clickCount by remember { mutableIntStateOf(0) }
-                        MoriCard(
-                            onClick = { clickCount++ },
-                            thermalStress = thermalStress,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-                                Text("Click this Card", style = MaterialTheme.typography.titleMedium, color = MoriTheme.colors.onSurface)
-                                Text("Click Count: $clickCount", color = MoriTheme.colors.accent)
-                                Text("Verify themed ripple and feedback", style = MaterialTheme.typography.labelSmall, color = MoriTheme.colors.onSurface.copy(alpha = 0.6f))
+                    // SECTION: PALETTE
+                    GallerySection(title = "Living Palette") {
+                        MoriCard(thermalStress = thermalStress) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                ColorToken("Accent", MoriTheme.colors.accent)
+                                ColorToken("Surface", MoriTheme.colors.surface)
+                                ColorToken("Text", MoriTheme.colors.onSurface)
                             }
                         }
                     }
 
-                    // SECTION: INTERACTIVE CONTROLS
-                    GallerySection(title = "Standard Controls") {
+                    // SECTION: INTERACTIVE
+                    GallerySection(title = "Interactive") {
+                        var clickCount by remember { mutableIntStateOf(0) }
                         var toggleChecked by remember { mutableStateOf(true) }
-                        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                            MoriCard(modifier = Modifier.weight(1f), thermalStress = thermalStress) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text("PULSE", style = MaterialTheme.typography.labelSmall, color = MoriTheme.colors.onSurface)
+                        
+                        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                            MoriCard(
+                                onClick = { clickCount++ },
+                                thermalStress = thermalStress,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                                    Text("CLICKABLE CARD", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MoriTheme.colors.accent)
                                     Spacer(Modifier.height(8.dp))
-                                    PulseToggle(
-                                        checked = toggleChecked,
-                                        onCheckedChange = { toggleChecked = it },
-                                        thermalStress = thermalStress
-                                    )
+                                    Text("Interaction Count: $clickCount", style = MaterialTheme.typography.titleMedium, color = MoriTheme.colors.onSurface)
                                 }
                             }
-                            MoriButton(
-                                onClick = {},
-                                modifier = Modifier.weight(1f),
-                                thermalStress = thermalStress
-                            ) {
-                                Text("ACTION", color = MoriTheme.colors.onSurface)
+
+                            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                                MoriCard(modifier = Modifier.weight(1f), thermalStress = thermalStress) {
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Text("PULSE", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MoriTheme.colors.onSurface.copy(alpha = 0.6f))
+                                        Spacer(Modifier.height(12.dp))
+                                        PulseToggle(
+                                            checked = toggleChecked,
+                                            onCheckedChange = { toggleChecked = it },
+                                            thermalStress = thermalStress
+                                        )
+                                    }
+                                }
+                                MoriButton(
+                                    onClick = {},
+                                    modifier = Modifier.weight(1f),
+                                    thermalStress = thermalStress
+                                ) {
+                                    Text("ACTION", color = MoriTheme.colors.onSurface, fontWeight = FontWeight.Bold)
+                                }
                             }
                         }
                     }
 
                     // SECTION: VISUALIZERS
-                    GallerySection(title = "Data Visualizers") {
+                    GallerySection(title = "Visualization") {
                         val dummyTrend = remember { listOf(0.2f, 0.5f, 0.4f, 0.8f, 0.3f, 0.9f, 0.6f) }
                         MoriCard(thermalStress = thermalStress) {
-                            MetricGraph(
-                                data = dummyTrend,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(80.dp)
-                            )
+                            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                Text("GLOWING METRIC", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MoriTheme.colors.onSurface.copy(alpha = 0.6f))
+                                MetricGraph(
+                                    data = dummyTrend,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(100.dp)
+                                )
+                            }
                         }
                     }
 
-                    Spacer(Modifier.height(80.dp))
+                    Spacer(Modifier.height(100.dp))
                 }
             }
         }
@@ -186,14 +208,23 @@ private fun GallerySection(
     title: String,
     content: @Composable () -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Text(
             text = title.uppercase(),
             style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.Bold,
-            color = MoriTheme.colors.accent.copy(alpha = 0.8f)
+            fontWeight = FontWeight.ExtraBold,
+            letterSpacing = 1.5.sp,
+            color = MoriTheme.colors.accent
         )
         content()
+    }
+}
+
+@Composable
+private fun ColorToken(label: String, color: Color) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Box(modifier = Modifier.size(40.dp).clip(CircleShape).background(color))
+        Text(text = label, style = MaterialTheme.typography.labelSmall, color = MoriTheme.colors.onSurface.copy(alpha = 0.6f))
     }
 }
 
@@ -209,7 +240,7 @@ private fun SimulatorControl(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(text = label, style = MaterialTheme.typography.labelMedium, color = MoriTheme.colors.onSurface)
+            Text(text = label, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium, color = MoriTheme.colors.onSurface)
             Text(text = String.format("%.2f", value), style = MaterialTheme.typography.labelMedium, color = MoriTheme.colors.onSurface)
         }
         MoriSlider(
