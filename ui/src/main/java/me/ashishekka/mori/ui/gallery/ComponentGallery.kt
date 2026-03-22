@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -44,13 +45,11 @@ import me.ashishekka.mori.ui.theme.MoriTheme
 
 /**
  * A dedicated screen to verify and showcase all components of the Mori Pulse Design System.
- * Now features a simulated wallpaper backdrop to verify glassmorphism blurs.
  */
 @Composable
 fun ComponentGallery(
     modifier: Modifier = Modifier
 ) {
-    // Gallery State Simulator
     var sunAltitude by remember { mutableFloatStateOf(0.5f) }
     var thermalStress by remember { mutableFloatStateOf(0f) }
     
@@ -61,46 +60,30 @@ fun ComponentGallery(
         )
     }
 
-    // 1. Prepare GraphicsLayer for Haze Simulation
     val galleryHazeLayer = rememberGraphicsLayer()
 
     MoriTheme(simulatedState) {
-        // 2. THE SIMULATED WALLPAPER (Source for blurs)
         Box(
             modifier = modifier
                 .fillMaxSize()
                 .drawBehind {
-                    // Record the simulated wallpaper pixels
                     galleryHazeLayer.record {
                         val skyColor = lerp(
-                            Color(0xFF1A237E), // Deep Night
-                            Color(0xFF81D4FA), // Noon Blue
+                            Color(0xFF1A237E), 
+                            Color(0xFF81D4FA), 
                             ((sunAltitude + 1f) / 2f).coerceIn(0f, 1f)
                         )
                         val accentGlow = lerp(
-                            Color(0xFF4A148C), // Night Purple
-                            Color(0xFFFFB74D), // Sunset Amber
+                            Color(0xFF4A148C), 
+                            Color(0xFFFFB74D), 
                             ((sunAltitude + 1f) / 2f).coerceIn(0f, 1f)
                         )
-                        
-                        drawRect(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(skyColor, accentGlow, skyColor)
-                            )
-                        )
-                        
-                        // Add some organic "blobs" to verify blur texture
-                        drawCircle(
-                            color = accentGlow.copy(alpha = 0.5f),
-                            radius = size.minDimension / 2,
-                            center = center
-                        )
+                        drawRect(brush = Brush.verticalGradient(colors = listOf(skyColor, accentGlow, skyColor)))
+                        drawCircle(color = accentGlow.copy(alpha = 0.5f), radius = size.minDimension / 2, center = center)
                     }
-                    // Draw the layer to the actual background
                     drawLayer(galleryHazeLayer)
                 }
         ) {
-            // 3. Share the simulated layer with the gallery components
             CompositionLocalProvider(
                 LocalHazeSource provides HazeSource(galleryHazeLayer)
             ) {
@@ -137,20 +120,24 @@ fun ComponentGallery(
                         }
                     }
 
-                    // SECTION: TYPOGRAPHY
-                    GallerySection(title = "Typography") {
-                        MoriCard(thermalStress = thermalStress) {
-                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Text("Atmospheric Bold", style = MaterialTheme.typography.headlineLarge, color = MoriTheme.colors.onSurface)
-                                Text("Secondary Pulse", style = MaterialTheme.typography.titleMedium, color = MoriTheme.colors.onSurface)
-                                Text("Content Clarity", style = MaterialTheme.typography.bodyLarge, color = MoriTheme.colors.onSurface)
-                                Text("LABEL TOKEN", style = MaterialTheme.typography.labelSmall, color = MoriTheme.colors.accent)
+                    // SECTION: INTERACTIVE CARDS (New!)
+                    GallerySection(title = "Interactive Containers") {
+                        var clickCount by remember { mutableIntStateOf(0) }
+                        MoriCard(
+                            onClick = { clickCount++ },
+                            thermalStress = thermalStress,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                                Text("Click this Card", style = MaterialTheme.typography.titleMedium, color = MoriTheme.colors.onSurface)
+                                Text("Click Count: $clickCount", color = MoriTheme.colors.accent)
+                                Text("Verify themed ripple and feedback", style = MaterialTheme.typography.labelSmall, color = MoriTheme.colors.onSurface.copy(alpha = 0.6f))
                             }
                         }
                     }
 
-                    // SECTION: INTERACTIVE
-                    GallerySection(title = "Interactive Controls") {
+                    // SECTION: INTERACTIVE CONTROLS
+                    GallerySection(title = "Standard Controls") {
                         var toggleChecked by remember { mutableStateOf(true) }
                         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                             MoriCard(modifier = Modifier.weight(1f), thermalStress = thermalStress) {
