@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -36,12 +37,14 @@ fun MoriButton(
     val interactionSource = remember { MutableInteractionSource() }
 
     MoriGlassBox(
-        modifier = modifier.clickable(
-            interactionSource = interactionSource,
-            indication = ripple(color = colors.accent),
-            enabled = enabled,
-            onClick = onClick
-        ),
+        modifier = modifier
+            .clip(shape) // RIPPLE FIX: Clip before clickable
+            .clickable(
+                interactionSource = interactionSource,
+                indication = ripple(color = colors.accent),
+                enabled = enabled,
+                onClick = onClick
+            ),
         thermalStress = thermalStress,
         shape = shape,
         borderAlpha = 0.6f

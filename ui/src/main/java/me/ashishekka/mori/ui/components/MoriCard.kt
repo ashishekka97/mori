@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -42,18 +43,21 @@ fun MoriCard(
     val colors = MoriTheme.colors
     val interactionSource = remember { MutableInteractionSource() }
 
-    val clickableModifier = if (onClick != null) {
-        Modifier.clickable(
-            interactionSource = interactionSource,
-            indication = ripple(color = colors.accent),
-            onClick = onClick
-        )
-    } else {
+    // RIPPLE FIX: Applying clip BEFORE clickable ensures the ripple is contained
+    val interactionModifier = if (onClick != null) {
         Modifier
+            .clip(shape)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = ripple(color = colors.accent),
+                onClick = onClick
+            )
+    } else {
+        Modifier.clip(shape)
     }
 
     MoriGlassBox(
-        modifier = modifier.then(clickableModifier),
+        modifier = modifier.then(interactionModifier),
         thermalStress = thermalStress,
         shape = shape
     ) {
