@@ -5,6 +5,7 @@ import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -39,7 +40,6 @@ import me.ashishekka.mori.engine.renderer.StaticFallbackRenderer
 import me.ashishekka.mori.persona.lifecycle.MoriLifecycleManager
 import me.ashishekka.mori.persona.state.StateManager
 import me.ashishekka.mori.ui.components.PulseButton
-import me.ashishekka.mori.ui.components.PulseCard
 import me.ashishekka.mori.ui.gallery.PulseGallery
 import me.ashishekka.mori.ui.theme.PulseTheme
 import org.koin.android.ext.android.inject
@@ -64,7 +64,11 @@ class MainActivity : ComponentActivity() {
 
             if (showGallery) {
                 Box(modifier = Modifier.fillMaxSize()) {
+                    // System Back Navigation Support
+                    BackHandler { showGallery = false }
+                    
                     PulseGallery(modifier = Modifier.fillMaxSize())
+                    
                     PulseButton(
                         onClick = { showGallery = false },
                         modifier = Modifier
@@ -108,9 +112,11 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(24.dp),
-                        verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        // TITLE
                         Text(
                             text = "MORI",
                             style = MaterialTheme.typography.headlineLarge,
@@ -125,38 +131,38 @@ class MainActivity : ComponentActivity() {
                             color = PulseTheme.colors.accent
                         )
 
-                        Spacer(modifier = Modifier.height(64.dp))
+                        Spacer(modifier = Modifier.weight(1f))
 
-                        PulseCard(
-                            modifier = Modifier.fillMaxWidth(0.8f)
+                        // ACTIONS (Now directly on the backdrop, no card)
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth(0.8f)
+                                .padding(bottom = 48.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Column(
-                                verticalArrangement = Arrangement.spacedBy(16.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
+                            PulseButton(
+                                onClick = {
+                                    val intent = Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER).apply {
+                                        putExtra(
+                                            WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
+                                            ComponentName(context, MoriWallpaperService::class.java)
+                                        )
+                                    }
+                                    context.startActivity(intent)
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                thermalStress = worldState.energyThermalStress
                             ) {
-                                PulseButton(
-                                    onClick = {
-                                        val intent = Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER).apply {
-                                            putExtra(
-                                                WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
-                                                ComponentName(context, MoriWallpaperService::class.java)
-                                            )
-                                        }
-                                        context.startActivity(intent)
-                                    },
-                                    modifier = Modifier.fillMaxWidth(),
-                                    thermalStress = worldState.energyThermalStress
-                                ) {
-                                    Text("SET WALLPAPER", fontWeight = FontWeight.Bold)
-                                }
+                                Text("SET WALLPAPER", fontWeight = FontWeight.Bold)
+                            }
 
-                                PulseButton(
-                                    onClick = onOpenGallery,
-                                    modifier = Modifier.fillMaxWidth(),
-                                    thermalStress = worldState.energyThermalStress
-                                ) {
-                                    Text("DESIGN LAB", fontWeight = FontWeight.Bold)
-                                }
+                            PulseButton(
+                                onClick = onOpenGallery,
+                                modifier = Modifier.fillMaxWidth(),
+                                thermalStress = worldState.energyThermalStress
+                            ) {
+                                Text("DESIGN LAB", fontWeight = FontWeight.Bold)
                             }
                         }
                     }
