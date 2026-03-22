@@ -4,30 +4,36 @@ Mori is built on a strict unidirectional data flow, enforced by Gradle modules. 
 
 ## 1. The "Mori Machine" (Visual Flow)
 
+The Phase 5 architecture introduces a sophisticated, renderer-driven theming pipeline.
+
 ```mermaid
 graph TD
     subgraph OS [Android OS Layer]
-        A[Sensor Events / Broadcasts] -->|Real-time| B
-        C[Health Connect / UsageStats] -->|Periodic| D
+        A[Sensor Events] -->|Real-time| B(Pulse Collectors)
     end
 
     subgraph Persona [Persona Layer - The Brain]
-        B(Pulse Collectors) -->|Update| E
-        D(Narrative WorkManager) -->|Update| E
-        E{WorldStateManager} -->|Emit Immutable| F[WorldState Flow]
+        B -->|StateUpdate| E{WorldStateManager}
+        E -->|Immutable WorldState| F[StateSynchronizer]
     end
 
     subgraph Bridge [Bridge Layer - The Handover]
-        F --> G(Synchronizer)
-        G -->|Atomic Copy| H[MoriEngineState - Mutable Mirror]
+        F -->|Atomic Copy| G[MoriEngineState]
     end
 
-    subgraph Engine [Engine Layer - The Muscle]
-        H --> I(RenderLoop)
-        I --> J{EffectRegistry}
-        J --> K[EffectRenderer 1: Sky]
-        J --> L[EffectRenderer 2: Flora]
-        K & L -->|Zero-Allocation Draw| M[Agnostic Canvas]
+    subgraph Engine [Engine Layer - The "Dumb" Muscle]
+        G -->|Update| H(LayerManager)
+        H -->|Update| I(EffectRenderer 1)
+        H -->|Update| J(EffectRenderer 2)
+        
+        subgraph ThemeSynthesis [Wallpaper-Owned Theme]
+            I -->|getPaletteContribution()| K{MoriWallpaper}
+            J -->|getPaletteContribution()| K
+            K -- Synthesize & Apply --> G
+        end
+
+        G -->|Draw| L(LayerManager)
+        L -->|Draw| M[Agnostic Canvas]
     end
 ```
 
@@ -36,88 +42,64 @@ graph TD
 ## 2. The 5 Modules
 
 1.  **App Layer (`:app`)**
-    *   **Role:** The Orchestrator.
-    *   **Responsibilities:** Manages the `WallpaperService` lifecycle, initializes the Koin dependency graph, and binds the Persona's data lifecycle to the Engine's visibility. Implements Android-specific components like `ChoreographerTicker` and `SurfaceHolderRenderSurface`.
+    *   **Role:** The Orchestrator & UI Bridge.
+    *   **Responsibilities:** Manages the `WallpaperService` lifecycle. Hosts app-level Composables like `PulseBackdrop` that bridge the `:engine`'s state into the `:ui`'s `PulseTheme`.
 
 2.  **UI Layer (`:ui`)**
-    *   **Role:** The Face (Pulse Design System).
-    *   **Responsibilities:** Atmospheric onboarding, progressive permission disclosure, and the Data-as-Art dashboard. Built with Jetpack Compose.
+    *   **Role:** The Agnostic Design System (Pulse).
+    *   **Responsibilities:** Provides a library of pure, stateless Jetpack Compose components (`PulseButton`, `PulseCard`, etc.) and the `PulseTheme` wrapper. Has **zero knowledge** of the Mori engine.
 
 3.  **Persona Layer (`:persona`)**
     *   **Role:** The Brain.
-    *   **Responsibilities:** 
-        *   **Pulse:** `BroadcastReceivers` for real-time events (Battery, DND, Time).
-        *   **Narrative:** `WorkManager` for high-latency background data (Health, Usage Summaries).
-        *   **Normalization:** Flattens all data into a single, primitive-only `WorldState`.
+    *   **Responsibilities:** Collects real-world data from device sensors and broadcasts and normalizes it into the immutable `WorldState`.
 
 4.  **Biome Layer (`:biome`)**
-    *   **Role:** The DSL & Assets.
-    *   **Responsibilities:** Interprets declarative JSON configurations (The Rule Engine). Manages the `BitmapTextureAtlas` and maps triggers to visual properties.
+    *   **Role:** (Phase 6) The DSL & Rule Engine.
+    *   **Responsibilities:** Will interpret declarative configurations to construct `MoriWallpaper` objects with specific `EffectRenderer` layers and palette rules.
 
 5.  **Engine Layer (`:engine`)**
-    *   **Role:** The Muscle (Rendering VM).
-    *   **Responsibilities:** A platform-agnostic rendering core. Interacts with the platform via `EngineTicker` and `RenderSurface` interfaces. Consumes raw pixel data from the `MoriEngineState` mirror. Strictly isolated from the Android Framework.
+    *   **Role:** The "Dumb" Muscle (Rendering VM).
+    *   **Responsibilities:** A platform-agnostic rendering core. `MoriEngine` orchestrates the rendering loop but delegates all visual and theme decisions to the active `MoriWallpaper`.
 
 ---
 
-## 3. The Smart Handover (Sync Strategy)
+## 3. The "Update-First" Rendering Cycle (Phase 5)
 
-To achieve **Zero-Allocation** in the rendering loop, we use a **Mirror Sync** protocol managed by the **`:bridge`** module:
+To fix critical race conditions and ensure data integrity, the engine now follows a strict three-phase rendering cycle on every frame:
 
-1.  **The Snapshot:** The Persona layer emits an immutable `WorldState` data class (The Brain).
-2.  **The Collection:** The **StateSynchronizer** (in the Bridge) collects this snapshot on a dedicated background thread.
-3.  **The Atomic Copy:** Values are copied field-by-field into a pre-allocated **MoriEngineState** (The Mirror).
-4.  **The Geometry Translation:** The Bridge applies screen density corrections to any DP-based values, converting them into raw Pixels.
-5.  **The Draw:** The **Engine** reads directly from the mirror's primitive fields during its 16ms draw window.
+1.  **UPDATE**: `MoriEngine` calls `layerManager.update(state)`. Every active `EffectRenderer` updates its internal logic (e.g., calculates colors, positions, physics) based on the latest `MoriEngineState`.
+2.  **SYNTHESIZE**: `MoriEngine` calls `currentWallpaper.synthesizePalette(state)`. The wallpaper iterates through its renderers, calls `getPaletteContribution()` on each, and aggregates the results to determine the final `dominant` theme colors for the frame.
+3.  **DRAW**: `MoriEngine` calls `layerManager.draw(canvas)`. Every active `EffectRenderer` now performs its "dumb" drawing operations using the now-consistent state.
 
-This ensures that the rendering thread never touches the Android Framework, never allocates memory, and never encounters a `ConcurrentModificationException`.
+This guarantees that palette synthesis always happens *after* all layers have had a chance to update their state for the current frame.
 
 ---
 
-## 4. Phase 1 Retrospective: The Agnostic Platform
+## 4. The Zero-Allocation Mandate (Phase 5 Refinements)
+
+### Renderer-Owned Palettes
+Instead of a central `AtmosphericThemeMapper`, each `EffectRenderer` can now report its own theme colors via the `getPaletteContribution()` method. This returns a `RendererPalette` data class.
+
+### Zero-Allocation Caching
+To prevent `RendererPalette` from being allocated on every frame, all renderers now implement a **caching strategy**. The `getPaletteContribution` method only creates a new palette object if its underlying color values have actually changed during the `update` phase. Otherwise, it returns a cached instance, ensuring zero per-frame allocations.
+
+---
+
+## 8. Phase 5 Retrospective: The Unified Design System
 
 **Status:** Completed (March 2026)
 
 ### Summary of Decisions
-1.  **Strict UDF (StateManager):** We split the state hub into read-only (`StateManager`) and internal-only (`MutableStateManager`) interfaces to physically prevent state mutation from outside the `:persona` module.
-2.  **Service-as-Orchestrator:** Moved `MoriWallpaperService` to the `:app` module. This ensures the `:engine` module remains a pure drawing library while `:app` manages the complex binding between the "Brain" (Persona) and the "Muscle" (Engine).
-3.  **Feature-Based Hierarchy:** Reorganized modules into `.state`, `.lifecycle`, `.sensor`, and `.core` packages to support long-term scalability and internal encapsulation.
-4.  **Decoupled Rendering:** Extracted `EngineTicker` and `RenderSurface` interfaces to isolate the `:engine` module from the Android Framework (`Canvas`, `Choreographer`, `SurfaceHolder`). This enables platform-agnostic testing and future-proofs the rendering logic.
-
----
-
-## 6. Phase 3 Retrospective: The Engine Bridge
-
-**Status:** Completed (March 2026)
-
-### Summary of Decisions
-1.  **The Dedicated :bridge Module:** Extracted all handover logic from the `:app` module into a standalone `:bridge` Android Library. This ensures the app entry point remains a thin wrapper while the complex translation logic is isolated and unit-testable.
-2.  **The "Stage vs. Actor" Model:** Established a clear boundary between geometry and rendering. The Bridge acts as the **Stage Manager**, pre-calculating viewport bounds and scale factors, while the Engine's renderers act as **Actors** that simply read those pixel-perfect limits.
-3.  **Zero-Allocation Data Handover:** Implemented the `StateSynchronizer` using manual field-by-field mapping from `WorldState` to `MoriEngineState`. This satisfies the core mandate by ensuring no garbage collection pressure is created during the data transfer.
-4.  **Virtual Camera (MetricCalculator):** Centralized all DP-to-Pixel and aspect-ratio math into a single component. Supporting `FIT` and `FILL` scaling modes ensures the wallpaper is robust against Android's diverse screen ecosystem.
+1.  **Renderer-Driven Theming:** The responsibility for color policy was moved from a central utility into the renderers themselves. `MoriWallpaper` now acts as a synthesizer, aggregating color contributions from its layers. This is the foundational pattern for the Phase 6 Biome DSL.
+2.  **Update-First Architecture:** The core engine loop was refactored to enforce a strict `update() -> synthesize() -> draw()` cycle, eliminating a critical `UninitializedPropertyAccessException` race condition.
+3.  **Zero-Allocation Hardening:** Implemented a caching pattern for `RendererPalette` contributions, ensuring the entire rendering and theming pipeline is allocation-free during steady-state operation.
+4.  **Unified UI Theme:** Refactored `MainActivity` and `PulseBackdrop` to ensure a single, engine-driven `PulseTheme` is provided to all Composables on the screen, fixing a "stale read" bug where some components were not updating.
+5.  **Pulse Design System Finalized:** Completed the full component suite (`PulseButton`, `PulseCard`, etc.), integrated the premium Satoshi font family, and created the `PulseGallery` for robust visual verification.
 
 ### State of the Machine
-*   **The Translator (:bridge):** Robust. Handles background state collection, atomic mirroring, and density-aware coordinate scaling.
-*   **The Blueprint (:engine):** Ready for high-level art. All renderers now have immediate access to a "Safe Zone" pixel boundary without performing math.
+*   **The Brain (:persona):** Alive and well.
+*   **The Muscle (:engine):** Architecturally pure. A "dumb" but powerful orchestrator.
+*   **The Face (:ui):** A beautiful and fully dynamic, data-driven design system.
+*   **The Bridge (:bridge):** Stable and performant.
 
----
-
-## 7. Phase 4 Retrospective: Persona (Data Collectors)
-
-**Status:** Completed (March 2026)
-
-### Summary of Decisions
-1.  **Energy-Rated Providers:** Categorized all system collectors into Grades (A, B, C) to ensure "Internal Excellence." Grade A (Passive) collectors like Battery and Time rely purely on system broadcasts, ensuring near-zero idle drain.
-2.  **Reactive State Handover:** Introduced the `StateUpdate` sealed hierarchy. This unified contract allows the `MoriStateManager` to remain a simple, reactive hub that merges multiple sensor streams into the `WorldState` without knowledge of Android-specific APIs.
-3.  **The "Burst" Sensor Strategy:** For Grade B sensors like Ambient Light, we implemented a 2-second "Burst" logic. The sensor is only active briefly when the wallpaper becomes visible, capturing a snapshot before shutting down to save power.
-4.  **Celestial & Narrative Readiness:** Built the foundational math for Solar/Lunar tracking and the "Health Pipe" for physical vitality. These systems are now ready to drive complex artistic biomes in Phase 7.
-
-### State of the Machine
-*   **The Brain (:persona):** Alive. It is actively sensing battery, time, focus, and environmental light.
-*   **The Translator (:bridge):** Fully functional. Correctly mapping normalized sensor data into pixel-perfect stage metrics.
-
-### Visual Validation (Living Pulse)
-The final smoke test for Phase 4 is the "Living Core" demo. A central pulsing circle now reacts to:
-*   **Speed:** Driven by real-time battery level and charging status.
-*   **Color:** Driven by the local sun altitude (shifting from gold to purple).
-*   **Size:** Driven by the user's current notification tray "noise."
+The Mori platform is now a world-class example of a high-performance, data-reactive graphics and UI system on Android.
