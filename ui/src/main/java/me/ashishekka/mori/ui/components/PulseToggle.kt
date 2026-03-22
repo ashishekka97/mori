@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -68,7 +69,7 @@ fun PulseToggle(
             .height(28.dp)
             .clickable(
                 interactionSource = interactionSource,
-                indication = null,
+                indication = ripple(bounded = false, radius = 24.dp), // Added tactile ripple
                 enabled = enabled,
                 onClick = { onCheckedChange(!checked) }
             ),
@@ -76,7 +77,7 @@ fun PulseToggle(
         shape = CircleShape,
         borderAlpha = 0.3f
     ) {
-        // The Thumb (Lives in the sharp content layer of MoriGlassBox)
+        // The Thumb
         Box(
             modifier = Modifier
                 .padding(4.dp)

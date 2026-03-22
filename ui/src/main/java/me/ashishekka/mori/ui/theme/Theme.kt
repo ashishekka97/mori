@@ -18,15 +18,16 @@ import me.ashishekka.mori.persona.state.WorldState
  * Injects [AtmosphereColors] and [PulseTypography] into the composition.
  * 
  * @param worldState The current state of the world used to drive the dynamic palette.
- * @param accentOverride An optional color to override the base accent (e.g., from the Engine).
+ * @param paletteOverride An optional full palette to override the base logic (e.g., from the Engine).
  */
 @Composable
 fun MoriTheme(
     worldState: WorldState = WorldState(),
-    accentOverride: Color? = null,
+    paletteOverride: AtmosphereColors? = null,
     content: @Composable () -> Unit
 ) {
-    val atmosphereColors = rememberAtmosphereColors(worldState, accentOverride)
+    // Use the override if provided, otherwise calculate based on worldState
+    val atmosphereColors = paletteOverride ?: rememberAtmosphereColors(worldState)
     
     // Map our dynamic tokens to standard Material 3 slots
     val colorScheme = if (atmosphereColors.isDark) {

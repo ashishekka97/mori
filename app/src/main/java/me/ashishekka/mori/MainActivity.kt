@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -37,6 +38,7 @@ import me.ashishekka.mori.ui.components.MoriButton
 import me.ashishekka.mori.ui.components.MoriCard
 import me.ashishekka.mori.ui.components.MoriSlider
 import me.ashishekka.mori.ui.components.PulseToggle
+import me.ashishekka.mori.ui.gallery.ComponentGallery
 import me.ashishekka.mori.ui.theme.MoriTheme
 import org.koin.android.ext.android.inject
 import kotlin.math.roundToInt
@@ -50,11 +52,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val worldState by stateManager.state.collectAsState()
-            var pulseEnabled by remember { mutableStateOf(true) }
-            var dummyIntensity by remember { mutableFloatStateOf(0.7f) }
-            
-            // Dummy data for visualizer
-            val dummyTrend = remember { listOf(0.2f, 0.5f, 0.4f, 0.8f, 0.3f, 0.9f, 0.6f, 0.4f, 0.2f, 0.5f) }
+            var showGallery by remember { mutableStateOf(false) }
             
             DisposableEffect(lifecycleManager) {
                 lifecycleManager.onStart()
@@ -63,109 +61,141 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            MoriTheme(worldState) {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = Color.Black
-                ) {
-                    EngineBackdrop(
-                        worldState = worldState,
-                        layerManager = remember { 
-                            LayerManager().apply { 
-                                addEffect(StaticFallbackRenderer(0xFF1A1A1A.toInt()))
-                                addEffect(DebugPulseRenderer()) 
-                            } 
-                        }
+            if (showGallery) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    ComponentGallery(
+                        modifier = Modifier.fillMaxSize()
+                    )
+                    // Add a back button overlay for the gallery
+                    MoriButton(
+                        onClick = { showGallery = false },
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(16.dp)
                     ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(24.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Spacer(modifier = Modifier.height(48.dp))
+                        Text("Back to Dashboard", color = MoriTheme.colors.onSurface)
+                    }
+                }
+            } else {
+                DashboardScreen(
+                    worldState = worldState,
+                    onOpenGallery = { showGallery = true }
+                )
+            }
+        }
+    }
 
-                            // 1. SYSTEM STATUS CARD (WITH GRAPH)
-                            MoriCard(modifier = Modifier.fillMaxWidth()) {
-                                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                    Text(
-                                        text = "Environment",
-                                        style = MaterialTheme.typography.labelLarge,
-                                        color = MoriTheme.colors.accent
-                                    )
-                                    
-                                    MetricGraph(
-                                        data = dummyTrend,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(60.dp)
-                                    )
+    @Composable
+    private fun DashboardScreen(
+        worldState: me.ashishekka.mori.persona.state.WorldState,
+        onOpenGallery: () -> Unit
+    ) {
+        var pulseEnabled by remember { mutableStateOf(true) }
+        var dummyIntensity by remember { mutableFloatStateOf(0.7f) }
+        val dummyTrend = remember { listOf(0.2f, 0.5f, 0.4f, 0.8f, 0.3f, 0.9f, 0.6f, 0.4f, 0.2f, 0.5f) }
 
-                                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                        StatusRow("Battery", "${(worldState.energyBatteryLevel * 100).roundToInt()}%")
-                                        StatusRow("Sun Altitude", String.format("%.2f", worldState.chronosSunAltitude))
-                                        StatusRow("Thermal Stress", String.format("%.2f", worldState.energyThermalStress))
-                                    }
+        MoriTheme(worldState) {
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = Color.Black
+            ) {
+                EngineBackdrop(
+                    worldState = worldState,
+                    layerManager = remember { 
+                        LayerManager().apply { 
+                            addEffect(StaticFallbackRenderer(0xFF1A1A1A.toInt()))
+                            addEffect(DebugPulseRenderer()) 
+                        } 
+                    }
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(24.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Spacer(modifier = Modifier.height(48.dp))
+
+                        // 1. SYSTEM STATUS CARD (WITH GRAPH)
+                        MoriCard(modifier = Modifier.fillMaxWidth()) {
+                            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                Text(
+                                    text = "Environment",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MoriTheme.colors.accent
+                                )
+                                
+                                MetricGraph(
+                                    data = dummyTrend,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(60.dp)
+                                )
+
+                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    StatusRow("Battery", "${(worldState.energyBatteryLevel * 100).roundToInt()}%")
+                                    StatusRow("Sun Altitude", String.format("%.2f", worldState.chronosSunAltitude))
+                                    StatusRow("Thermal Stress", String.format("%.2f", worldState.energyThermalStress))
                                 }
                             }
-
-                            // 2. INTERACTIVE CONTROLS
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(16.dp)
-                            ) {
-                                MoriCard(modifier = Modifier.weight(1f)) {
-                                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                        Text("Living Pulse", style = MaterialTheme.typography.labelMedium, color = MoriTheme.colors.onSurface)
-                                        PulseToggle(
-                                            checked = pulseEnabled,
-                                            onCheckedChange = { pulseEnabled = it },
-                                            thermalStress = worldState.energyThermalStress
-                                        )
-                                    }
-                                }
-
-                                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                                    MoriButton(
-                                        onClick = { /* Action */ },
-                                        modifier = Modifier.fillMaxWidth(),
-                                        thermalStress = worldState.energyThermalStress
-                                    ) {
-                                        Text("Sync", color = MoriTheme.colors.onSurface)
-                                    }
-                                    
-                                    MoriButton(
-                                        onClick = { /* Action */ },
-                                        modifier = Modifier.fillMaxWidth(),
-                                        thermalStress = worldState.energyThermalStress
-                                    ) {
-                                        Text("Reset", color = MoriTheme.colors.onSurface)
-                                    }
-                                }
-                            }
-
-                            // 3. INTENSITY SLIDER
-                            MoriCard(modifier = Modifier.fillMaxWidth()) {
-                                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                    Text("Atmospheric Intensity", style = MaterialTheme.typography.labelMedium, color = MoriTheme.colors.onSurface)
-                                    MoriSlider(
-                                        value = dummyIntensity,
-                                        onValueChange = { dummyIntensity = it },
-                                        thermalStress = worldState.energyThermalStress
-                                    )
-                                }
-                            }
-
-                            Spacer(modifier = Modifier.weight(1f))
-
-                            Text(
-                                text = "Mori Glass System v1.0",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MoriTheme.colors.onSurface.copy(alpha = 0.4f),
-                                modifier = Modifier.padding(bottom = 12.dp)
-                            )
                         }
+
+                        // 2. INTERACTIVE CONTROLS
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            MoriCard(modifier = Modifier.weight(1f)) {
+                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    Text("Living Pulse", style = MaterialTheme.typography.labelMedium, color = MoriTheme.colors.onSurface)
+                                    PulseToggle(
+                                        checked = pulseEnabled,
+                                        onCheckedChange = { pulseEnabled = it },
+                                        thermalStress = worldState.energyThermalStress
+                                    )
+                                }
+                            }
+
+                            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                                MoriButton(
+                                    onClick = onOpenGallery,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    thermalStress = worldState.energyThermalStress
+                                ) {
+                                    Text("Gallery", color = MoriTheme.colors.onSurface)
+                                }
+                                
+                                MoriButton(
+                                    onClick = { /* Action */ },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    thermalStress = worldState.energyThermalStress
+                                ) {
+                                    Text("Reset", color = MoriTheme.colors.onSurface)
+                                }
+                            }
+                        }
+
+                        // 3. INTENSITY SLIDER
+                        MoriCard(modifier = Modifier.fillMaxWidth()) {
+                            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Text("Atmospheric Intensity", style = MaterialTheme.typography.labelMedium, color = MoriTheme.colors.onSurface)
+                                MoriSlider(
+                                    value = dummyIntensity,
+                                    onValueChange = { dummyIntensity = it },
+                                    thermalStress = worldState.energyThermalStress
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        Text(
+                            text = "Mori Glass System v1.1",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MoriTheme.colors.onSurface.copy(alpha = 0.4f),
+                            modifier = Modifier.padding(bottom = 12.dp)
+                        )
                     }
                 }
             }

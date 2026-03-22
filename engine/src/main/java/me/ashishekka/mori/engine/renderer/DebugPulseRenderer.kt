@@ -8,7 +8,7 @@ import kotlin.random.Random
 
 /**
  * The Ultimate Phase 4 Smoke Test.
- * A "Living Core" that reacts to atmospheric signals.
+ * A "Living Core" that reacts to atmospheric signals and drives the UI Theme.
  */
 class DebugPulseRenderer : EffectRenderer {
 
@@ -34,11 +34,17 @@ class DebugPulseRenderer : EffectRenderer {
         }
 
         // 2. Atmospheric Data Handover (Living Palette)
-        // We determine the "Dominant Color" based on the Sun's altitude
-        state.dominantAccentColor = if (state.chronosSunAltitude > 0) {
-            0xFFFFB74D.toInt() // Day Accent (Amber)
+        val isDay = state.chronosSunAltitude > 0
+        state.isDarkState = !isDay
+
+        if (isDay) {
+            state.dominantAccentColor = 0xFFFFB74D.toInt() // Day Accent (Amber)
+            state.dominantSurfaceColor = 0x44FFFFFF.toInt() // Day Surface
+            state.dominantOnSurfaceColor = 0xFF333333.toInt() // Day OnSurface (Dark Grey)
         } else {
-            0xFF9575CD.toInt() // Night Accent (Purple)
+            state.dominantAccentColor = 0xFF9575CD.toInt() // Night Accent (Purple)
+            state.dominantSurfaceColor = 0x44000000.toInt() // Night Surface
+            state.dominantOnSurfaceColor = 0xFFF5F5F5.toInt() // Night OnSurface (Off White)
         }
 
         val alpha = (50 + (state.atmosLightLevel * 205)).toInt()

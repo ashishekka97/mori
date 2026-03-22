@@ -69,6 +69,12 @@ class MoriEngineState {
     var currentTimeNanos: Long = 0L
 
     // === PALETTE (Atmospheric) ===
-    /** The primary accent color currently being rendered (e.g., based on sun/battery). */
-    var dominantAccentColor: Int = 0xFF9575CD.toInt() // Default NightAccent
+    /** The primary accent color currently being rendered. */
+    var dominantAccentColor: Int = 0xFF9575CD.toInt()
+    /** The primary surface color currently being rendered. */
+    var dominantSurfaceColor: Int = 0x44000000.toInt()
+    /** The text/icon color currently being rendered. */
+    var dominantOnSurfaceColor: Int = 0xFFF5F5F5.toInt()
+    /** Whether the current frame represents a "Dark" environment. */
+    var isDarkState: Boolean = true
 }
