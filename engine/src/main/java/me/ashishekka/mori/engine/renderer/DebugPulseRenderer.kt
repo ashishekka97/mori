@@ -8,7 +8,10 @@ import kotlin.random.Random
 
 /**
  * The Ultimate Phase 4 Smoke Test.
- * A "Living Core" that reacts to atmospheric signals and drives the UI Theme.
+ * A "Living Core" that reacts to atmospheric signals.
+ * 
+ * Note: Theme color calculation has been moved to AtmosphericThemeMapper
+ * to ensure separation of concerns.
  */
 class DebugPulseRenderer : EffectRenderer {
 
@@ -33,20 +36,7 @@ class DebugPulseRenderer : EffectRenderer {
             ((sin(timeSeconds * frequency * multiplier * Math.PI) + 1.0) / 2.0).toFloat()
         }
 
-        // 2. Atmospheric Data Handover (Living Palette)
-        val isDay = state.chronosSunAltitude > 0
-        state.isDarkState = !isDay
-
-        if (isDay) {
-            state.dominantAccentColor = 0xFFFFB74D.toInt() // Day Accent (Amber)
-            state.dominantSurfaceColor = 0x44FFFFFF.toInt() // Day Surface
-            state.dominantOnSurfaceColor = 0xFF333333.toInt() // Day OnSurface (Dark Grey)
-        } else {
-            state.dominantAccentColor = 0xFF9575CD.toInt() // Night Accent (Purple)
-            state.dominantSurfaceColor = 0x44000000.toInt() // Night Surface
-            state.dominantOnSurfaceColor = 0xFFF5F5F5.toInt() // Night OnSurface (Off White)
-        }
-
+        // 2. Visual Synthesis
         val alpha = (50 + (state.atmosLightLevel * 205)).toInt()
         val rgbValue = (intensity * 255).toInt()
         
@@ -54,7 +44,7 @@ class DebugPulseRenderer : EffectRenderer {
     }
 
     override fun render(canvas: EngineCanvas) {
-        // 3. Solar Altitude drives Color Hue
+        // 3. Use state-driven colors (calculated by Mapper)
         val baseColor = if (state.chronosSunAltitude > 0) {
             // Day: Amber
             (colorAlpha shl 24) or (pulseIntensity shl 16) or ((pulseIntensity * 0.8f).toInt() shl 8)

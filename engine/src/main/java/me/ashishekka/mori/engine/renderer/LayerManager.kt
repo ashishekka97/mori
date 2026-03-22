@@ -35,6 +35,30 @@ class LayerManager(
     }
 
     /**
+     * Removes an effect from the stack.
+     */
+    fun removeEffect(effect: EffectRenderer): Boolean {
+        var foundIndex = -1
+        for (i in 0 until activeLayerCount) {
+            if (layers[i] == effect) {
+                foundIndex = i
+                break
+            }
+        }
+
+        if (foundIndex != -1) {
+            // Shift remaining elements down
+            for (i in foundIndex until activeLayerCount - 1) {
+                layers[i] = layers[i + 1]
+            }
+            layers[activeLayerCount - 1] = null
+            activeLayerCount--
+            return true
+        }
+        return false
+    }
+
+    /**
      * Propagates surface changes to all active layers.
      */
     fun onSurfaceChanged(width: Int, height: Int, density: Float) {

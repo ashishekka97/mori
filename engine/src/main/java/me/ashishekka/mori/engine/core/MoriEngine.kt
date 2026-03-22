@@ -3,6 +3,7 @@ package me.ashishekka.mori.engine.core
 import me.ashishekka.mori.engine.core.interfaces.EngineTicker
 import me.ashishekka.mori.engine.core.interfaces.RenderSurface
 import me.ashishekka.mori.engine.core.models.ScaleMode
+import me.ashishekka.mori.engine.core.util.AtmosphericThemeMapper
 import me.ashishekka.mori.engine.renderer.EffectRenderer
 import me.ashishekka.mori.engine.renderer.LayerManager
 import me.ashishekka.mori.engine.renderer.StaticFallbackRenderer
@@ -34,8 +35,8 @@ class MoriEngine(
             frameIntervalNanos = 1_000_000_000L / field
         }
 
+    private var frameIntervalNanos: Long = 1_000_000_000L / 60
     private var lastFrameTimeNanos: Long = 0L
-    private var frameIntervalNanos: Long = 1_000_000_000L / targetFps
 
     init {
         ticker.setOnTickCallback { frameTimeNanos ->
@@ -49,10 +50,52 @@ class MoriEngine(
     }
 
     /**
-     * Adds an effect to the rendering stack.
+     * Starts the rendering loop.
      */
-    fun addEffect(effect: EffectRenderer): Boolean {
-        return layerManager.addEffect(effect)
+    fun start() {
+        if (isRunning) return
+        isRunning = true
+        ticker.start()
+    }
+
+    /**
+     * Stops the rendering loop.
+     */
+    fun stop() {
+        if (!isRunning) return
+        isRunning = false
+        ticker.stop()
+    }
+
+    /**
+     * Manually requests a single frame tick.
+     */
+    fun requestFrame() {
+        ticker.requestTick()
+    }
+
+    /**
+     * Triggers the rendering of a single frame.
+     */
+    fun onDrawFrame(frameTimeNanos: Long = System.nanoTime()) {
+        state.currentTimeNanos = frameTimeNanos
+        
+        // 1. Update Theme Policy (Centralized)
+        AtmosphericThemeMapper.updatePalette(state)
+
+        val canvas = renderSurface.lockCanvas()
+
+        canvas?.let {
+            try {
+                // 2. Update and Draw layers
+                layerManager.updateAndDraw(state, it)
+            } catch (e: Throwable) {
+                // Failsafe: if the complex render loop fails, draw the fallback
+                fallbackRenderer.updateAndDraw(state, it)
+            } finally {
+                renderSurface.unlockCanvasAndPost(it)
+            }
+        }
     }
 
     /**
@@ -84,58 +127,17 @@ class MoriEngine(
     }
 
     /**
-     * Starts the engine and begins rendering.
+     * Adds an effect layer to the engine.
      */
-    fun start() {
-        if (!isRunning) {
-            isRunning = true
-            lastFrameTimeNanos = 0L // Reset to trigger immediate draw
-            ticker.start()
-        }
+    fun addEffect(renderer: EffectRenderer) {
+        layerManager.addEffect(renderer)
     }
 
     /**
-     * Stops the engine.
+     * Removes an effect layer from the engine.
      */
-    fun stop() {
-        if (isRunning) {
-            isRunning = false
-            ticker.stop()
-        }
-    }
-
-    /**
-     * Toggles whether the engine continuously renders frames (e.g., 60 FPS) 
-     * or only renders when a frame is explicitly requested.
-     */
-    fun setContinuousRendering(enabled: Boolean) {
-        ticker.setContinuous(enabled)
-    }
-
-    /**
-     * Requests a single frame to be rendered.
-     */
-    fun requestFrame() {
-        ticker.requestTick()
-    }
-
-    /**
-     * Triggers the rendering of a single frame.
-     */
-    fun onDrawFrame(frameTimeNanos: Long = System.nanoTime()) {
-        state.currentTimeNanos = frameTimeNanos
-        val canvas = renderSurface.lockCanvas()
-
-        canvas?.let {
-            try {
-                layerManager.updateAndDraw(state, it)
-            } catch (e: Throwable) {
-                // Failsafe: if the complex render loop fails, draw the fallback
-                fallbackRenderer.updateAndDraw(state, it)
-            } finally {
-                renderSurface.unlockCanvasAndPost(it)
-            }
-        }
+    fun removeEffect(renderer: EffectRenderer) {
+        layerManager.removeEffect(renderer)
     }
 
     /**
