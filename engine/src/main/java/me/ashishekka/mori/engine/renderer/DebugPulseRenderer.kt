@@ -7,8 +7,8 @@ import kotlin.math.sin
 import kotlin.random.Random
 
 /**
- * A vibrant, fullscreen atmospheric "Aurora" that reacts to signals,
- * now including a "Stardust" visualization for step goal progress.
+ * A vibrant, fullscreen atmospheric "Aurora" that reacts to signals.
+ * This is a pure visual effect and does not contribute to the global theme.
  */
 class DebugPulseRenderer : EffectRenderer {
 
@@ -26,10 +26,6 @@ class DebugPulseRenderer : EffectRenderer {
     // JITTER (ZERO-ALLOCATION)
     private var jitterX = 0f
     private var jitterY = 0f
-
-    // PALETTE CACHE
-    private var cachedPalette: RendererPalette? = null
-    private var lastAccentColor: Int = 0
 
     override fun onSurfaceChanged(width: Int, height: Int, density: Float) {
         for (i in 0 until maxParticles) {
@@ -52,12 +48,6 @@ class DebugPulseRenderer : EffectRenderer {
         val alpha = (100 + (state.atmosLightLevel * 155)).toInt()
         val rgbIntensity = (intensity * 255).toInt()
         pulseIntensityValue = (alpha shl 24) or (rgbIntensity shl 16)
-        
-        val currentAccent = state.dominantAccentColor
-        if (currentAccent != lastAccentColor) {
-            cachedPalette = null
-            lastAccentColor = currentAccent
-        }
 
         // Pre-calculate jitter in the update phase
         if (state.energyThermalStress > 0.3f) {
@@ -70,25 +60,29 @@ class DebugPulseRenderer : EffectRenderer {
         }
     }
 
-    override fun getPaletteContribution(): RendererPalette? {
-        if (cachedPalette == null) {
-            val themeRgb = state.dominantAccentColor and 0x00FFFFFF
-            val accentColor = (colorAlpha shl 24) or themeRgb
-            cachedPalette = RendererPalette(accent = accentColor)
-        }
-        return cachedPalette
-    }
+    // This renderer is purely decorative and should not influence the theme.
+    override fun getPaletteContribution(): RendererPalette? = null
 
     override fun render(canvas: EngineCanvas) {
         val width = state.surfaceWidth.toFloat()
         val height = state.surfaceHeight.toFloat()
         val timeSeconds = state.currentTimeNanos / 1_000_000_000.0
         
+        // Read the pure, opaque accent color from the state.
         val themeRgb = state.dominantAccentColor and 0x00FFFFFF
         val pulseFactor = pulseIntensity / 255f
 
-        // ... (Atmospheric Blobs rendering)
+        // Atmospheric Blobs
+        val alpha1 = (colorAlpha * 0.4f).toInt()
+        canvas.drawCircle(width / 2f, height / 2f, min(width, height) * 0.8f, (alpha1 shl 24) or themeRgb, true)
+        val driftX = sin(timeSeconds * 0.5) * 100f
+        val driftY = sin(timeSeconds * 0.3) * 100f
+        val alpha2 = (colorAlpha * 0.3f * pulseFactor).toInt()
+        canvas.drawCircle(width * 0.2f + driftX.toFloat(), height * 0.2f + driftY.toFloat(), min(width, height) * 0.5f, (alpha2 shl 24) or themeRgb, true)
+        val alpha3 = (colorAlpha * 0.2f * (1f - pulseFactor)).toInt()
+        canvas.drawCircle(width * 0.8f - driftX.toFloat(), height * 0.8f - driftY.toFloat(), min(width, height) * 0.6f, (alpha3 shl 24) or themeRgb, true)
 
+        // Stardust
         val numActiveParticles = (state.vitalityStepsProgress * maxParticles).toInt()
         val stardustColor = 0xFFFFFFFF.toInt()
         for (i in 0 until numActiveParticles) {
@@ -97,7 +91,7 @@ class DebugPulseRenderer : EffectRenderer {
             canvas.drawCircle(particleX[i], particleY[i], 3f, finalColor, true)
         }
 
-        // Use pre-calculated jitter values for a pure render method
+        // Core
         val coreX = state.viewportSafeX + (state.viewportSafeWidth / 2f) + jitterX
         val coreY = state.viewportSafeY + (state.viewportSafeHeight / 2f) + jitterY
         val coreRadius = min(state.viewportSafeWidth, state.viewportSafeHeight) * 0.12f
