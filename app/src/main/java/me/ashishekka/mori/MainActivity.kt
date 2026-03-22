@@ -7,6 +7,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -61,109 +68,124 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            if (showGallery) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    BackHandler { showGallery = false }
-                    
-                    PulseGallery(modifier = Modifier.fillMaxSize())
-                    
-                    PulseButton(
-                        onClick = { showGallery = false },
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(24.dp)
+            PulseTheme(worldState) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = Color.Black
+                ) {
+                    // PERSISTENT BACKDROP: Stays active during navigation for visual continuity
+                    PulseBackdrop(
+                        worldState = worldState,
+                        layerManager = remember { 
+                            LayerManager().apply { 
+                                addEffect(StaticFallbackRenderer(0xFF1A1A1A.toInt()))
+                                addEffect(DebugPulseRenderer()) 
+                            } 
+                        }
                     ) {
-                        Text("BACK", fontWeight = FontWeight.Bold)
+                        AnimatedContent(
+                            targetState = showGallery,
+                            transitionSpec = {
+                                if (targetState) {
+                                    // Slide Design Lab IN from bottom
+                                    (slideInVertically { height -> height } + fadeIn())
+                                        .togetherWith(fadeOut(animationSpec = tween(200)))
+                                } else {
+                                    // Slide Design Lab OUT to bottom
+                                    fadeIn(animationSpec = tween(300))
+                                        .togetherWith(slideOutVertically { height -> height } + fadeOut())
+                                }
+                            },
+                            label = "NavigationTransition"
+                        ) { isGalleryVisible ->
+                            if (isGalleryVisible) {
+                                Box(modifier = Modifier.fillMaxSize()) {
+                                    BackHandler { showGallery = false }
+                                    
+                                    PulseGallery(modifier = Modifier.fillMaxSize())
+                                    
+                                    PulseButton(
+                                        onClick = { showGallery = false },
+                                        modifier = Modifier
+                                            .align(Alignment.BottomEnd)
+                                            .padding(24.dp)
+                                    ) {
+                                        Text("BACK", fontWeight = FontWeight.Bold)
+                                    }
+                                }
+                            } else {
+                                LauncherContent(
+                                    thermalStress = worldState.energyThermalStress,
+                                    onOpenGallery = { showGallery = true }
+                                )
+                            }
+                        }
                     }
                 }
-            } else {
-                LauncherScreen(
-                    worldState = worldState,
-                    onOpenGallery = { showGallery = true }
-                )
             }
         }
     }
 
     @Composable
-    private fun LauncherScreen(
-        worldState: me.ashishekka.mori.persona.state.WorldState,
+    private fun LauncherContent(
+        thermalStress: Float,
         onOpenGallery: () -> Unit
     ) {
         val context = LocalContext.current
 
-        PulseTheme(worldState) {
-            Surface(
-                modifier = Modifier.fillMaxSize(),
-                color = Color.Black
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.height(64.dp))
+
+            Text(
+                text = "MORI",
+                style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = 8.sp,
+                color = PulseTheme.colors.onSurface
+            )
+            Text(
+                text = "LIVING ATMOSPHERE",
+                style = MaterialTheme.typography.labelSmall,
+                letterSpacing = 2.sp,
+                color = PulseTheme.colors.accent
+            )
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(0.8f)
+                    .padding(bottom = 48.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                PulseBackdrop(
-                    worldState = worldState,
-                    layerManager = remember { 
-                        LayerManager().apply { 
-                            addEffect(StaticFallbackRenderer(0xFF1A1A1A.toInt()))
-                            addEffect(DebugPulseRenderer()) 
-                        } 
-                    }
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Spacer(modifier = Modifier.height(64.dp)) // Safe area top
-
-                        // TITLE (Anchored Top)
-                        Text(
-                            text = "MORI",
-                            style = MaterialTheme.typography.headlineLarge,
-                            fontWeight = FontWeight.ExtraBold,
-                            letterSpacing = 8.sp,
-                            color = PulseTheme.colors.onSurface
-                        )
-                        Text(
-                            text = "LIVING ATMOSPHERE",
-                            style = MaterialTheme.typography.labelSmall,
-                            letterSpacing = 2.sp,
-                            color = PulseTheme.colors.accent
-                        )
-
-                        Spacer(modifier = Modifier.weight(1f))
-
-                        // ACTIONS (Anchored Bottom)
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth(0.8f)
-                                .padding(bottom = 48.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            PulseButton(
-                                onClick = {
-                                    val intent = Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER).apply {
-                                        putExtra(
-                                            WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
-                                            ComponentName(context, MoriWallpaperService::class.java)
-                                        )
-                                    }
-                                    context.startActivity(intent)
-                                },
-                                modifier = Modifier.fillMaxWidth(),
-                                thermalStress = worldState.energyThermalStress
-                            ) {
-                                Text("SET WALLPAPER", fontWeight = FontWeight.Bold)
-                            }
-
-                            PulseButton(
-                                onClick = onOpenGallery,
-                                modifier = Modifier.fillMaxWidth(),
-                                thermalStress = worldState.energyThermalStress
-                            ) {
-                                Text("DESIGN LAB", fontWeight = FontWeight.Bold)
-                            }
+                PulseButton(
+                    onClick = {
+                        val intent = Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER).apply {
+                            putExtra(
+                                WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
+                                ComponentName(context, MoriWallpaperService::class.java)
+                            )
                         }
-                    }
+                        context.startActivity(intent)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    thermalStress = thermalStress
+                ) {
+                    Text("SET WALLPAPER", fontWeight = FontWeight.Bold)
+                }
+
+                PulseButton(
+                    onClick = onOpenGallery,
+                    modifier = Modifier.fillMaxWidth(),
+                    thermalStress = thermalStress
+                ) {
+                    Text("DESIGN LAB", fontWeight = FontWeight.Bold)
                 }
             }
         }
