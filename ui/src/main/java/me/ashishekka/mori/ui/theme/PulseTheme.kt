@@ -15,10 +15,6 @@ import me.ashishekka.mori.persona.state.WorldState
 
 /**
  * The main theme wrapper for the Pulse Design System.
- * Injects [PulseColors] and [PulseTypography] into the composition.
- * 
- * @param worldState The current state of the world used to drive the dynamic palette.
- * @param paletteOverride An optional full palette to override the base logic.
  */
 @Composable
 fun PulseTheme(
@@ -26,10 +22,8 @@ fun PulseTheme(
     paletteOverride: PulseColors? = null,
     content: @Composable () -> Unit
 ) {
-    // Use the override if provided, otherwise calculate based on worldState
     val pulseColors = paletteOverride ?: rememberPulseColors(worldState)
     
-    // Map our dynamic tokens to standard Material 3 slots
     val colorScheme = if (pulseColors.isDark) {
         darkColorScheme(
             primary = pulseColors.accent,
@@ -48,8 +42,16 @@ fun PulseTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = pulseColors.surface.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !pulseColors.isDark
+            
+            // SYSTEM BAR SYNC:
+            // 1. Transparent status bar to let the backdrop shine through
+            window.statusBarColor = android.graphics.Color.TRANSPARENT
+            window.navigationBarColor = android.graphics.Color.TRANSPARENT
+            
+            // 2. Adjust icon color based on perceptual brightness (isDark)
+            val controller = WindowCompat.getInsetsController(window, view)
+            controller.isAppearanceLightStatusBars = !pulseColors.isDark
+            controller.isAppearanceLightNavigationBars = !pulseColors.isDark
         }
     }
 
