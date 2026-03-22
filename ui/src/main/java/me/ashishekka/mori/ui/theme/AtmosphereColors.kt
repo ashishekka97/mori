@@ -8,6 +8,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import me.ashishekka.mori.persona.state.WorldState
+import kotlin.math.abs
 
 /**
  * A reactive set of color tokens that shift based on the [WorldState].
@@ -55,10 +56,22 @@ fun rememberAtmosphereColors(
         // 1. Calculate Time Factor (Normalize -1..1 to 0..1)
         val timeFactor = ((worldState.chronosSunAltitude + 1f) / 2f).coerceIn(0f, 1f)
 
-        // 2. Interpolate Day vs Night tokens
+        // 2. Interpolate base tokens
         val baseAccent = lerp(NightAccent, DayAccent, timeFactor)
         val baseSurface = lerp(NightSurface, DaySurface, timeFactor)
-        val baseOnSurface = lerp(NightOnSurface, DayOnSurface, timeFactor)
+        
+        // READABILITY FIX: Dawn/Dusk (Altitude ~ 0.0) usually creates low-contrast grey-on-grey.
+        // We force a high-contrast shift when the sun is near the horizon.
+        val sunAltitude = worldState.chronosSunAltitude
+        val baseOnSurface = when {
+            sunAltitude > 0.2f -> DayOnSurface // Broad daylight
+            sunAltitude < -0.2f -> NightOnSurface // Deep night
+            else -> {
+                // Transition zone: lerp between black and white based on slight altitude
+                // to avoid the "muddy grey" middle ground.
+                if (sunAltitude > 0) DayOnSurface else NightOnSurface
+            }
+        }
 
         // 3. Apply Thermal Stress (Desaturation)
         val finalAccent = if (worldState.energyThermalStress > 0.5f) {
@@ -71,7 +84,7 @@ fun rememberAtmosphereColors(
             accent = finalAccent,
             surface = baseSurface,
             onSurface = baseOnSurface,
-            isDark = worldState.chronosSunAltitude <= 0f
+            isDark = sunAltitude <= 0f
         )
     }
 }

@@ -1,5 +1,7 @@
 package me.ashishekka.mori.ui.components
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -9,7 +11,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
@@ -20,21 +24,39 @@ import me.ashishekka.mori.ui.theme.MoriTheme
 
 /**
  * A glassmorphic container that ensures content remains sharp while the background is blurred.
+ * 
+ * @param modifier The modifier to be applied to the card.
+ * @param onClick Optional click listener. If provided, the card will show a themed ripple.
+ * @param thermalStress The current thermal stress level. Blurs are disabled when stress > 0.8.
+ * @param shape The shape of the card.
+ * @param content The content to be displayed inside the card.
  */
 @Composable
 fun MoriCard(
     modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
     thermalStress: Float = 0f,
     shape: Shape = RoundedCornerShape(24.dp),
     content: @Composable () -> Unit
 ) {
+    val colors = MoriTheme.colors
+    val interactionSource = remember { MutableInteractionSource() }
+
+    val clickableModifier = if (onClick != null) {
+        Modifier.clickable(
+            interactionSource = interactionSource,
+            indication = ripple(color = colors.accent),
+            onClick = onClick
+        )
+    } else {
+        Modifier
+    }
+
     MoriGlassBox(
-        modifier = modifier,
+        modifier = modifier.then(clickableModifier),
         thermalStress = thermalStress,
         shape = shape
     ) {
-        // UNIFIED: Use padding only, allow parent to wrap content.
-        // Removed fillMaxSize() which was causing the layout to push other components away.
         Box(modifier = Modifier.padding(16.dp)) {
             content()
         }
@@ -52,10 +74,11 @@ fun PreviewMoriCard() {
         MoriTheme(goldenHour) {
             MoriCard(
                 modifier = Modifier.size(width = 300.dp, height = 120.dp),
+                onClick = {},
                 thermalStress = 0f
             ) {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    Text("Golden Hour Glass", color = MoriTheme.colors.onSurface)
+                    Text("Clickable Card", color = MoriTheme.colors.onSurface)
                 }
             }
         }
