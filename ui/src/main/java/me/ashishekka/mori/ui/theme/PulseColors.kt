@@ -44,27 +44,41 @@ object PulseTheme {
 }
 
 /**
- * Calculates and animates the current atmospheric palette using perceptually accurate contrast.
+ * Calculates the current atmospheric palette using the exact same math as the Engine.
  */
 @Composable
 fun rememberPulseColors(
     worldState: WorldState
 ): PulseColors {
     return remember(worldState.chronosSunAltitude, worldState.energyThermalStress) {
-        // 1. Base Interpolation (The "Vibe")
-        val timeFactor = ((worldState.chronosSunAltitude + 1f) / 2f).coerceIn(0f, 1f)
-        val baseAccent = lerp(NightAccent, DayAccent, timeFactor)
-        val baseSurface = lerp(NightSurface, DaySurface, timeFactor)
+        val sun = worldState.chronosSunAltitude
         
-        // 2. APPLY PERCEPTUAL LUMINANCE
-        val surfaceLuminance = baseSurface.luminance()
+        // 1. Determine Perceptual "Dark" state
+        val isDark = sun <= 0.2f
+
+        // 2. Calculate Continuous Foundation (Background context for luminance)
+        val foundation = when {
+            sun < -0.5f -> Color(0xFF0A0E14)
+            sun < 0f -> lerp(Color(0xFF0A0E14), Color(0xFF1A1C2E), (sun + 0.5f) * 2f)
+            sun < 0.5f -> lerp(Color(0xFF1A1C2E), Color(0xFFF5F5F5), sun * 2f)
+            else -> Color(0xFFFFFFFF)
+        }
+
+        // 3. Calculate Continuous Accent
+        val baseAccent = when {
+            sun < 0f -> lerp(Color(0xFFBB86FC), Color(0xFFFF7043), (sun + 1f))
+            else -> lerp(Color(0xFFFF7043), Color(0xFFFF9800), sun)
+        }
+
+        // 4. Perceptual Contrast Guard (The "Monet" Principle)
+        val surfaceLuminance = foundation.luminance()
         val highContrastText = if (surfaceLuminance > 0.5f) {
             Color(0xFF1A1A1A)
         } else {
             Color(0xFFF5F5F5)
         }
 
-        // 3. THERMAL STRESS REFINEMENT
+        // 5. Thermal Stress Refinement
         val stressTarget = if (surfaceLuminance > 0.5f) {
             Color.Black.copy(alpha = 0.6f)
         } else {
@@ -77,11 +91,15 @@ fun rememberPulseColors(
             baseAccent
         }
 
+        // 6. Final Surface (Glass)
+        val surfaceAlpha = if (isDark) 0.4f else 0.4f // Unified for better glass verification
+        val baseSurface = foundation.copy(alpha = surfaceAlpha)
+
         PulseColors(
             accent = finalAccent,
             surface = baseSurface,
             onSurface = highContrastText,
-            isDark = surfaceLuminance <= 0.5f
+            isDark = isDark
         )
     }
 }
