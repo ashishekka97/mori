@@ -10,7 +10,6 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -64,7 +63,6 @@ class MainActivity : ComponentActivity() {
 
             if (showGallery) {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    // System Back Navigation Support
                     BackHandler { showGallery = false }
                     
                     PulseGallery(modifier = Modifier.fillMaxSize())
@@ -114,9 +112,9 @@ class MainActivity : ComponentActivity() {
                             .padding(24.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Spacer(modifier = Modifier.weight(1f))
+                        Spacer(modifier = Modifier.height(64.dp)) // Safe area top
 
-                        // TITLE
+                        // TITLE (Anchored Top)
                         Text(
                             text = "MORI",
                             style = MaterialTheme.typography.headlineLarge,
@@ -133,7 +131,7 @@ class MainActivity : ComponentActivity() {
 
                         Spacer(modifier = Modifier.weight(1f))
 
-                        // ACTIONS (Now directly on the backdrop, no card)
+                        // ACTIONS (Anchored Bottom)
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth(0.8f)
