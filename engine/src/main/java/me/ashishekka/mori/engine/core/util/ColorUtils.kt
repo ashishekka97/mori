@@ -12,10 +12,12 @@ object ColorUtils {
 
     /**
      * Interpolates between two colors in the perceptual OKLab color space.
-     * This prevents the "Grey Trap" (muddiness) of linear RGB blending.
+     * Includes an identity guard to prevent rounding errors at the boundaries.
      */
     fun lerpColorOklab(from: Int, to: Int, fraction: Float): Int {
-        val f = fraction.coerceIn(0f, 1f)
+        // IDENTITY GUARD: Ensures bit-perfect results at 0.0 and 1.0
+        if (fraction <= 0f) return from
+        if (fraction >= 1f) return to
         
         // 1. Convert both to OKLab
         val l1 = rgbToOklabL(from)
@@ -27,29 +29,24 @@ object ColorUtils {
         val b2 = rgbToOklabB(to)
         
         // 2. Linear interpolate in OKLab space
-        val l = l1 + (l2 - l1) * f
-        val a = a1 + (a2 - a1) * f
-        val b = b1 + (b2 - b1) * f
+        val l = l1 + (l2 - l1) * fraction
+        val a = a1 + (a2 - a1) * fraction
+        val b = b1 + (b2 - b1) * fraction
         
         // 3. Convert back to RGB
         return oklabToRgb(l, a, b)
     }
 
-    // --- OKLAB MATH (Simplified for zero-allocation performance) ---
-
     private fun rgbToOklabL(color: Int): Float {
         val r = ((color shr 16) and 0xFF) / 255f
         val g = ((color shr 8) and 0xFF) / 255f
         val b = (color and 0xFF) / 255f
-        
         val l = 0.4122214708f * r + 0.5363325363f * g + 0.0514459929f * b
         val m = 0.2119034982f * r + 0.6806995451f * g + 0.1073969566f * b
         val s = 0.0883024619f * r + 0.2817188376f * g + 0.6299787005f * b
-        
         val l_ = Math.cbrt(l.toDouble()).toFloat()
         val m_ = Math.cbrt(m.toDouble()).toFloat()
         val s_ = Math.cbrt(s.toDouble()).toFloat()
-        
         return 0.2104542553f * l_ + 0.7936177850f * m_ - 0.0040720468f * s_
     }
 
@@ -57,15 +54,12 @@ object ColorUtils {
         val r = ((color shr 16) and 0xFF) / 255f
         val g = ((color shr 8) and 0xFF) / 255f
         val b = (color and 0xFF) / 255f
-        
         val l = 0.4122214708f * r + 0.5363325363f * g + 0.0514459929f * b
         val m = 0.2119034982f * r + 0.6806995451f * g + 0.1073969566f * b
         val s = 0.0883024619f * r + 0.2817188376f * g + 0.6299787005f * b
-        
         val l_ = Math.cbrt(l.toDouble()).toFloat()
         val m_ = Math.cbrt(m.toDouble()).toFloat()
         val s_ = Math.cbrt(s.toDouble()).toFloat()
-        
         return 1.9779984951f * l_ - 2.4285922050f * m_ + 0.4505937099f * s_
     }
 
@@ -73,15 +67,12 @@ object ColorUtils {
         val r = ((color shr 16) and 0xFF) / 255f
         val g = ((color shr 8) and 0xFF) / 255f
         val b = (color and 0xFF) / 255f
-        
         val l = 0.4122214708f * r + 0.5363325363f * g + 0.0514459929f * b
         val m = 0.2119034982f * r + 0.6806995451f * g + 0.1073969566f * b
         val s = 0.0883024619f * r + 0.2817188376f * g + 0.6299787005f * b
-        
         val l_ = Math.cbrt(l.toDouble()).toFloat()
         val m_ = Math.cbrt(m.toDouble()).toFloat()
         val s_ = Math.cbrt(s.toDouble()).toFloat()
-        
         return 0.0259040371f * l_ + 0.7827717662f * m_ - 0.8086757660f * s_
     }
 
