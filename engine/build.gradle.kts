@@ -42,9 +42,8 @@ dependencies {
     // Dependency Injection
     implementation(libs.koin.android)
 
-    // Mori Modules (Engine needs Data and Assets)
-    implementation(project(":persona"))
-    implementation(project(":biome"))
+    // Mori Modules (Engine is now a pure Stage - no internal dependencies)
+    // Removed :persona and :biome
 
     // Testing
     testImplementation(libs.junit)

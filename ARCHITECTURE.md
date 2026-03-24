@@ -21,22 +21,18 @@ graph TD
         F -->|Atomic Copy| G[MoriEngineState]
     end
 
-    subgraph Biome [Biome Layer - The Logic Engine]
-        JSON[Biome DSL] -->|Parser| Bytecode[OpCode Arrays]
-        G -->|Input| VM{RuleEvaluator}
-        Bytecode -->|Execute| VM
-        VM -->|Fill| Buffer[Property Buffers]
+    subgraph Biome [Biome Layer - Logic Engine]
+        JSON[Biome DSL] -.->|One-time Parse| Bytecode[OpCode Arrays]
+        
+        G -->|Frame State| VM{RuleEvaluator}
+        Bytecode -->|Execution Instructions| VM
+        
+        VM -->|Calculate| Buffer[Property Buffers]
     end
 
-    subgraph Engine [Engine Layer - The "Dumb" Muscle]
-        Buffer -->|Read| Instruments(DslEffectRenderer)
-        
-        subgraph ThemeSynthesis [Wallpaper-Owned Theme]
-            Instruments -->|getPaletteContribution()| K{MoriWallpaper}
-            K -- Synthesize & Apply --> G
-        end
-
-        Instruments -->|Draw| M[Agnostic Canvas]
+    subgraph Engine [Engine Layer - Dumb Muscle]
+        Buffer -->|Read Constants| Instruments(DslEffectRenderer)
+        Instruments -->|Draw| Canvas[Agnostic Canvas]
     end
 ```
 
@@ -46,11 +42,11 @@ graph TD
 
 1.  **App Layer (`:app`)**
     *   **Role:** The Orchestrator & UI Bridge.
-    *   **Responsibilities:** Manages the `WallpaperService` lifecycle. Hosts app-level Composables like `PulseBackdrop`.
+    *   **Responsibilities:** Manages the `WallpaperService` lifecycle. Hosts app-level Composables like `PulseBackdrop` that bridge the `:engine`'s state into the `:ui`'s `PulseTheme`.
 
 2.  **UI Layer (`:ui`)**
     *   **Role:** The Agnostic Design System (Pulse).
-    *   **Responsibilities:** Provides a library of pure, stateless Jetpack Compose components. Has **zero knowledge** of the Mori engine.
+    *   **Responsibilities:** Provides a library of pure, stateless Jetpack Compose components and the `PulseTheme` wrapper. Has **zero knowledge** of the Mori engine.
 
 3.  **Persona Layer (`:persona`)**
     *   **Role:** The Brain.
@@ -62,7 +58,7 @@ graph TD
 
 5.  **Biome Layer (`:biome`)**
     *   **Role:** The Logic Engine (Phase 6/7).
-    *   **Responsibilities:** Interprets declarative configurations (DSL) into primitive OpCodes. Manages the high-performance `BitmapTextureAtlas`.
+    *   **Responsibilities:** Interprets declarative configurations (DSL) into primitive OpCodes. Manages the high-performance `BitmapTextureAtlas` and maps triggers to visual properties.
 
 6.  **Engine Layer (`:engine`)**
     *   **Role:** The "Dumb" Muscle (Rendering VM).
@@ -70,7 +66,18 @@ graph TD
 
 ---
 
-## 3. The "Update-First" Rendering Cycle
+## 3. The Rule Engine (Phase 6)
+
+The logic core of Mori is a stack-based Virtual Machine. It decouples visual behavior from Kotlin code by executing pre-compiled bytecode. For a complete list of supported mathematical operations and high-value macros, refer to the **[Instruction Set Architecture (SPEC_ISA.md)](SPEC_ISA.md)**.
+
+### Execution Model
+*   **Initialization**: JSON biomes are parsed once into primitive `IntArray` bytecode.
+*   **Hot-Path**: On every frame, the `RuleEvaluator` executes this bytecode to calculate visual properties (Position, Rotation, Alpha, etc.).
+*   **Purity**: The evaluator is a pure function that requires 0 object allocations during the frame cycle.
+
+---
+
+## 4. The "Update-First" Rendering Cycle
 
 To ensure data integrity and zero-allocation synthesis, the engine follows a strict three-phase cycle on every frame:
 
@@ -80,19 +87,20 @@ To ensure data integrity and zero-allocation synthesis, the engine follows a str
 
 ---
 
-## 4. Engineering Standards
+## 5. Engineering Standards
 
 ### Zero-Allocation Mandate
 *   **The Render Loop**: No `new` or `.copy()` inside the `drawFrame` loop.
+*   **Macro-OpCode VM**: Logic is executed using primitive `IntArray` bytecode and a pre-allocated `FloatArray` stack.
+*   **Property Buffers**: Results are written into flat memory buffers, ensuring 0 heap allocations during the hot path.
 *   **Cached Contributions**: Renderers use a caching strategy for `RendererPalette` objects to avoid per-frame allocations.
-*   **Flat Memory**: Rule results are written into pre-allocated `FloatArray` buffers.
 
 ### Perceptual Design
 *   **OKLab Synthesis**: All atmospheric color transitions are performed in OKLab space to prevent "muddy" desaturation during sunrise/sunset cycles.
 
 ---
 
-## 5. Phase Retrospectives
+## 6. Phase Retrospectives
 
 ### Phase 1: The Agnostic Platform
 *   **Decisions**: Established strict UDF via `StateManager`. Decoupled rendering from Android `Canvas` via `EngineCanvas` interface.
@@ -108,5 +116,5 @@ To ensure data integrity and zero-allocation synthesis, the engine follows a str
 
 ---
 
-## 6. The Future: Phases 6 & 7
+## 7. The Future: Phases 6 & 7
 The current goal is to transition Mori from hardcoded Kotlin renderers to a declarative, data-driven system. This is achieved via a stack-based **Macro-OpCode VM** that allows complex atmospheric logic to be defined in JSON and executed with Zero-Allocation performance.

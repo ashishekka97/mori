@@ -1,14 +1,31 @@
 package me.ashishekka.mori.engine.core
 
 /**
+ * Static mapping of MoriEngineState fields to integer indices.
+ * Used by the RuleEvaluator to maintain 100% zero-allocation access via the ISA.
+ */
+object MoriEngineStateIndices {
+    const val INDEX_TIME_SECONDS = 0
+    const val INDEX_SUN_ALTITUDE = 1
+    const val INDEX_BATTERY_LEVEL = 2
+    const val INDEX_IS_CHARGING = 3
+    const val INDEX_STEPS_PROGRESS = 4
+    const val INDEX_THERMAL_STRESS = 5
+    const val INDEX_SOCIAL_NOISE = 6
+    const val INDEX_LIGHT_LEVEL = 7
+}
+
+/**
  * A mutable, pre-allocated mirror of the Persona's WorldState.
  * This class is a "Flat Memory" object designed for zero-allocation access
  * by the rendering thread. 
- *
- * All fields are primitives.
- * Phase 3 (Bridge) will handle field-by-field updates from WorldState.
  */
 class MoriEngineState {
+
+    // === ENGINE TIME (Internal) ===
+    /** Continuous normalized time in seconds for smooth animations. */
+    var timeSeconds: Float = 0f
+
     // === CHRONOS (Time & Cycles) ===
     var chronosTimeProgress: Float = 0f
     var chronosSunAltitude: Float = 0f
@@ -39,24 +56,12 @@ class MoriEngineState {
     var atmosIsPocketed: Boolean = false
     
     // === VIEWPORT (Geometric Handover) ===
-    // These values translate the Artist's "Reference Canvas" (e.g. 1000x1000 units)
-    // into the physical pixel space of the device. This ensures the Engine stays
-    // "dumb" and only performs minimal pixel math.
-    
-    /** The X pixel offset to the start of the safe design area (top-left). */
     var viewportSafeX: Float = 0f
-    /** The Y pixel offset to the start of the safe design area (top-left). */
     var viewportSafeY: Float = 0f
-    /** The actual pixel width of the scaled reference canvas. */
     var viewportSafeWidth: Float = 0f
-    /** The actual pixel height of the scaled reference canvas. */
     var viewportSafeHeight: Float = 0f
-    /** The multiplier used to convert design units to physical pixels. */
     var viewportReferenceScale: Float = 1f
-    
-    /** The original design width (e.g., 1000f). */
     var referenceWidth: Float = 1000f
-    /** The original design height (e.g., 1000f). */
     var referenceHeight: Float = 1000f
 
     // === SURFACE (Geometry) ===
@@ -65,18 +70,30 @@ class MoriEngineState {
     var surfaceDensity: Float = 1f
 
     // === TIME (Global Sync) ===
-    /** The absolute system frame time in nanoseconds, used to synchronize animations across instances. */
     var currentTimeNanos: Long = 0L
 
     // === PALETTE (Atmospheric) ===
-    /** The opaque foundation color currently being rendered. */
     var dominantFoundationColor: Int = 0xFF121212.toInt()
-    /** The primary accent color currently being rendered. */
     var dominantAccentColor: Int = 0xFF9575CD.toInt()
-    /** The primary surface color currently being rendered. */
     var dominantSurfaceColor: Int = 0x44000000.toInt()
-    /** The text/icon color currently being rendered. */
     var dominantOnSurfaceColor: Int = 0xFFF5F5F5.toInt()
-    /** Whether the current frame represents a "Dark" environment. */
     var isDarkState: Boolean = true
+
+    /**
+     * Helper to fetch a value by its index.
+     * Used by the RuleEvaluator to maintain 100% zero-allocation access.
+     */
+    fun getFieldValue(index: Int): Float {
+        return when (index) {
+            MoriEngineStateIndices.INDEX_TIME_SECONDS -> timeSeconds
+            MoriEngineStateIndices.INDEX_SUN_ALTITUDE -> chronosSunAltitude
+            MoriEngineStateIndices.INDEX_BATTERY_LEVEL -> energyBatteryLevel
+            MoriEngineStateIndices.INDEX_IS_CHARGING -> if (energyIsCharging) 1.0f else 0.0f
+            MoriEngineStateIndices.INDEX_STEPS_PROGRESS -> vitalityStepsProgress
+            MoriEngineStateIndices.INDEX_THERMAL_STRESS -> energyThermalStress
+            MoriEngineStateIndices.INDEX_SOCIAL_NOISE -> zenSocialNoise
+            MoriEngineStateIndices.INDEX_LIGHT_LEVEL -> atmosLightLevel
+            else -> 0.0f
+        }
+    }
 }
