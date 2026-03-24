@@ -10,31 +10,34 @@ import org.junit.Test
 class MoriWallpaperTest {
 
     @Test
-    fun `synthesizePalette should respect weights and prioritize high-weight layers`() {
+    fun `synthesizePalette should respect granular weights`() {
         // Given
-        val lowWeightLayer = mockk<EffectRenderer> {
+        val layer1 = mockk<EffectRenderer> {
             every { getPaletteContribution() } returns RendererPalette(
                 accent = 0xFFFF0000.toInt(), // Red
+                accentWeight = 0.9f,         // High accent weight
                 foundation = 0xFF00FF00.toInt(), // Green
-                weight = 0.1f
+                foundationWeight = 0.1f      // Low foundation weight
             )
         }
-        val highWeightLayer = mockk<EffectRenderer> {
+        val layer2 = mockk<EffectRenderer> {
             every { getPaletteContribution() } returns RendererPalette(
                 accent = 0xFF0000FF.toInt(), // Blue
-                weight = 0.9f
+                accentWeight = 0.1f,         // Low accent weight
+                foundation = 0xFFFFFF00.toInt(), // Yellow
+                foundationWeight = 0.9f      // High foundation weight
             )
         }
 
-        val wallpaper = MoriWallpaper("test", listOf(lowWeightLayer, highWeightLayer))
+        val wallpaper = MoriWallpaper("test", listOf(layer1, layer2))
         val state = MoriEngineState()
 
         // When
         wallpaper.synthesizePalette(state)
 
         // Then
-        assertEquals(0xFF0000FF.toInt(), state.dominantAccentColor) // Blue wins (Higher weight)
-        assertEquals(0xFF00FF00.toInt(), state.dominantFoundationColor) // Green wins (Only one providing foundation)
+        assertEquals(0xFFFF0000.toInt(), state.dominantAccentColor) // Red wins (Higher accent weight)
+        assertEquals(0xFFFFFF00.toInt(), state.dominantFoundationColor) // Yellow wins (Higher foundation weight)
     }
 
     @Test

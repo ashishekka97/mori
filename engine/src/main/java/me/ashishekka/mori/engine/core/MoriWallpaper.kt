@@ -15,8 +15,7 @@ class MoriWallpaper(
 ) {
     /**
      * Aggregates color contributions from all layers to produce a unified UI theme.
-     * Uses a Weighted Precedence strategy: the layer with the highest weight for a specific 
-     * token wins. In case of ties, the higher Z-order (later in list) wins.
+     * Uses a Granular Weighted Precedence strategy.
      */
     fun synthesizePalette(state: MoriEngineState) {
         var finalAccent: Int? = null
@@ -37,23 +36,22 @@ class MoriWallpaper(
         while (i < size) {
             val contrib = layers[i].getPaletteContribution()
             if (contrib != null) {
-                val weight = contrib.weight
                 
-                if (contrib.accent != null && weight >= maxAccentWeight) {
+                if (contrib.accent != null && contrib.accentWeight >= maxAccentWeight) {
                     finalAccent = contrib.accent
-                    maxAccentWeight = weight
+                    maxAccentWeight = contrib.accentWeight
                 }
-                if (contrib.foundation != null && weight >= maxFoundationWeight) {
+                if (contrib.foundation != null && contrib.foundationWeight >= maxFoundationWeight) {
                     finalFoundation = contrib.foundation
-                    maxFoundationWeight = weight
+                    maxFoundationWeight = contrib.foundationWeight
                 }
-                if (contrib.surface != null && weight >= maxSurfaceWeight) {
+                if (contrib.surface != null && contrib.surfaceWeight >= maxSurfaceWeight) {
                     finalSurface = contrib.surface
-                    maxSurfaceWeight = weight
+                    maxSurfaceWeight = contrib.surfaceWeight
                 }
-                if (contrib.onSurface != null && weight >= maxOnSurfaceWeight) {
+                if (contrib.onSurface != null && contrib.onSurfaceWeight >= maxOnSurfaceWeight) {
                     finalOnSurface = contrib.onSurface
-                    maxOnSurfaceWeight = weight
+                    maxOnSurfaceWeight = contrib.onSurfaceWeight
                 }
             }
             i++
