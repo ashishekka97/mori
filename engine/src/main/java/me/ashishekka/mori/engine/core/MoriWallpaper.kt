@@ -15,6 +15,7 @@ class MoriWallpaper(
 ) {
     /**
      * Aggregates color contributions from all layers to produce a unified UI theme.
+     * ZERO-ALLOCATION: Uses manual indexing to avoid iterator creation.
      */
     fun synthesizePalette(state: MoriEngineState) {
         var finalAccent: Int? = null
@@ -24,12 +25,15 @@ class MoriWallpaper(
 
         // Collect all palette contributions from layers, in order.
         // The first layer to provide a non-null color wins.
-        layers.forEach { layer ->
-            val contrib = layer.getPaletteContribution()
+        var i = 0
+        val size = layers.size
+        while (i < size) {
+            val contrib = layers[i].getPaletteContribution()
             if (finalAccent == null) finalAccent = contrib?.accent
             if (finalFoundation == null) finalFoundation = contrib?.foundation
             if (finalSurface == null) finalSurface = contrib?.surface
             if (finalOnSurface == null) finalOnSurface = contrib?.onSurface
+            i++
         }
 
         // Apply synthesized or fallback colors to the global state.

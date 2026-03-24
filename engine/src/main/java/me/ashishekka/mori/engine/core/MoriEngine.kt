@@ -47,10 +47,20 @@ class MoriEngine(
         }
     }
 
+    /**
+     * Applies a complete wallpaper definition to the engine.
+     * ZERO-ALLOCATION: Uses manual indexing to avoid iterator creation.
+     */
     fun setWallpaper(wallpaper: MoriWallpaper) {
         this.currentWallpaper = wallpaper
         layerManager.clear()
-        wallpaper.layers.forEach { layerManager.addEffect(it) }
+        
+        var i = 0
+        val size = wallpaper.layers.size
+        while (i < size) {
+            layerManager.addEffect(wallpaper.layers[i])
+            i++
+        }
     }
 
     fun start() {
