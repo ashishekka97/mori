@@ -66,7 +66,18 @@ graph TD
 
 ---
 
-## 3. The "Update-First" Rendering Cycle
+## 3. The Rule Engine (Phase 6)
+
+The logic core of Mori is a stack-based Virtual Machine. It decouples visual behavior from Kotlin code by executing pre-compiled bytecode. For a complete list of supported mathematical operations and high-value macros, refer to the **[Instruction Set Architecture (SPEC_ISA.md)](SPEC_ISA.md)**.
+
+### Execution Model
+*   **Initialization**: JSON biomes are parsed once into primitive `IntArray` bytecode.
+*   **Hot-Path**: On every frame, the `RuleEvaluator` executes this bytecode to calculate visual properties (Position, Rotation, Alpha, etc.).
+*   **Purity**: The evaluator is a pure function that requires 0 object allocations during the frame cycle.
+
+---
+
+## 4. The "Update-First" Rendering Cycle
 
 To ensure data integrity and zero-allocation synthesis, the engine follows a strict three-phase cycle on every frame:
 
@@ -76,7 +87,7 @@ To ensure data integrity and zero-allocation synthesis, the engine follows a str
 
 ---
 
-## 4. Engineering Standards
+## 5. Engineering Standards
 
 ### Zero-Allocation Mandate
 *   **The Render Loop**: No `new` or `.copy()` inside the `drawFrame` loop.
@@ -89,7 +100,7 @@ To ensure data integrity and zero-allocation synthesis, the engine follows a str
 
 ---
 
-## 5. Phase Retrospectives
+## 6. Phase Retrospectives
 
 ### Phase 1: The Agnostic Platform
 *   **Decisions**: Established strict UDF via `StateManager`. Decoupled rendering from Android `Canvas` via `EngineCanvas` interface.
@@ -105,5 +116,5 @@ To ensure data integrity and zero-allocation synthesis, the engine follows a str
 
 ---
 
-## 6. The Future: Phases 6 & 7
+## 7. The Future: Phases 6 & 7
 The current goal is to transition Mori from hardcoded Kotlin renderers to a declarative, data-driven system. This is achieved via a stack-based **Macro-OpCode VM** that allows complex atmospheric logic to be defined in JSON and executed with Zero-Allocation performance.

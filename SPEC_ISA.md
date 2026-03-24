@@ -1,4 +1,4 @@
-# Mori Instruction Set Architecture (ISA v1.2)
+# Mori Instruction Set Architecture (ISA v1.4)
 
 This document defines the primitive "Machine Code" of the Mori Rule Engine. These OpCodes are executed 60 times per second on a stack-based VM to drive atmospheric visual properties.
 
@@ -9,32 +9,30 @@ This document defines the primitive "Machine Code" of the Mori Rule Engine. Thes
 
 ---
 
-## 2. Full Instruction Table
+## 2. The Instruction Set
 
-| Category | Instruction | Bytecode | Stack Action | Description |
+| Category | Instruction | Bytecode | Purpose | Example |
 | :--- | :--- | :--- | :--- | :--- |
-| **Ingress** | `PUSH_CONST` | `0x01` | `[] -> [f]` | Pushes the next float from bytecode. |
-| | `GET_TIME` | `0x02` | `[] -> [f]` | Pushes smooth normalized time (seconds). |
-| | `GET_STATE` | `0x03` | `[idx] -> [f]` | Fetches a value from `MoriEngineState`. |
-| | `GET_SIGNAL`| `0x04` | `[idx] -> [f]` | Fetches a pre-calculated global signal. |
-| **Math** | `ADD` | `0x10` | `[a, b] -> [a+b]` | Binary addition. |
-| | `SUB` | `0x11` | `[a, b] -> [a-b]` | Binary subtraction. |
-| | `MUL` | `0x12` | `[a, b] -> [a*b]` | Binary multiplication. |
-| | `DIV` | `0x13` | `[a, b] -> [a/b]` | Binary division. |
-| | `MOD` | `0x14` | `[a, b] -> [a%b]` | Binary modulo. |
-| | `SIN` | `0x20` | `[f] -> [sin(f)]` | Sine wave (-1 to 1). |
-| | `COS` | `0x21` | `[f] -> [cos(f)]` | Cosine wave (-1 to 1). |
-| | `ABS` | `0x22` | `[f] -> [abs(f)]` | Absolute value. |
-| | `SQRT`| `0x23` | `[f] -> [sqrt(f)]`| Square root. |
-| **Macros** | `REMAP` | `0x30` | `[v, iMin, iMax, oMin, oMax] -> [f]` | Normalized remapping. |
-| | `CLAMP` | `0x31` | `[v, min, max] -> [f]` | Constrain value to range. |
-| | `STEP`  | `0x32` | `[v, edge] -> [0 or 1]` | Binary threshold logic. |
-| | `LERP`  | `0x33` | `[a, b, t] -> [f]` | Linear interpolation. |
-| **Logic** | `IF_GT` | `0x40` | `[a, b, t, f] -> [t or f]` | If a > b return t, else f. |
-| | `AND` | `0x41` | `[a, b] -> [0 or 1]` | Boolean AND (1.0 = true). |
-| | `OR`  | `0x42` | `[a, b] -> [0 or 1]` | Boolean OR (1.0 = true). |
-| **Atmosphere**| `NOISE` | `0x50` | `[seed] -> [f]` | Coherent Perlin-style noise. |
-| | `MIX_OKLAB`| `0x51` | `[cA, cB, t] -> [color]` | Perceptual color blending. |
+| **Data Ingress** | `PUSH_CONST` | `0x01` | Loads a hardcoded number from the JSON. | `2.5`, `360.0` |
+| | `GET_TIME` | `0x02` | Fetches the smooth 60fps frame-time. | Driving constant motion. |
+| | `GET_STATE` | `0x03` | Fetches real-world data (Battery, Sun, Steps). | Making layers reactive. |
+| | `GET_SIGNAL`| `0x04` | Reuses a calculation from another layer. | Syncing cloud & shadow. |
+| **Core Math** | `ADD`, `SUB` | `0x10-11`| Basic coordinate offsets. | `x + offset` |
+| | `MUL`, `DIV` | `0x12-13`| Scaling and rate adjustment. | `time * speed` |
+| | `SIN`, `COS` | `0x20-21`| Advanced geometric or orbital patterns. | Circular paths. |
+| | `ABS`, `SQRT`| `0x22-23`| Non-linear math requirements. | Distance calculations. |
+| **Macros** | `REMAP` | `0x30` | **The Primary Tool**: Scales a sensor to a visual. | `Battery (0..1)` -> `Alpha (1..0)` |
+| | `CLAMP` | `0x31` | Keeps values within safe, visible ranges. | Prevents "exploding" scales. |
+| | `STEP` | `0x32` | Binary triggers for goals or thresholds. | `if steps > 10000` |
+| | `LERP` | `0x33` | Simple linear transitions. | Moving from point A to B. |
+| | `OSCILLATE`| `0x34` | **Vibrant Shortcut**: For swaying and pulsing. | Trees in wind, light heartbeats. |
+| **Logic** | `IF_GT` | `0x40` | Decision making ("If Day then A else B"). | Dynamic asset swapping. |
+| | `AND`, `OR` | `0x41-42`| Combining multiple sensor conditions. | `isNight AND isCharging` |
+| **Atmosphere**| `NOISE` | `0x50` | Natural, organic randomness. | Wind gusts, water ripples. |
+| | `MIX_OKLAB`| `0x51` | **Mori Standard**: Vibrant color blending. | Mud-free sunsets. |
+| **Motion** | `EASE_IN_OUT`| `0x60` | Smooth, cinematic start/stop. | Sun/Moon trajectories. |
+| | `EASE_BACK` | `0x61` | Natural "overshoot" for organic objects. | Bending tree branches. |
+| | `EASE_ELASTIC`| `0x62` | Snappy, bouncy physical reactions. | Notification "pops". |
 
 ---
 
