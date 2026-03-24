@@ -4,7 +4,7 @@ Mori is built on a strict unidirectional data flow, enforced by Gradle modules. 
 
 ## 1. The "Mori Machine" (Visual Flow)
 
-The Phase 5 architecture introduces a sophisticated, renderer-driven theming pipeline.
+The system transforms raw environmental data into atmospheric visual properties via a stack-based Rule Engine.
 
 ```mermaid
 graph TD
@@ -21,85 +21,92 @@ graph TD
         F -->|Atomic Copy| G[MoriEngineState]
     end
 
+    subgraph Biome [Biome Layer - The Logic Engine]
+        JSON[Biome DSL] -->|Parser| Bytecode[OpCode Arrays]
+        G -->|Input| VM{RuleEvaluator}
+        Bytecode -->|Execute| VM
+        VM -->|Fill| Buffer[Property Buffers]
+    end
+
     subgraph Engine [Engine Layer - The "Dumb" Muscle]
-        G -->|Update| H(LayerManager)
-        H -->|Update| I(EffectRenderer 1)
-        H -->|Update| J(EffectRenderer 2)
+        Buffer -->|Read| Instruments(DslEffectRenderer)
         
         subgraph ThemeSynthesis [Wallpaper-Owned Theme]
-            I -->|getPaletteContribution()| K{MoriWallpaper}
-            J -->|getPaletteContribution()| K
+            Instruments -->|getPaletteContribution()| K{MoriWallpaper}
             K -- Synthesize & Apply --> G
         end
 
-        G -->|Draw| L(LayerManager)
-        L -->|Draw| M[Agnostic Canvas]
+        Instruments -->|Draw| M[Agnostic Canvas]
     end
 ```
 
 ---
 
-## 2. The 5 Modules
+## 2. The 6 Modules
 
 1.  **App Layer (`:app`)**
     *   **Role:** The Orchestrator & UI Bridge.
-    *   **Responsibilities:** Manages the `WallpaperService` lifecycle. Hosts app-level Composables like `PulseBackdrop` that bridge the `:engine`'s state into the `:ui`'s `PulseTheme`.
+    *   **Responsibilities:** Manages the `WallpaperService` lifecycle. Hosts app-level Composables like `PulseBackdrop`.
 
 2.  **UI Layer (`:ui`)**
     *   **Role:** The Agnostic Design System (Pulse).
-    *   **Responsibilities:** Provides a library of pure, stateless Jetpack Compose components (`PulseButton`, `PulseCard`, etc.) and the `PulseTheme` wrapper. Has **zero knowledge** of the Mori engine.
+    *   **Responsibilities:** Provides a library of pure, stateless Jetpack Compose components. Has **zero knowledge** of the Mori engine.
 
 3.  **Persona Layer (`:persona`)**
     *   **Role:** The Brain.
-    *   **Responsibilities:** Collects real-world data from device sensors and broadcasts and normalizes it into the immutable `WorldState`.
+    *   **Responsibilities:** Collects real-world data from device sensors and normalizes it into the immutable `WorldState`.
 
-4.  **Biome Layer (`:biome`)**
-    *   **Role:** (Phase 6) The DSL & Rule Engine.
-    *   **Responsibilities:** Will interpret declarative configurations to construct `MoriWallpaper` objects with specific `EffectRenderer` layers and palette rules.
+4.  **Bridge Layer (`:bridge`)**
+    *   **Role:** The Translator.
+    *   **Responsibilities:** Centralizes the "Data Handover" from Persona to Engine. Handles all DP-to-Pixel math and metric calculations to keep the Engine "dumb" and pixel-pure.
 
-5.  **Engine Layer (`:engine`)**
+5.  **Biome Layer (`:biome`)**
+    *   **Role:** The Logic Engine (Phase 6/7).
+    *   **Responsibilities:** Interprets declarative configurations (DSL) into primitive OpCodes. Manages the high-performance `BitmapTextureAtlas`.
+
+6.  **Engine Layer (`:engine`)**
     *   **Role:** The "Dumb" Muscle (Rendering VM).
-    *   **Responsibilities:** A platform-agnostic rendering core. `MoriEngine` orchestrates the rendering loop but delegates all visual and theme decisions to the active `MoriWallpaper`.
+    *   **Responsibilities:** A platform-agnostic rendering core. Orchestrates the loop but delegates all visual and theme decisions to the active `MoriWallpaper`.
 
 ---
 
-## 3. The "Update-First" Rendering Cycle (Phase 5)
+## 3. The "Update-First" Rendering Cycle
 
-To fix critical race conditions and ensure data integrity, the engine now follows a strict three-phase rendering cycle on every frame:
+To ensure data integrity and zero-allocation synthesis, the engine follows a strict three-phase cycle on every frame:
 
-1.  **UPDATE**: `MoriEngine` calls `layerManager.update(state)`. Every active `EffectRenderer` updates its internal logic (e.g., calculates colors, positions, physics) based on the latest `MoriEngineState`.
-2.  **SYNTHESIZE**: `MoriEngine` calls `currentWallpaper.synthesizePalette(state)`. The wallpaper iterates through its renderers, calls `getPaletteContribution()` on each, and aggregates the results to determine the final `dominant` theme colors for the frame.
-3.  **DRAW**: `MoriEngine` calls `layerManager.draw(canvas)`. Every active `EffectRenderer` now performs its "dumb" drawing operations using the now-consistent state.
-
-This guarantees that palette synthesis always happens *after* all layers have had a chance to update their state for the current frame.
+1.  **UPDATE**: `MoriEngine` updates the `LayerManager`. Every renderer calculates its internal logic (positions, scales, colors) based on the latest state.
+2.  **SYNTHESIZE**: `MoriWallpaper` aggregates `RendererPalette` contributions from all updated layers to determine the final UI theme for the frame.
+3.  **DRAW**: Renderers perform their "dumb" drawing operations using the now-consistent state results.
 
 ---
 
-## 4. The Zero-Allocation Mandate (Phase 5 Refinements)
+## 4. Engineering Standards
 
-### Renderer-Owned Palettes
-Instead of a central `AtmosphericThemeMapper`, each `EffectRenderer` can now report its own theme colors via the `getPaletteContribution()` method. This returns a `RendererPalette` data class.
+### Zero-Allocation Mandate
+*   **The Render Loop**: No `new` or `.copy()` inside the `drawFrame` loop.
+*   **Cached Contributions**: Renderers use a caching strategy for `RendererPalette` objects to avoid per-frame allocations.
+*   **Flat Memory**: Rule results are written into pre-allocated `FloatArray` buffers.
 
-### Zero-Allocation Caching
-To prevent `RendererPalette` from being allocated on every frame, all renderers now implement a **caching strategy**. The `getPaletteContribution` method only creates a new palette object if its underlying color values have actually changed during the `update` phase. Otherwise, it returns a cached instance, ensuring zero per-frame allocations.
+### Perceptual Design
+*   **OKLab Synthesis**: All atmospheric color transitions are performed in OKLab space to prevent "muddy" desaturation during sunrise/sunset cycles.
 
 ---
 
-## 8. Phase 5 Retrospective: The Unified Design System
+## 5. Phase Retrospectives
 
-**Status:** Completed (March 2026)
+### Phase 1: The Agnostic Platform
+*   **Decisions**: Established strict UDF via `StateManager`. Decoupled rendering from Android `Canvas` via `EngineCanvas` interface.
 
-### Summary of Decisions
-1.  **Renderer-Driven Theming:** The responsibility for color policy was moved from a central utility into the renderers themselves. `MoriWallpaper` now acts as a synthesizer, aggregating color contributions from its layers. This is the foundational pattern for the Phase 6 Biome DSL.
-2.  **Update-First Architecture:** The core engine loop was refactored to enforce a strict `update() -> synthesize() -> draw()` cycle, eliminating a critical `UninitializedPropertyAccessException` race condition.
-3.  **Zero-Allocation Hardening:** Implemented a caching pattern for `RendererPalette` contributions, ensuring the entire rendering and theming pipeline is allocation-free during steady-state operation.
-4.  **Unified UI Theme:** Refactored `MainActivity` and `PulseBackdrop` to ensure a single, engine-driven `PulseTheme` is provided to all Composables on the screen, fixing a "stale read" bug where some components were not updating.
-5.  **Pulse Design System Finalized:** Completed the full component suite (`PulseButton`, `PulseCard`, etc.), integrated the premium Satoshi font family, and created the `PulseGallery` for robust visual verification.
+### Phase 3: The Engine Bridge
+*   **Decisions**: Implemented the "Stage vs. Actor" model. Centralized all DP-to-Pixel math in the Bridge to keep the Engine "dumb."
 
-### State of the Machine
-*   **The Brain (:persona):** Alive and well.
-*   **The Muscle (:engine):** Architecturally pure. A "dumb" but powerful orchestrator.
-*   **The Face (:ui):** A beautiful and fully dynamic, data-driven design system.
-*   **The Bridge (:bridge):** Stable and performant.
+### Phase 4: Persona (Data Collectors)
+*   **Decisions**: Implemented Grade-based energy ratings for sensors. Introduced the "Burst" sensor strategy for battery efficiency.
 
-The Mori platform is now a world-class example of a high-performance, data-reactive graphics and UI system on Android.
+### Phase 5: Pulse Design System
+*   **Decisions**: Unified the entire app UI under a single engine-driven `PulseTheme`. Refactored `PulseButton` to ensure 100% theme compliance.
+
+---
+
+## 6. The Future: Phases 6 & 7
+The current goal is to transition Mori from hardcoded Kotlin renderers to a declarative, data-driven system. This is achieved via a stack-based **Macro-OpCode VM** that allows complex atmospheric logic to be defined in JSON and executed with Zero-Allocation performance.

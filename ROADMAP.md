@@ -52,7 +52,7 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 *Goal: Pass data and geometry from Persona to Engine without allocations.*
 
 ### 3.1 Data Handover
-- [x] **3.1.1 MoriEngineState:** Create the mutable, pre-allocated mirror of `WorldState`. (Completed in 2.2.1)
+- [x] **3.1.1 MoriEngineState:** Create the mutable, pre-allocated mirror of `WorldState`.
 - [x] **3.1.2 Bridge Module Setup:** Initialize the `:bridge` Android module and define its DI boundaries.
 - [x] **3.1.3 State Synchronizer:** Implement the `Flow` collector that performs the zero-allocation handover from `WorldState` to `MoriEngineState`.
 
@@ -73,7 +73,6 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 - [x] **4.1.2 Chronos Provider:** 1-minute resolution day progress and Next Alarm sync.
 - [x] **4.1.3 System Zen:** DND status, Ringer mode, and Media active pulse.
 
-
 ### 4.2 Celestial Calculus (Grade A/B - Math-Heavy)
 - [x] **4.2.1 Solar Math:** Local Sun position based on time and coarse location.
 - [x] **4.2.2 Lunar Math:** Local Moon phase and illumination calculations.
@@ -87,8 +86,7 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 - [x] **4.4.2 Social Provider:** Notification frequency summaries (Zen Pulse).
 
 ### 4.5 Phase 4 Finalization
-- [x] **4.4.1 Phase 4 Finalization:** Documentation, Retrospective, and Tagging.
-
+- [x] **4.5.1 Phase 4 Finalization:** Documentation, Retrospective, and Tagging.
 
 ---
 
@@ -112,59 +110,64 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 
 ---
 
-## Phase 6: Biome DSL & Rule Engine (The Orchestrator)
-*Goal: Decouple visuals from code via a declarative DSL.*
+## Phase 6: The Rule Engine (The Brain)
+*Goal: Implement the zero-allocation OpCode VM and Perceptual Synthesis.*
 
-### 6.1 Asset Pipeline
-- [ ] **6.1.1 Texture Atlas:** Implement `BitmapTextureAtlas` for GPU efficiency.
-- [ ] **6.1.2 Asset Registry:** Implement pre-decoding and "Ready" handshake logic.
+### 6.1 Perceptual Foundations
+- [ ] **6.1.1 Zero-Allocation Synthesis:** Replace `forEach` iterators with index-based loops in the engine core.
+- [ ] **6.1.2 Weighted Contributions:** Allow renderers to "vote" on theme aspects with specific weights.
+- [ ] **6.1.3 OKLab Blending:** Implement perceptual color interpolation for vibrant theme extraction.
 
-### 6.2 DSL & Rule Engine
-- [ ] **6.2.1 Trigger & Mapper:** Define how JSON maps and scales `WorldState` values.
-- [ ] **6.2.2 Rule Evaluator:** Build the logic engine that calculates per-frame effect properties.
-- [ ] **6.2.3 Parser:** Implement the JSON-to-Domain-Model deserializer.
+### 6.2 The Macro-OpCode VM
+- [ ] **6.2.1 OpCode ISA:** Define the instruction set for high-value macros (Oscillate, Remap, Step).
+- [ ] **6.2.2 Rule Evaluator:** Build the high-performance loop and pre-allocated stack for rule execution.
+- [ ] **6.2.3 Property Buffer:** Implement the "Flat Memory" bridge between the VM and Renderers.
 
 ### 6.3 Phase 6 Finalization
-- [ ] **6.3.1 Phase 6 Finalization:** Documentation, Retrospective, and Tagging.
+- [ ] **6.3.1 Biome Decoder:** Implement the initial JSON-to-Bytecode parser.
+- [ ] **6.3.2 Demo: "The Data-Driven Prism":** Validate zero-allocation execution of a JSON-driven scene.
+- [ ] **6.3.3 Phase 6 Finalization:** Documentation, Retrospective, and Tagging.
 
 ---
 
-## Phase 7: The Island Biome (Art Implementation)
-*Goal: The first production-ready biome.*
+## Phase 7: The Visual Pipeline (The Body)
+*Goal: Connect the Brain to high-performance assets.*
 
-- [ ] **7.1 Atmosphere:** Dynamic Skybox and Celestial layers.
-- [ ] **7.2 Landscape:** Procedural swaying grass and growth-aware trees.
-- [ ] **7.3 Details:** Water reflections and night-time fireflies.
-- [ ] **7.4 Phase 7 Finalization:** Documentation, Retrospective, and Tagging.
+### 7.1 Asset Management
+- [ ] **7.1.1 Bitmap Texture Atlas:** Implement a system to pack multiple assets into a single GPU texture.
+- [ ] **7.1.2 Asset Registry:** Manage asset lifecycles and "Ready" state handshakes.
+
+### 7.2 The Shader Bridge
+- [ ] **7.2.1 AGSL Integration:** Enable custom shaders in the platform-agnostic `EngineCanvas`.
+- [ ] **7.2.2 Uniform Mapping:** Automate the handover of Property Buffer values to GPU Uniforms.
+
+### 7.3 Phase 7 Finalization
+- [ ] **7.3.1 DslEffectRenderer:** Build the single, optimized renderer that interprets the full DSL.
+- [ ] **7.3.2 Demo: "The Hazy Horizon":** Validate atlas batching and dynamic shader uniforms.
+- [ ] **7.3.3 Phase 7 Finalization:** Documentation, Retrospective, and Tagging.
 
 ---
 
-## Phase 8: Dashboard & UX
-*Goal: User-facing features and onboarding.*
+## Phase 8: The Island Biome (Art Implementation)
+*Goal: The first production-ready biome (Zelda-inspired).*
 
-- [ ] **8.1 Onboarding Flow:** Multi-step atmospheric intro and permission gateway.
-- [ ] **8.2 Status Dashboard:** The summary screen decoding visuals into data.
-- [ ] **8.3 Preview & Simulation:** Compose surface for Engine preview and state scrubbing.
+- [ ] **8.1 Atmosphere:** Dynamic Skybox and multi-stop Gradient layers.
+- [ ] **8.2 Landscape:** Procedural swaying grass and growth-aware trees.
+- [ ] **8.3 Details:** Water reflections and night-time fireflies.
 - [ ] **8.4 Phase 8 Finalization:** Documentation, Retrospective, and Tagging.
 
 ---
 
-## Phase 9: Engineering Excellence (Finalization)
-- [ ] **9.1 Custom Linting:** Detekt rule for zero-allocation enforcement.
-- [ ] **9.2 Snapshot Testing:** Visual regression suite.
-- [ ] **9.3 Performance Audit:** Frame-time and battery profiling.
-- [ ] **9.4 Phase 9 Finalization:** Documentation, Retrospective, and Tagging.
+## Phase 9: Dashboard & UX
+*Goal: User-facing features and onboarding.*
+
+- [ ] **9.1 Onboarding Flow:** Multi-step atmospheric intro and permission gateway.
+- [ ] **9.2 Status Dashboard:** The summary screen decoding visuals into data.
+- [ ] **9.3 Phase 9 Finalization:** Documentation, Retrospective, and Tagging.
 
 ---
 
-## Phase 10: The Extended Brain (Future)
-- [ ] **10.1.1 Health Connect:** Replace sensor-based vitality with full system-wide health data.
-- [ ] **10.1.2 Social Velocity:** Persistent notification frequency tracking over 24-hour cycles.
-- [ ] **10.1.3 Remote Weather:** Opt-in weather data via secure API bridge.
-
----
-
-## Meta: AI Configuration
-*Goal: Maintain standardized agent behavior across the codebase.*
-
-- [x] **Meta.1 Gemini Configuration:** Setup `.gemini/settings.json` to point to `AGENTS.md`.
+## Phase 10: Engineering Excellence (Finalization)
+- [ ] **10.1 Custom Linting:** Detekt rule for zero-allocation enforcement.
+- [ ] **10.2 Performance Audit:** Frame-time and battery profiling.
+- [ ] **10.3 Phase 10 Finalization:** Documentation, Retrospective, and Tagging.
