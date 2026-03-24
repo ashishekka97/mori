@@ -114,12 +114,12 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 *Goal: Implement the zero-allocation OpCode VM and Perceptual Synthesis.*
 
 ### 6.1 Perceptual Foundations
-- [ ] **6.1.1 Zero-Allocation Synthesis:** Replace `forEach` iterators with index-based loops in the engine core.
-- [ ] **6.1.2 Weighted Contributions:** Allow renderers to "vote" on theme aspects with specific weights.
-- [ ] **6.1.3 OKLab Blending:** Implement perceptual color interpolation for vibrant theme extraction.
+- [x] **6.1.1 Zero-Allocation Synthesis:** Replace `forEach` iterators with index-based loops in the engine core.
+- [x] **6.1.2 Weighted Contributions:** Allow renderers to "vote" on theme aspects with specific weights.
+- [x] **6.1.3 OKLab Blending:** Implement perceptual color interpolation for vibrant theme extraction.
 
 ### 6.2 The Macro-OpCode VM
-- [ ] **6.2.1 OpCode ISA:** Define the instruction set for high-value macros (Oscillate, Remap, Step).
+- [x] **6.2.1 OpCode ISA:** Define the instruction set for high-value macros (Oscillate, Remap, Step).
 - [ ] **6.2.2 Rule Evaluator:** Build the high-performance loop and pre-allocated stack for rule execution.
 - [ ] **6.2.3 Property Buffer:** Implement the "Flat Memory" bridge between the VM and Renderers.
 
