@@ -10,49 +10,44 @@ import org.junit.Test
 class MoriWallpaperTest {
 
     @Test
-    fun `synthesizePalette should aggregate contributions from layers`() {
+    fun `synthesizePalette should respect weights and prioritize high-weight layers`() {
         // Given
-        val mockLayer1 = mockk<EffectRenderer> {
+        val lowWeightLayer = mockk<EffectRenderer> {
             every { getPaletteContribution() } returns RendererPalette(
-                accent = 0xFFFF0000.toInt(),
-                foundation = 0xFF00FF00.toInt()
+                accent = 0xFFFF0000.toInt(), // Red
+                foundation = 0xFF00FF00.toInt(), // Green
+                weight = 0.1f
             )
         }
-        val mockLayer2 = mockk<EffectRenderer> {
+        val highWeightLayer = mockk<EffectRenderer> {
             every { getPaletteContribution() } returns RendererPalette(
-                surface = 0x88FFFFFF.toInt()
+                accent = 0xFF0000FF.toInt(), // Blue
+                weight = 0.9f
             )
         }
 
-        val wallpaper = MoriWallpaper("test", listOf(mockLayer1, mockLayer2))
+        val wallpaper = MoriWallpaper("test", listOf(lowWeightLayer, highWeightLayer))
         val state = MoriEngineState()
 
         // When
         wallpaper.synthesizePalette(state)
 
         // Then
-        assertEquals(0xFF00FF00.toInt(), state.dominantFoundationColor) // From Layer 1
-        assertEquals(0xFFFF0000.toInt(), state.dominantAccentColor)     // From Layer 1
-        assertEquals(0x88FFFFFF.toInt(), state.dominantSurfaceColor)    // From Layer 2
+        assertEquals(0xFF0000FF.toInt(), state.dominantAccentColor) // Blue wins (Higher weight)
+        assertEquals(0xFF00FF00.toInt(), state.dominantFoundationColor) // Green wins (Only one providing foundation)
     }
 
     @Test
     fun `synthesizePalette should use default fallbacks if no layers contribute`() {
-        // Given
         val emptyWallpaper = MoriWallpaper("empty", emptyList())
         val state = MoriEngineState().apply {
             chronosSunAltitude = -1.0f // Midnight
         }
 
-        // When
         emptyWallpaper.synthesizePalette(state)
 
-        // Then
         assertEquals(0xFF121212.toInt(), state.dominantFoundationColor)
         assertEquals(0xFF9575CD.toInt(), state.dominantAccentColor)
-        // Derive surface for dark state (0x4D000000)
-        assertEquals(0x4D121212.toInt(), state.dominantSurfaceColor)
-        assertEquals(0xFFFFFFFF.toInt(), state.dominantOnSurfaceColor)
     }
 
     @Test

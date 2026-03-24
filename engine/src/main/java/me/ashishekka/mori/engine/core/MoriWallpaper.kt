@@ -15,36 +15,56 @@ class MoriWallpaper(
 ) {
     /**
      * Aggregates color contributions from all layers to produce a unified UI theme.
-     * ZERO-ALLOCATION: Uses manual indexing to avoid iterator creation.
+     * Uses a Weighted Precedence strategy: the layer with the highest weight for a specific 
+     * token wins. In case of ties, the higher Z-order (later in list) wins.
      */
     fun synthesizePalette(state: MoriEngineState) {
         var finalAccent: Int? = null
-        var finalFoundation: Int? = null
-        var finalSurface: Int? = null
-        var finalOnSurface: Int? = null
+        var maxAccentWeight = -1.0f
 
-        // Collect all palette contributions from layers, in order.
-        // The first layer to provide a non-null color wins.
+        var finalFoundation: Int? = null
+        var maxFoundationWeight = -1.0f
+
+        var finalSurface: Int? = null
+        var maxSurfaceWeight = -1.0f
+
+        var finalOnSurface: Int? = null
+        var maxOnSurfaceWeight = -1.0f
+
+        // ZERO-ALLOCATION Loop
         var i = 0
         val size = layers.size
         while (i < size) {
             val contrib = layers[i].getPaletteContribution()
-            if (finalAccent == null) finalAccent = contrib?.accent
-            if (finalFoundation == null) finalFoundation = contrib?.foundation
-            if (finalSurface == null) finalSurface = contrib?.surface
-            if (finalOnSurface == null) finalOnSurface = contrib?.onSurface
+            if (contrib != null) {
+                val weight = contrib.weight
+                
+                if (contrib.accent != null && weight >= maxAccentWeight) {
+                    finalAccent = contrib.accent
+                    maxAccentWeight = weight
+                }
+                if (contrib.foundation != null && weight >= maxFoundationWeight) {
+                    finalFoundation = contrib.foundation
+                    maxFoundationWeight = weight
+                }
+                if (contrib.surface != null && weight >= maxSurfaceWeight) {
+                    finalSurface = contrib.surface
+                    maxSurfaceWeight = weight
+                }
+                if (contrib.onSurface != null && weight >= maxOnSurfaceWeight) {
+                    finalOnSurface = contrib.onSurface
+                    maxOnSurfaceWeight = weight
+                }
+            }
             i++
         }
 
-        // Apply synthesized or fallback colors to the global state.
+        // Apply synthesized or fallback colors
         state.dominantFoundationColor = finalFoundation ?: 0xFF121212.toInt()
         state.dominantAccentColor = finalAccent ?: 0xFF9575CD.toInt()
-        
-        // TRUE SYNTHESIS: Prioritize the contributed surface/onSurface colors.
         state.dominantSurfaceColor = finalSurface ?: deriveSurface(state)
         state.dominantOnSurfaceColor = finalOnSurface ?: deriveOnSurface(state)
         
-        // Ensure isDarkState is consistent with the final foundation color.
         state.isDarkState = state.chronosSunAltitude <= 0.2f
     }
 
