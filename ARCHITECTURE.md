@@ -21,22 +21,18 @@ graph TD
         F -->|Atomic Copy| G[MoriEngineState]
     end
 
-    subgraph Biome [Biome Layer - The Logic Engine]
-        JSON[Biome DSL] -->|Parser| Bytecode[OpCode Arrays]
-        G -->|Input| VM{RuleEvaluator}
-        Bytecode -->|Execute| VM
-        VM -->|Fill| Buffer[Property Buffers]
+    subgraph Biome [Biome Layer - Logic Engine]
+        JSON[Biome DSL] -.->|One-time Parse| Bytecode[OpCode Arrays]
+        
+        G -->|Frame State| VM{RuleEvaluator}
+        Bytecode -->|Execution Instructions| VM
+        
+        VM -->|Calculate| Buffer[Property Buffers]
     end
 
-    subgraph Engine [Engine Layer - The "Dumb" Muscle]
-        Buffer -->|Read| Instruments(DslEffectRenderer)
-        
-        subgraph ThemeSynthesis [Wallpaper-Owned Theme]
-            Instruments -->|getPaletteContribution()| K{MoriWallpaper}
-            K -- Synthesize & Apply --> G
-        end
-
-        Instruments -->|Draw| M[Agnostic Canvas]
+    subgraph Engine [Engine Layer - Dumb Muscle]
+        Buffer -->|Read Constants| Instruments(DslEffectRenderer)
+        Instruments -->|Draw| Canvas[Agnostic Canvas]
     end
 ```
 
@@ -46,11 +42,11 @@ graph TD
 
 1.  **App Layer (`:app`)**
     *   **Role:** The Orchestrator & UI Bridge.
-    *   **Responsibilities:** Manages the `WallpaperService` lifecycle. Hosts app-level Composables like `PulseBackdrop`.
+    *   **Responsibilities:** Manages the `WallpaperService` lifecycle. Hosts app-level Composables like `PulseBackdrop` that bridge the `:engine`'s state into the `:ui`'s `PulseTheme`.
 
 2.  **UI Layer (`:ui`)**
     *   **Role:** The Agnostic Design System (Pulse).
-    *   **Responsibilities:** Provides a library of pure, stateless Jetpack Compose components. Has **zero knowledge** of the Mori engine.
+    *   **Responsibilities:** Provides a library of pure, stateless Jetpack Compose components and the `PulseTheme` wrapper. Has **zero knowledge** of the Mori engine.
 
 3.  **Persona Layer (`:persona`)**
     *   **Role:** The Brain.
@@ -62,7 +58,7 @@ graph TD
 
 5.  **Biome Layer (`:biome`)**
     *   **Role:** The Logic Engine (Phase 6/7).
-    *   **Responsibilities:** Interprets declarative configurations (DSL) into primitive OpCodes. Manages the high-performance `BitmapTextureAtlas`.
+    *   **Responsibilities:** Interprets declarative configurations (DSL) into primitive OpCodes. Manages the high-performance `BitmapTextureAtlas` and maps triggers to visual properties.
 
 6.  **Engine Layer (`:engine`)**
     *   **Role:** The "Dumb" Muscle (Rendering VM).
@@ -84,8 +80,9 @@ To ensure data integrity and zero-allocation synthesis, the engine follows a str
 
 ### Zero-Allocation Mandate
 *   **The Render Loop**: No `new` or `.copy()` inside the `drawFrame` loop.
+*   **Macro-OpCode VM**: Logic is executed using primitive `IntArray` bytecode and a pre-allocated `FloatArray` stack.
+*   **Property Buffers**: Results are written into flat memory buffers, ensuring 0 heap allocations during the hot path.
 *   **Cached Contributions**: Renderers use a caching strategy for `RendererPalette` objects to avoid per-frame allocations.
-*   **Flat Memory**: Rule results are written into pre-allocated `FloatArray` buffers.
 
 ### Perceptual Design
 *   **OKLab Synthesis**: All atmospheric color transitions are performed in OKLab space to prevent "muddy" desaturation during sunrise/sunset cycles.

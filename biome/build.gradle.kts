@@ -27,4 +27,7 @@ android {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.android)
+
+    // Mori Modules (Biome depends on Engine to build wallpapers)
+    implementation(project(":engine"))
 }
