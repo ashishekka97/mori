@@ -5,13 +5,20 @@ import me.ashishekka.mori.engine.core.interfaces.EngineCanvas
 
 /**
  * A container for color tokens contributed by a renderer.
- * Now includes all themeable color aspects.
+ * Includes specific weights for each color token to allow granular influence.
  */
 data class RendererPalette(
     val accent: Int? = null,
+    val accentWeight: Float = 1.0f,
+    
     val foundation: Int? = null,
+    val foundationWeight: Float = 1.0f,
+    
     val surface: Int? = null,
-    val onSurface: Int? = null
+    val surfaceWeight: Float = 1.0f,
+    
+    val onSurface: Int? = null,
+    val onSurfaceWeight: Float = 1.0f
 )
 
 /**
