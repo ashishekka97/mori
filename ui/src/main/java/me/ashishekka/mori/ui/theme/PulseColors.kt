@@ -6,9 +6,9 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.luminance
 import me.ashishekka.mori.persona.state.WorldState
+import me.ashishekka.mori.ui.theme.util.ColorUtils
 
 /**
  * A reactive set of color tokens that shift based on the [WorldState].
@@ -26,9 +26,9 @@ data class PulseColors(
  */
 val LocalPulseColors = staticCompositionLocalOf {
     PulseColors(
-        accent = DayAccent,
-        surface = DaySurface,
-        onSurface = DayOnSurface,
+        accent = Color(0xFFFFB74D), // Default Amber
+        surface = Color(0x44FFFFFF),
+        onSurface = Color(0xFF333333),
         isDark = false
     )
 }
@@ -44,7 +44,7 @@ object PulseTheme {
 }
 
 /**
- * Calculates the current atmospheric palette using the exact same math as the Engine.
+ * Calculates the current atmospheric palette using perceptual OKLab blending.
  */
 @Composable
 fun rememberPulseColors(
@@ -58,41 +58,35 @@ fun rememberPulseColors(
 
         // 2. Calculate Continuous Foundation (Background context for luminance)
         val foundation = when {
-            sun < -0.5f -> Color(0xFF0A0E14)
-            sun < 0f -> lerp(Color(0xFF0A0E14), Color(0xFF1A1C2E), (sun + 0.5f) * 2f)
-            sun < 0.5f -> lerp(Color(0xFF1A1C2E), Color(0xFFF5F5F5), sun * 2f)
-            else -> Color(0xFFFFFFFF)
+            sun < -0.5f -> Color(0xFF0D0221)
+            sun < 0f -> ColorUtils.lerpColorOklab(Color(0xFF0D0221), Color(0xFF240B36), (sun + 0.5f) * 2f)
+            sun < 0.5f -> ColorUtils.lerpColorOklab(Color(0xFF240B36), Color(0xFF00B0FF), sun * 2f)
+            else -> Color(0xFF40C4FF)
         }
 
         // 3. Calculate Continuous Accent
         val baseAccent = when {
-            sun < 0f -> lerp(Color(0xFFBB86FC), Color(0xFFFF7043), (sun + 1f))
-            else -> lerp(Color(0xFFFF7043), Color(0xFFFF9800), sun)
+            sun < 0f -> ColorUtils.lerpColorOklab(Color(0xFFE040FB), Color(0xFFFF5252), (sun + 1f))
+            else -> ColorUtils.lerpColorOklab(Color(0xFFFF5252), Color(0xFF00E676), sun)
         }
 
-        // 4. Perceptual Contrast Guard (The "Monet" Principle)
+        // 4. Perceptual Contrast Guard
         val surfaceLuminance = foundation.luminance()
         val highContrastText = if (surfaceLuminance > 0.5f) {
-            Color(0xFF1A1A1A)
+            Color(0xFF000000)
         } else {
-            Color(0xFFF5F5F5)
+            Color(0xFFFFFFFF)
         }
 
         // 5. Thermal Stress Refinement
-        val stressTarget = if (surfaceLuminance > 0.5f) {
-            Color.Black.copy(alpha = 0.6f)
-        } else {
-            Color.White.copy(alpha = 0.6f)
-        }
-
         val finalAccent = if (worldState.energyThermalStress > 0.5f) {
-            lerp(baseAccent, stressTarget, (worldState.energyThermalStress - 0.5f) * 2f)
+            ColorUtils.lerpColorOklab(baseAccent, Color.Black.copy(alpha = 0.6f), (worldState.energyThermalStress - 0.5f) * 2f)
         } else {
             baseAccent
         }
 
         // 6. Final Surface (Glass)
-        val surfaceAlpha = if (isDark) 0.4f else 0.4f // Unified for better glass verification
+        val surfaceAlpha = if (isDark) 0.3f else 0.3f
         val baseSurface = foundation.copy(alpha = surfaceAlpha)
 
         PulseColors(

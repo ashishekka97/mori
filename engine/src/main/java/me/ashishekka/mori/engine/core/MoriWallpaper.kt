@@ -1,5 +1,6 @@
 package me.ashishekka.mori.engine.core
 
+import me.ashishekka.mori.engine.core.util.ColorUtils
 import me.ashishekka.mori.engine.renderer.DebugPulseRenderer
 import me.ashishekka.mori.engine.renderer.EffectRenderer
 import me.ashishekka.mori.engine.renderer.RendererPalette
@@ -15,20 +16,20 @@ class MoriWallpaper(
 ) {
     /**
      * Aggregates color contributions from all layers to produce a unified UI theme.
-     * Uses a Granular Weighted Precedence strategy.
+     * Uses Weighted OKLab Blending to ensure perceptual vibrancy.
      */
     fun synthesizePalette(state: MoriEngineState) {
         var finalAccent: Int? = null
-        var maxAccentWeight = -1.0f
+        var accentWeightSum = 0f
 
         var finalFoundation: Int? = null
-        var maxFoundationWeight = -1.0f
+        var foundationWeightSum = 0f
 
         var finalSurface: Int? = null
-        var maxSurfaceWeight = -1.0f
+        var surfaceWeightSum = 0f
 
         var finalOnSurface: Int? = null
-        var maxOnSurfaceWeight = -1.0f
+        var onSurfaceWeightSum = 0f
 
         // ZERO-ALLOCATION Loop
         var i = 0
@@ -36,22 +37,26 @@ class MoriWallpaper(
         while (i < size) {
             val contrib = layers[i].getPaletteContribution()
             if (contrib != null) {
-                
-                if (contrib.accent != null && contrib.accentWeight >= maxAccentWeight) {
-                    finalAccent = contrib.accent
-                    maxAccentWeight = contrib.accentWeight
+                // Weighted OKLab Accumulation
+                if (contrib.accent != null) {
+                    finalAccent = if (finalAccent == null) contrib.accent 
+                                 else ColorUtils.lerpColorOklab(finalAccent, contrib.accent, contrib.accentWeight / (accentWeightSum + contrib.accentWeight))
+                    accentWeightSum += contrib.accentWeight
                 }
-                if (contrib.foundation != null && contrib.foundationWeight >= maxFoundationWeight) {
-                    finalFoundation = contrib.foundation
-                    maxFoundationWeight = contrib.foundationWeight
+                if (contrib.foundation != null) {
+                    finalFoundation = if (finalFoundation == null) contrib.foundation
+                                     else ColorUtils.lerpColorOklab(finalFoundation, contrib.foundation, contrib.foundationWeight / (foundationWeightSum + contrib.foundationWeight))
+                    foundationWeightSum += contrib.foundationWeight
                 }
-                if (contrib.surface != null && contrib.surfaceWeight >= maxSurfaceWeight) {
-                    finalSurface = contrib.surface
-                    maxSurfaceWeight = contrib.surfaceWeight
+                if (contrib.surface != null) {
+                    finalSurface = if (finalSurface == null) contrib.surface
+                                  else ColorUtils.lerpColorOklab(finalSurface, contrib.surface, contrib.surfaceWeight / (surfaceWeightSum + contrib.surfaceWeight))
+                    surfaceWeightSum += contrib.surfaceWeight
                 }
-                if (contrib.onSurface != null && contrib.onSurfaceWeight >= maxOnSurfaceWeight) {
-                    finalOnSurface = contrib.onSurface
-                    maxOnSurfaceWeight = contrib.onSurfaceWeight
+                if (contrib.onSurface != null) {
+                    finalOnSurface = if (finalOnSurface == null) contrib.onSurface
+                                    else ColorUtils.lerpColorOklab(finalOnSurface, contrib.onSurface, contrib.onSurfaceWeight / (onSurfaceWeightSum + contrib.onSurfaceWeight))
+                    onSurfaceWeightSum += contrib.onSurfaceWeight
                 }
             }
             i++

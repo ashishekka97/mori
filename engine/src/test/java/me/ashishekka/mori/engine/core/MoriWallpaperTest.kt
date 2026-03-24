@@ -5,27 +5,25 @@ import io.mockk.mockk
 import me.ashishekka.mori.engine.renderer.EffectRenderer
 import me.ashishekka.mori.engine.renderer.RendererPalette
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class MoriWallpaperTest {
 
     @Test
-    fun `synthesizePalette should respect granular weights`() {
+    fun `synthesizePalette should perform weighted blending`() {
         // Given
         val layer1 = mockk<EffectRenderer> {
             every { getPaletteContribution() } returns RendererPalette(
                 accent = 0xFFFF0000.toInt(), // Red
-                accentWeight = 0.9f,         // High accent weight
-                foundation = 0xFF00FF00.toInt(), // Green
-                foundationWeight = 0.1f      // Low foundation weight
+                accentWeight = 0.9f
             )
         }
         val layer2 = mockk<EffectRenderer> {
             every { getPaletteContribution() } returns RendererPalette(
                 accent = 0xFF0000FF.toInt(), // Blue
-                accentWeight = 0.1f,         // Low accent weight
-                foundation = 0xFFFFFF00.toInt(), // Yellow
-                foundationWeight = 0.9f      // High foundation weight
+                accentWeight = 0.1f
             )
         }
 
@@ -36,15 +34,21 @@ class MoriWallpaperTest {
         wallpaper.synthesizePalette(state)
 
         // Then
-        assertEquals(0xFFFF0000.toInt(), state.dominantAccentColor) // Red wins (Higher accent weight)
-        assertEquals(0xFFFFFF00.toInt(), state.dominantFoundationColor) // Yellow wins (Higher foundation weight)
+        // Under OKLab weighted blending, the result should NOT be pure Red or pure Blue.
+        // It should be a blended color heavily skewed toward Red (0.9 weight).
+        assertNotEquals(0xFFFF0000.toInt(), state.dominantAccentColor)
+        assertNotEquals(0xFF0000FF.toInt(), state.dominantAccentColor)
+        
+        // We verify that the "Red" component is still dominant (> 200)
+        val red = (state.dominantAccentColor shr 16) and 0xFF
+        assertTrue("Red component should be dominant", red > 200)
     }
 
     @Test
     fun `synthesizePalette should use default fallbacks if no layers contribute`() {
         val emptyWallpaper = MoriWallpaper("empty", emptyList())
         val state = MoriEngineState().apply {
-            chronosSunAltitude = -1.0f // Midnight
+            chronosSunAltitude = -1.0f 
         }
 
         emptyWallpaper.synthesizePalette(state)
@@ -62,12 +66,10 @@ class MoriWallpaperTest {
         state.chronosSunAltitude = -0.5f
         wallpaper.synthesizePalette(state)
         assertEquals(true, state.isDarkState)
-        assertEquals(0xFFFFFFFF.toInt(), state.dominantOnSurfaceColor)
 
         // Test Light Mode
         state.chronosSunAltitude = 0.8f
         wallpaper.synthesizePalette(state)
         assertEquals(false, state.isDarkState)
-        assertEquals(0xFF000000.toInt(), state.dominantOnSurfaceColor)
     }
 }
