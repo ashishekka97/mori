@@ -5,6 +5,7 @@ import me.ashishekka.mori.engine.core.interfaces.EngineCanvas
 
 /**
  * Manages a fixed set of [EffectRenderer] layers, ordered by Z-Order.
+ * ZERO-ALLOCATION: Uses manual indexing for all iterations in the hot path.
  */
 class LayerManager(
     private val maxLayers: Int = 16
@@ -22,16 +23,20 @@ class LayerManager(
 
     fun removeEffect(effect: EffectRenderer): Boolean {
         var foundIndex = -1
-        for (i in 0 until activeLayerCount) {
+        var i = 0
+        while (i < activeLayerCount) {
             if (layers[i] == effect) {
                 foundIndex = i
                 break
             }
+            i++
         }
 
         if (foundIndex != -1) {
-            for (i in foundIndex until activeLayerCount - 1) {
+            i = foundIndex
+            while (i < activeLayerCount - 1) {
                 layers[i] = layers[i + 1]
+                i++
             }
             layers[activeLayerCount - 1] = null
             activeLayerCount--
@@ -41,8 +46,10 @@ class LayerManager(
     }
 
     fun onSurfaceChanged(width: Int, height: Int, density: Float) {
-        for (i in 0 until activeLayerCount) {
+        var i = 0
+        while (i < activeLayerCount) {
             layers[i]?.onSurfaceChanged(width, height, density)
+            i++
         }
     }
 
