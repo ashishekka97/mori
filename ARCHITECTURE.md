@@ -4,7 +4,7 @@ Mori is built on a strict unidirectional data flow, enforced by Gradle modules. 
 
 ## 1. The "Mori Machine" (Visual Flow)
 
-Phase 6 introduces the **"Data-Driven Brain,"** a stack-based VM that interprets high-level Biome rules into real-time visual properties.
+The system transforms raw environmental data into atmospheric visual properties via a stack-based Rule Engine.
 
 ```mermaid
 graph TD
@@ -30,46 +30,83 @@ graph TD
 
     subgraph Engine [Engine Layer - The "Dumb" Muscle]
         Buffer -->|Read| Instruments(DslEffectRenderer)
+        
+        subgraph ThemeSynthesis [Wallpaper-Owned Theme]
+            Instruments -->|getPaletteContribution()| K{MoriWallpaper}
+            K -- Synthesize & Apply --> G
+        end
+
         Instruments -->|Draw| M[Agnostic Canvas]
     end
 ```
 
 ---
 
-## 2. The Rule Engine (Phase 6 Foundations)
+## 2. The 6 Modules
 
-To achieve maximum scalability without technical debt, Phase 6 replaces hardcoded Kotlin logic with a **Flyweight Data Architecture.**
+1.  **App Layer (`:app`)**
+    *   **Role:** The Orchestrator & UI Bridge.
+    *   **Responsibilities:** Manages the `WallpaperService` lifecycle. Hosts app-level Composables like `PulseBackdrop`.
 
-### Macro-OpCode VM
-Instead of interpreting strings at runtime, Mori "compiles" JSON expressions once into primitive `IntArray` bytecode. A high-performance, stack-based evaluator executes these macros (Oscillate, Remap, Step) 60 times per second using a pre-allocated `FloatArray` stack.
+2.  **UI Layer (`:ui`)**
+    *   **Role:** The Agnostic Design System (Pulse).
+    *   **Responsibilities:** Provides a library of pure, stateless Jetpack Compose components. Has **zero knowledge** of the Mori engine.
 
-### Property Buffers (Flat Memory)
-Each layer in a Biome owns a pre-allocated `FloatArray`. The Rule Engine writes the results of its calculations (X, Y, Rotation, Scale, Alpha, Tint) directly into this buffer. The Renderers then perform "dumb" drawing by reading from these fixed indices, ensuring **Zero-Allocation** during the entire frame cycle.
+3.  **Persona Layer (`:persona`)**
+    *   **Role:** The Brain.
+    *   **Responsibilities:** Collects real-world data from device sensors and normalizes it into the immutable `WorldState`.
 
----
+4.  **Bridge Layer (`:bridge`)**
+    *   **Role:** The Translator.
+    *   **Responsibilities:** Centralizes the "Data Handover" from Persona to Engine. Handles all DP-to-Pixel math and metric calculations to keep the Engine "dumb" and pixel-pure.
 
-## 3. The Visual Pipeline (Phase 7 Foundations)
+5.  **Biome Layer (`:biome`)**
+    *   **Role:** The Logic Engine (Phase 6/7).
+    *   **Responsibilities:** Interprets declarative configurations (DSL) into primitive OpCodes. Manages the high-performance `BitmapTextureAtlas`.
 
-Phase 7 bridges the Rule Engine's logic to high-fidelity assets.
-
-### Bitmap Texture Atlas
-To minimize GPU state changes, multiple biome assets are packed into a single large texture. The `EngineCanvas` is expanded to support "Bit-Blit" rendering (drawing specific source regions from the atlas).
-
-### AGSL Shader Bridge
-Mori supports **Android Graphics Shading Language (AGSL)** for pixel-level effects like water reflections and volumetric fog. The Rule Engine maps dynamic state values directly to Shader Uniforms, enabling a "Living Atmosphere" that reacts to persona data at the pixel level.
-
----
-
-## 4. The 5 Modules
-
-1.  **App Layer (`:app`)**: The Orchestrator & UI Bridge.
-2.  **UI Layer (`:ui`)**: The Agnostic Design System (Pulse).
-3.  **Persona Layer (`:persona`)**: The Brain (Sensor collection and normalization).
-4.  **Biome Layer (`:biome`)**: The Logic Engine (DSL Parsing and OpCode Evaluation).
-5.  **Engine Layer (`:engine`)**: The Muscle (Platform-agnostic rendering instruments).
+6.  **Engine Layer (`:engine`)**
+    *   **Role:** The "Dumb" Muscle (Rendering VM).
+    *   **Responsibilities:** A platform-agnostic rendering core. Orchestrates the loop but delegates all visual and theme decisions to the active `MoriWallpaper`.
 
 ---
 
-## 8. Phase 5 Retrospective: The Unified Design System
-**Status:** Completed (March 2026)
-[... Existing Phase 5 retro content ...]
+## 3. The "Update-First" Rendering Cycle
+
+To ensure data integrity and zero-allocation synthesis, the engine follows a strict three-phase cycle on every frame:
+
+1.  **UPDATE**: `MoriEngine` updates the `LayerManager`. Every renderer calculates its internal logic (positions, scales, colors) based on the latest state.
+2.  **SYNTHESIZE**: `MoriWallpaper` aggregates `RendererPalette` contributions from all updated layers to determine the final UI theme for the frame.
+3.  **DRAW**: Renderers perform their "dumb" drawing operations using the now-consistent state results.
+
+---
+
+## 4. Engineering Standards
+
+### Zero-Allocation Mandate
+*   **The Render Loop**: No `new` or `.copy()` inside the `drawFrame` loop.
+*   **Cached Contributions**: Renderers use a caching strategy for `RendererPalette` objects to avoid per-frame allocations.
+*   **Flat Memory**: Rule results are written into pre-allocated `FloatArray` buffers.
+
+### Perceptual Design
+*   **OKLab Synthesis**: All atmospheric color transitions are performed in OKLab space to prevent "muddy" desaturation during sunrise/sunset cycles.
+
+---
+
+## 5. Phase Retrospectives
+
+### Phase 1: The Agnostic Platform
+*   **Decisions**: Established strict UDF via `StateManager`. Decoupled rendering from Android `Canvas` via `EngineCanvas` interface.
+
+### Phase 3: The Engine Bridge
+*   **Decisions**: Implemented the "Stage vs. Actor" model. Centralized all DP-to-Pixel math in the Bridge to keep the Engine "dumb."
+
+### Phase 4: Persona (Data Collectors)
+*   **Decisions**: Implemented Grade-based energy ratings for sensors. Introduced the "Burst" sensor strategy for battery efficiency.
+
+### Phase 5: Pulse Design System
+*   **Decisions**: Unified the entire app UI under a single engine-driven `PulseTheme`. Refactored `PulseButton` to ensure 100% theme compliance.
+
+---
+
+## 6. The Future: Phases 6 & 7
+The current goal is to transition Mori from hardcoded Kotlin renderers to a declarative, data-driven system. This is achieved via a stack-based **Macro-OpCode VM** that allows complex atmospheric logic to be defined in JSON and executed with Zero-Allocation performance.
