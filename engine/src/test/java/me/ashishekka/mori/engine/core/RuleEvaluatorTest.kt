@@ -147,6 +147,22 @@ class RuleEvaluatorTest {
 
     @Test
     fun `test logic truth table`() {
+        // IF_GT
+        state.energyBatteryLevel = 0.8f
+        val ifGtThen = intArrayOf(
+            OpCode.GET_STATE, MoriEngineStateIndices.INDEX_BATTERY_LEVEL,
+            OpCode.PUSH_CONST, 0.5f.toBits(), OpCode.PUSH_CONST, 1f.toBits(), OpCode.PUSH_CONST, 0f.toBits(),
+            OpCode.IF_GT
+        )
+        assertEquals(1f, evaluator.evaluate(ifGtThen, state, signals), 1e-6f)
+        
+        val ifGtElse = intArrayOf(
+            OpCode.GET_STATE, MoriEngineStateIndices.INDEX_BATTERY_LEVEL,
+            OpCode.PUSH_CONST, 0.9f.toBits(), OpCode.PUSH_CONST, 1f.toBits(), OpCode.PUSH_CONST, 0f.toBits(),
+            OpCode.IF_GT
+        )
+        assertEquals(0f, evaluator.evaluate(ifGtElse, state, signals), 1e-6f)
+
         // AND
         assertEquals(1f, evaluator.evaluate(intArrayOf(OpCode.PUSH_CONST, 1f.toBits(), OpCode.PUSH_CONST, 1f.toBits(), OpCode.AND), state, signals), 1e-6f)
         assertEquals(0f, evaluator.evaluate(intArrayOf(OpCode.PUSH_CONST, 1f.toBits(), OpCode.PUSH_CONST, 0f.toBits(), OpCode.AND), state, signals), 1e-6f)
@@ -169,6 +185,9 @@ class RuleEvaluatorTest {
         // t=0.0 -> Red
         val mix0 = intArrayOf(OpCode.PUSH_CONST, red.toBits(), OpCode.PUSH_CONST, blue.toBits(), OpCode.PUSH_CONST, 0.0f.toBits(), OpCode.MIX_OKLAB)
         assertEquals(red, evaluator.evaluate(mix0, state, signals), 1e-6f)
+        // t=1.0 -> Blue
+        val mix1 = intArrayOf(OpCode.PUSH_CONST, red.toBits(), OpCode.PUSH_CONST, blue.toBits(), OpCode.PUSH_CONST, 1.0f.toBits(), OpCode.MIX_OKLAB)
+        assertEquals(blue, evaluator.evaluate(mix1, state, signals), 1e-6f)
     }
 
     @Test
