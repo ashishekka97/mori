@@ -127,6 +127,25 @@ class RuleEvaluatorTest {
     }
 
     @Test
+    fun `test oscillate parameters`() {
+        // center=10, amp=5, speed=2, phase=PI/2
+        // at time=0: 10 + sin(0*2 + PI/2) * 5 = 10 + 1 * 5 = 15
+        state.timeSeconds = 0f
+        val bc0 = intArrayOf(
+            OpCode.PUSH_CONST, 10f.toBits(), // center
+            OpCode.PUSH_CONST, 5f.toBits(),  // amp
+            OpCode.PUSH_CONST, 2f.toBits(),  // speed
+            OpCode.PUSH_CONST, (PI/2).toFloat().toBits(), // phase
+            OpCode.OSCILLATE
+        )
+        assertEquals(15f, evaluator.evaluate(bc0, state, signals), 1e-6f)
+
+        // at time=PI/4: 10 + sin(PI/4 * 2 + PI/2) * 5 = 10 + sin(PI) * 5 = 10
+        state.timeSeconds = (PI/4).toFloat()
+        assertEquals(10f, evaluator.evaluate(bc0, state, signals), 1e-6f)
+    }
+
+    @Test
     fun `test logic truth table`() {
         // AND
         assertEquals(1f, evaluator.evaluate(intArrayOf(OpCode.PUSH_CONST, 1f.toBits(), OpCode.PUSH_CONST, 1f.toBits(), OpCode.AND), state, signals), 1e-6f)
