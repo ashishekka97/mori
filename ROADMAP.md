@@ -121,7 +121,7 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 ### 6.2 The Macro-OpCode VM
 - [x] 6.2.1 OpCode ISA: Define the instruction set for high-value macros (Oscillate, Remap, Step).
 - [x] **6.2.1.1 Tactical Realignment: Identity Senses:** Expand MoriEngineState and SPEC_ISA for personal biomes.
-- [ ] **6.2.2 Rule Evaluator:** Build the high-performance loop and pre-allocated stack for rule execution.
+- [x] **6.2.2 Rule Evaluator:** Build the high-performance loop and pre-allocated stack for rule execution.
 
 - [ ] **6.2.3 Property Buffer:** Implement the "Flat Memory" bridge between the VM and Renderers.
 
