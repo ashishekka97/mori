@@ -163,12 +163,16 @@ class RuleEvaluatorTest {
         )
         assertEquals(0f, evaluator.evaluate(ifGtElse, state, signals), 1e-6f)
 
-        // AND
+        // AND (Full Truth Table)
         assertEquals(1f, evaluator.evaluate(intArrayOf(OpCode.PUSH_CONST, 1f.toBits(), OpCode.PUSH_CONST, 1f.toBits(), OpCode.AND), state, signals), 1e-6f)
         assertEquals(0f, evaluator.evaluate(intArrayOf(OpCode.PUSH_CONST, 1f.toBits(), OpCode.PUSH_CONST, 0f.toBits(), OpCode.AND), state, signals), 1e-6f)
+        assertEquals(0f, evaluator.evaluate(intArrayOf(OpCode.PUSH_CONST, 0f.toBits(), OpCode.PUSH_CONST, 1f.toBits(), OpCode.AND), state, signals), 1e-6f)
+        assertEquals(0f, evaluator.evaluate(intArrayOf(OpCode.PUSH_CONST, 0f.toBits(), OpCode.PUSH_CONST, 0f.toBits(), OpCode.AND), state, signals), 1e-6f)
         
-        // OR
+        // OR (Full Truth Table)
+        assertEquals(1f, evaluator.evaluate(intArrayOf(OpCode.PUSH_CONST, 1f.toBits(), OpCode.PUSH_CONST, 1f.toBits(), OpCode.OR), state, signals), 1e-6f)
         assertEquals(1f, evaluator.evaluate(intArrayOf(OpCode.PUSH_CONST, 1f.toBits(), OpCode.PUSH_CONST, 0f.toBits(), OpCode.OR), state, signals), 1e-6f)
+        assertEquals(1f, evaluator.evaluate(intArrayOf(OpCode.PUSH_CONST, 0f.toBits(), OpCode.PUSH_CONST, 1f.toBits(), OpCode.OR), state, signals), 1e-6f)
         assertEquals(0f, evaluator.evaluate(intArrayOf(OpCode.PUSH_CONST, 0f.toBits(), OpCode.PUSH_CONST, 0f.toBits(), OpCode.OR), state, signals), 1e-6f)
     }
 
@@ -188,6 +192,22 @@ class RuleEvaluatorTest {
         // t=1.0 -> Blue
         val mix1 = intArrayOf(OpCode.PUSH_CONST, red.toBits(), OpCode.PUSH_CONST, blue.toBits(), OpCode.PUSH_CONST, 1.0f.toBits(), OpCode.MIX_OKLAB)
         assertEquals(blue, evaluator.evaluate(mix1, state, signals), 1e-6f)
+        // t=0.5 -> Perceptual Mix
+        val mixMid = intArrayOf(OpCode.PUSH_CONST, red.toBits(), OpCode.PUSH_CONST, blue.toBits(), OpCode.PUSH_CONST, 0.5f.toBits(), OpCode.MIX_OKLAB)
+        val resultMid = evaluator.evaluate(mixMid, state, signals).toInt()
+        // Expected mid value for Red/Blue in OKLab (0xFF43165C)
+        assertEquals(0xFF43165C.toInt(), resultMid)
+    }
+
+    @Test
+    fun `test unknown opcode safety`() {
+        // 0x99 is not a valid opcode. It should be skipped and return 0f (stack empty)
+        val bytecode = intArrayOf(0x99)
+        assertEquals(0f, evaluator.evaluate(bytecode, state, signals), 1e-6f)
+        
+        // Push 10.0, then an unknown opcode. Should still return 10.0
+        val bytecodeWithVal = intArrayOf(OpCode.PUSH_CONST, 10f.toBits(), 0x99)
+        assertEquals(10f, evaluator.evaluate(bytecodeWithVal, state, signals), 1e-6f)
     }
 
     @Test
