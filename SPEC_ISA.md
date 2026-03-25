@@ -38,13 +38,21 @@ This document defines the primitive "Machine Code" of the Mori Rule Engine. Thes
 
 ## 3. State Field Index Map (`GET_STATE`)
 
-| Index | Field | Description |
-| :--- | :--- | :--- |
-| `0` | `timeSeconds` | Continuous frame-time. |
-| `1` | `chronosSunAltitude` | -1.0 (Midnight) to 1.0 (Noon). |
-| `2` | `energyBatteryLevel` | 0.0 to 1.0. |
-| `3` | `energyIsCharging` | 0.0 (False) or 1.0 (True). |
-| `4` | `vitalityStepsProgress` | 0.0 to 1.0 (Daily Goal). |
-| `5` | `energyThermalStress` | 0.0 (Cold) to 1.0 (Shutdown). |
-| `6` | `zenSocialNoise` | 0.0 (Calm) to 1.0 (Congested). |
-| `7` | `atmosLightLevel` | 0.0 (Dark) to 1.0 (Bright). |
+| Index | Field | Description | Category |
+| :--- | :--- | :--- | :--- |
+| `0` | `timeSeconds` | Continuous frame-time. | Environmental |
+| `1` | `sunAltitude` | -1.0 (Midnight) to 1.0 (Noon). | Environmental |
+| `2` | `batteryLevel` | 0.0 to 1.0. | Environmental |
+| `3` | `isCharging` | 0.0 (False) or 1.0 (True). | Environmental |
+| `4` | `stepsProgress`| 0.0 to 1.0 (Daily Goal). | Human Pulse |
+| `5` | `thermalStress`| 0.0 (Cold) to 1.0 (Shutdown). | Device Pulse |
+| `6` | `socialNoise` | 0.0 (Calm) to 1.0 (Congested). | Digital Noise |
+| `7` | `lightLevel` | 0.0 (Dark) to 1.0 (Bright). | Environmental |
+| `8` | `dailyScreenTime`| 0.0 to 1.0 (Target limit). | Personal Focus |
+| `9` | `restQuality` | 0.0 to 1.0 (Sleep depth). | Human Pulse |
+| `10`| `kpIndex` | 0.0 to 1.0 (Aurora Strength).| Global Pulse |
+| `11`| `mediaPulse` | 0.0 to 1.0 (Active Beat). | Current Vibe |
+| `12`| `alarmDistance`| 1.0 to 0.0 (Time to alarm). | Future Pulse |
+| `13`| `chargingSpeed`| 0.0 to 1.0 (Fast/Slow). | Device Pulse |
+| `14`| `notificationCount`| 0.0 to 1.0 (Unread density).| Digital Noise |
+| `15`| `temperature` | Normalized (-30C..+40C). | Environmental |

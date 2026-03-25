@@ -13,6 +13,14 @@ object MoriEngineStateIndices {
     const val INDEX_THERMAL_STRESS = 5
     const val INDEX_SOCIAL_NOISE = 6
     const val INDEX_LIGHT_LEVEL = 7
+    const val INDEX_DAILY_SCREEN_TIME = 8
+    const val INDEX_REST_QUALITY = 9
+    const val INDEX_KP_INDEX = 10
+    const val INDEX_MEDIA_PULSE = 11
+    const val INDEX_ALARM_DISTANCE = 12
+    const val INDEX_CHARGING_SPEED = 13
+    const val INDEX_NOTIFICATION_COUNT = 14
+    const val INDEX_TEMPERATURE = 15
 }
 
 /**
@@ -32,29 +40,39 @@ class MoriEngineState {
     var chronosMoonPhase: Float = 0f
     var chronosSeasonProgress: Float = 0f
     var chronosIsWeekend: Boolean = false
+    var chronosAlarmDistance: Float = 1f
 
-    // === VITALITY (Health & Activity) ===
+    // === VITALITY (Human Pulse) ===
     var vitalityStepsProgress: Float = 0f
+    var vitalityRestQuality: Float = 1f
     var vitalityActivityIntensity: Float = 0f
     var vitalitySleepClarity: Float = 1f
     var vitalityStandGoalProgress: Float = 0f
 
-    // === ZEN (Digital Wellbeing) ===
-    var zenDigitalCongestion: Float = 0f
+    // === ZEN (Digital Noise & Focus) ===
+    var zenDailyScreenTime: Float = 0f
     var zenSocialNoise: Float = 0f
-    var zenContextSwitching: Float = 0f
+    var zenNotificationCount: Float = 0f
     var zenIsDndActive: Boolean = false
+    var zenDigitalCongestion: Float = 0f
+    var zenContextSwitching: Float = 0f
     var zenLastInteractionAge: Float = 0f
 
     // === ENERGY (Device Pulse) ===
     var energyBatteryLevel: Float = 1f
     var energyIsCharging: Boolean = false
+    var energyChargingSpeed: Float = 0f
     var energyThermalStress: Float = 0f
 
     // === ATMOS (Environment) ===
     var atmosLightLevel: Float = 1f
+    var atmosKpIndex: Float = 0f
+    var atmosTemperature: Float = 0f
     var atmosIsPocketed: Boolean = false
     
+    // === MEDIA (Vibe) ===
+    var mediaPulse: Float = 0f
+
     // === VIEWPORT (Geometric Handover) ===
     var viewportSafeX: Float = 0f
     var viewportSafeY: Float = 0f
@@ -69,15 +87,15 @@ class MoriEngineState {
     var surfaceHeight: Int = 0
     var surfaceDensity: Float = 1f
 
-    // === TIME (Global Sync) ===
-    var currentTimeNanos: Long = 0L
-
     // === PALETTE (Atmospheric) ===
     var dominantFoundationColor: Int = 0xFF121212.toInt()
     var dominantAccentColor: Int = 0xFF9575CD.toInt()
     var dominantSurfaceColor: Int = 0x44000000.toInt()
     var dominantOnSurfaceColor: Int = 0xFFF5F5F5.toInt()
     var isDarkState: Boolean = true
+
+    // === TIME (Global Sync) ===
+    var currentTimeNanos: Long = 0L
 
     /**
      * Helper to fetch a value by its index.
@@ -93,6 +111,14 @@ class MoriEngineState {
             MoriEngineStateIndices.INDEX_THERMAL_STRESS -> energyThermalStress
             MoriEngineStateIndices.INDEX_SOCIAL_NOISE -> zenSocialNoise
             MoriEngineStateIndices.INDEX_LIGHT_LEVEL -> atmosLightLevel
+            MoriEngineStateIndices.INDEX_DAILY_SCREEN_TIME -> zenDailyScreenTime
+            MoriEngineStateIndices.INDEX_REST_QUALITY -> vitalityRestQuality
+            MoriEngineStateIndices.INDEX_KP_INDEX -> atmosKpIndex
+            MoriEngineStateIndices.INDEX_MEDIA_PULSE -> mediaPulse
+            MoriEngineStateIndices.INDEX_ALARM_DISTANCE -> chronosAlarmDistance
+            MoriEngineStateIndices.INDEX_CHARGING_SPEED -> energyChargingSpeed
+            MoriEngineStateIndices.INDEX_NOTIFICATION_COUNT -> zenNotificationCount
+            MoriEngineStateIndices.INDEX_TEMPERATURE -> atmosTemperature
             else -> 0.0f
         }
     }
