@@ -35,18 +35,28 @@ class MoriEngineState {
     var timeSeconds: Float = 0f
 
     // === CHRONOS (Time & Cycles) ===
+    var chronosTimeProgress: Float = 0f
     var chronosSunAltitude: Float = 0f
+    var chronosMoonPhase: Float = 0f
+    var chronosSeasonProgress: Float = 0f
+    var chronosIsWeekend: Boolean = false
     var chronosAlarmDistance: Float = 1f
 
     // === VITALITY (Human Pulse) ===
     var vitalityStepsProgress: Float = 0f
     var vitalityRestQuality: Float = 1f
+    var vitalityActivityIntensity: Float = 0f
+    var vitalitySleepClarity: Float = 1f
+    var vitalityStandGoalProgress: Float = 0f
 
     // === ZEN (Digital Noise & Focus) ===
     var zenDailyScreenTime: Float = 0f
     var zenSocialNoise: Float = 0f
     var zenNotificationCount: Float = 0f
     var zenIsDndActive: Boolean = false
+    var zenDigitalCongestion: Float = 0f
+    var zenContextSwitching: Float = 0f
+    var zenLastInteractionAge: Float = 0f
 
     // === ENERGY (Device Pulse) ===
     var energyBatteryLevel: Float = 1f
@@ -58,6 +68,7 @@ class MoriEngineState {
     var atmosLightLevel: Float = 1f
     var atmosKpIndex: Float = 0f
     var atmosTemperature: Float = 0f
+    var atmosIsPocketed: Boolean = false
     
     // === MEDIA (Vibe) ===
     var mediaPulse: Float = 0f
