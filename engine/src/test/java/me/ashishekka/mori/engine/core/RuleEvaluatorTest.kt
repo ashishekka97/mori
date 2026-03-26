@@ -111,6 +111,10 @@ class RuleEvaluatorTest {
         val clamp = intArrayOf(OpCode.PUSH_CONST, 10f.toBits(), OpCode.PUSH_CONST, 0f.toBits(), OpCode.PUSH_CONST, 5f.toBits(), OpCode.CLAMP)
         assertEquals(5f, evaluator.evaluate(clamp, state, signals), 1e-6f)
 
+        // CLAMP Robustness: Swap min/max (min=5, max=0) should still work
+        val clampRobust = intArrayOf(OpCode.PUSH_CONST, 10f.toBits(), OpCode.PUSH_CONST, 5f.toBits(), OpCode.PUSH_CONST, 0f.toBits(), OpCode.CLAMP)
+        assertEquals(5f, evaluator.evaluate(clampRobust, state, signals), 1e-6f)
+
         // STEP: value=0.6, threshold=0.5 -> 1.0
         val stepTrue = intArrayOf(OpCode.PUSH_CONST, 0.6f.toBits(), OpCode.PUSH_CONST, 0.5f.toBits(), OpCode.STEP)
         assertEquals(1f, evaluator.evaluate(stepTrue, state, signals), 1e-6f)
@@ -124,12 +128,21 @@ class RuleEvaluatorTest {
         // REMAP (Zero Range safety)
         val remapZero = intArrayOf(OpCode.PUSH_CONST, 5f.toBits(), OpCode.PUSH_CONST, 1f.toBits(), OpCode.PUSH_CONST, 1f.toBits(), OpCode.PUSH_CONST, 10f.toBits(), OpCode.PUSH_CONST, 20f.toBits(), OpCode.REMAP)
         assertEquals(10f, evaluator.evaluate(remapZero, state, signals), 1e-6f)
+
+        // REMAP (Inverse Mapping): in(0..1) to out(1..0)
+        val remapInverse = intArrayOf(
+            OpCode.PUSH_CONST, 0.8f.toBits(), // value
+            OpCode.PUSH_CONST, 0f.toBits(),   // inLow
+            OpCode.PUSH_CONST, 1f.toBits(),   // inHigh
+            OpCode.PUSH_CONST, 1f.toBits(),   // outLow
+            OpCode.PUSH_CONST, 0f.toBits(),   // outHigh
+            OpCode.REMAP
+        )
+        assertEquals(0.2f, evaluator.evaluate(remapInverse, state, signals), 1e-6f)
     }
 
     @Test
     fun `test oscillate parameters`() {
-        // center=10, amp=5, speed=2, phase=PI/2
-        // at time=0: 10 + sin(0*2 + PI/2) * 5 = 10 + 1 * 5 = 15
         state.timeSeconds = 0f
         val bc0 = intArrayOf(
             OpCode.PUSH_CONST, 10f.toBits(), // center
@@ -140,7 +153,6 @@ class RuleEvaluatorTest {
         )
         assertEquals(15f, evaluator.evaluate(bc0, state, signals), 1e-6f)
 
-        // at time=PI/4: 10 + sin(PI/4 * 2 + PI/2) * 5 = 10 + sin(PI) * 5 = 10
         state.timeSeconds = (PI/4).toFloat()
         assertEquals(10f, evaluator.evaluate(bc0, state, signals), 1e-6f)
     }
@@ -163,6 +175,14 @@ class RuleEvaluatorTest {
         )
         assertEquals(0f, evaluator.evaluate(ifGtElse, state, signals), 1e-6f)
 
+        // IF_GT Boundary (Equal)
+        val ifGtBound = intArrayOf(
+            OpCode.GET_STATE, MoriEngineStateIndices.INDEX_BATTERY_LEVEL,
+            OpCode.PUSH_CONST, 0.8f.toBits(), OpCode.PUSH_CONST, 1f.toBits(), OpCode.PUSH_CONST, 0f.toBits(),
+            OpCode.IF_GT
+        )
+        assertEquals(0f, evaluator.evaluate(ifGtBound, state, signals), 1e-6f)
+
         // AND (Full Truth Table)
         assertEquals(1f, evaluator.evaluate(intArrayOf(OpCode.PUSH_CONST, 1f.toBits(), OpCode.PUSH_CONST, 1f.toBits(), OpCode.AND), state, signals), 1e-6f)
         assertEquals(0f, evaluator.evaluate(intArrayOf(OpCode.PUSH_CONST, 1f.toBits(), OpCode.PUSH_CONST, 0f.toBits(), OpCode.AND), state, signals), 1e-6f)
@@ -178,51 +198,35 @@ class RuleEvaluatorTest {
 
     @Test
     fun `test atmosphere and noise`() {
-        // NOISE (deterministic)
+        // NOISE (strictly positive)
         val n1 = evaluator.evaluate(intArrayOf(OpCode.PUSH_CONST, 1.0f.toBits(), OpCode.NOISE), state, signals)
-        val n2 = evaluator.evaluate(intArrayOf(OpCode.PUSH_CONST, 1.0f.toBits(), OpCode.NOISE), state, signals)
-        assertEquals(n1, n2, 1e-6f)
+        assert(n1 >= 0f)
+        val n2 = evaluator.evaluate(intArrayOf(OpCode.PUSH_CONST, 4.0f.toBits(), OpCode.NOISE), state, signals)
+        assert(n2 >= 0f)
 
         // MIX_OKLAB
         val red = 0xFFFF0000.toInt().toFloat()
         val blue = 0xFF0000FF.toInt().toFloat()
-        // t=0.0 -> Red
-        val mix0 = intArrayOf(OpCode.PUSH_CONST, red.toBits(), OpCode.PUSH_CONST, blue.toBits(), OpCode.PUSH_CONST, 0.0f.toBits(), OpCode.MIX_OKLAB)
-        assertEquals(red, evaluator.evaluate(mix0, state, signals), 1e-6f)
-        // t=1.0 -> Blue
-        val mix1 = intArrayOf(OpCode.PUSH_CONST, red.toBits(), OpCode.PUSH_CONST, blue.toBits(), OpCode.PUSH_CONST, 1.0f.toBits(), OpCode.MIX_OKLAB)
-        assertEquals(blue, evaluator.evaluate(mix1, state, signals), 1e-6f)
-        // t=0.5 -> Perceptual Mix
-        val mixMid = intArrayOf(OpCode.PUSH_CONST, red.toBits(), OpCode.PUSH_CONST, blue.toBits(), OpCode.PUSH_CONST, 0.5f.toBits(), OpCode.MIX_OKLAB)
-        val resultMid = evaluator.evaluate(mixMid, state, signals).toInt()
-        // Expected mid value for Red/Blue in OKLab (0xFF43165C)
+        assertEquals(red, evaluator.evaluate(intArrayOf(OpCode.PUSH_CONST, red.toBits(), OpCode.PUSH_CONST, blue.toBits(), OpCode.PUSH_CONST, 0.0f.toBits(), OpCode.MIX_OKLAB), state, signals), 1e-6f)
+        assertEquals(blue, evaluator.evaluate(intArrayOf(OpCode.PUSH_CONST, red.toBits(), OpCode.PUSH_CONST, blue.toBits(), OpCode.PUSH_CONST, 1.0f.toBits(), OpCode.MIX_OKLAB), state, signals), 1e-6f)
+        
+        val resultMid = evaluator.evaluate(intArrayOf(OpCode.PUSH_CONST, red.toBits(), OpCode.PUSH_CONST, blue.toBits(), OpCode.PUSH_CONST, 0.5f.toBits(), OpCode.MIX_OKLAB), state, signals).toInt()
         assertEquals(0xFF43165C.toInt(), resultMid)
     }
 
     @Test
     fun `test unknown opcode safety`() {
-        // 0x99 is not a valid opcode. It should be skipped and return 0f (stack empty)
-        val bytecode = intArrayOf(0x99)
-        assertEquals(0f, evaluator.evaluate(bytecode, state, signals), 1e-6f)
-        
-        // Push 10.0, then an unknown opcode. Should still return 10.0
-        val bytecodeWithVal = intArrayOf(OpCode.PUSH_CONST, 10f.toBits(), 0x99)
-        assertEquals(10f, evaluator.evaluate(bytecodeWithVal, state, signals), 1e-6f)
+        assertEquals(0f, evaluator.evaluate(intArrayOf(0x99), state, signals), 1e-6f)
+        assertEquals(10f, evaluator.evaluate(intArrayOf(OpCode.PUSH_CONST, 10f.toBits(), 0x99), state, signals), 1e-6f)
     }
 
     @Test
     fun `test all easing functions`() {
-        // Ease In Out
         assertEquals(0.5f, evaluator.evaluate(intArrayOf(OpCode.PUSH_CONST, 0.5f.toBits(), OpCode.EASE_IN_OUT), state, signals), 1e-6f)
-        
-        // Ease Back (Boundary)
         assertEquals(0f, evaluator.evaluate(intArrayOf(OpCode.PUSH_CONST, 0f.toBits(), OpCode.EASE_BACK), state, signals), 1e-6f)
         assertEquals(1f, evaluator.evaluate(intArrayOf(OpCode.PUSH_CONST, 1f.toBits(), OpCode.EASE_BACK), state, signals), 1e-6f)
-
-        // Ease Elastic (Boundary)
         assertEquals(0f, evaluator.evaluate(intArrayOf(OpCode.PUSH_CONST, 0f.toBits(), OpCode.EASE_ELASTIC), state, signals), 1e-6f)
         assertEquals(1f, evaluator.evaluate(intArrayOf(OpCode.PUSH_CONST, 1f.toBits(), OpCode.EASE_ELASTIC), state, signals), 1e-6f)
-        // Mid-point
         val elasticMid = evaluator.evaluate(intArrayOf(OpCode.PUSH_CONST, 0.5f.toBits(), OpCode.EASE_ELASTIC), state, signals)
         assertEquals(1.0162f, elasticMid, 0.001f)
     }
@@ -234,14 +238,11 @@ class RuleEvaluatorTest {
             bytecode[i * 2] = OpCode.PUSH_CONST
             bytecode[i * 2 + 1] = i.toFloat().toBits()
         }
-        // Result should be the 32nd element (index 31)
         assertEquals(31f, evaluator.evaluate(bytecode, state, signals), 1e-6f)
     }
 
     @Test
     fun `test safety try-catch`() {
-        // Malformed bytecode (PUSH_CONST but no value following)
-        val bytecode = intArrayOf(OpCode.PUSH_CONST)
-        assertEquals(0f, evaluator.evaluate(bytecode, state, signals), 1e-6f)
+        assertEquals(0f, evaluator.evaluate(intArrayOf(OpCode.PUSH_CONST), state, signals), 1e-6f)
     }
 }

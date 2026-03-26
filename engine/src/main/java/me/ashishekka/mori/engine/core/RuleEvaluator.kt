@@ -116,10 +116,12 @@ class RuleEvaluator(private val maxStackSize: Int = 32) {
                         })
                     }
                     OpCode.CLAMP -> {
-                        val max = pop()
-                        val min = pop()
+                        val maxArg = pop()
+                        val minArg = pop()
                         val value = pop()
-                        push(value.coerceIn(min, max))
+                        val realMin = min(minArg, maxArg)
+                        val realMax = max(minArg, maxArg)
+                        push(value.coerceIn(realMin, realMax))
                     }
                     OpCode.STEP -> {
                         val threshold = pop()
@@ -162,9 +164,9 @@ class RuleEvaluator(private val maxStackSize: Int = 32) {
 
                     // --- 0x50: Atmosphere ---
                     OpCode.NOISE -> {
-                        // High-performance deterministic pseudo-random hash
+                        // High-performance deterministic strictly-positive pseudo-random hash
                         val x = pop()
-                        push((sin(x) * 43758.5453123f) % 1.0f)
+                        push(abs(sin(x) * 43758.5453123f) % 1.0f)
                     }
                     OpCode.MIX_OKLAB -> {
                         val t = pop()
