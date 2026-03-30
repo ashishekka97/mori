@@ -14,6 +14,7 @@ koin = "3.5.3"
 room = "2.6.1"
 workManager = "2.9.0"
 coroutines = "1.8.0"
+kotlinSerialization = "1.6.3"
 
 # Linting & Code Gen
 ktlint = "12.1.0"
@@ -59,6 +60,7 @@ androidx-room-compiler = { group = "androidx.room", name = "room-compiler", vers
 # Concurrency
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinSerialization" }
 
 # Mori Testing
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
@@ -74,5 +76,6 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 
 # Mori Plugins
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
 android-library = { id = "com.android.library", version.ref = "agp" }
