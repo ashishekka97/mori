@@ -10,6 +10,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import me.ashishekka.mori.engine.core.MoriEngine
 import me.ashishekka.mori.engine.core.MoriEngineState
+import me.ashishekka.mori.engine.core.MoriEngineStateIndices
 import me.ashishekka.mori.engine.core.models.ScaleMode
 import me.ashishekka.mori.persona.state.StateManager
 import me.ashishekka.mori.persona.state.WorldState
@@ -44,9 +45,9 @@ class StateSynchronizerTest {
         // Given
         val synchronizer = StateSynchronizer(mockStateManager, mockEngine, testScope)
         val newState = WorldState(
-            chronosTimeProgress = 0.5f,
+            chronosSunAltitude = 0.5f,
             energyBatteryLevel = 0.8f,
-            zenIsDndActive = true
+            energyIsCharging = true
         )
 
         // When
@@ -54,9 +55,9 @@ class StateSynchronizerTest {
         stateFlow.value = newState
 
         // Then
-        assertEquals(0.5f, engineState.chronosTimeProgress)
-        assertEquals(0.8f, engineState.energyBatteryLevel)
-        assertEquals(true, engineState.zenIsDndActive)
+        assertEquals(0.5f, engineState.getFieldValue(MoriEngineStateIndices.FACT_SUN_ALTITUDE), 1e-6f)
+        assertEquals(0.8f, engineState.getFieldValue(MoriEngineStateIndices.FACT_BATTERY_LEVEL), 1e-6f)
+        assertEquals(1.0f, engineState.getFieldValue(MoriEngineStateIndices.FACT_IS_CHARGING), 1e-6f)
 
         verify { mockEngine.requestFrame() }
 
@@ -85,9 +86,9 @@ class StateSynchronizerTest {
         // When
         synchronizer.start()
         synchronizer.stop()
-        stateFlow.value = WorldState(chronosTimeProgress = 0.9f)
+        stateFlow.value = WorldState(chronosSunAltitude = 0.9f)
 
         // Then (Mirror should not have updated)
-        assertEquals(0f, engineState.chronosTimeProgress)
+        assertEquals(0f, engineState.getFieldValue(MoriEngineStateIndices.FACT_SUN_ALTITUDE), 1e-6f)
     }
 }

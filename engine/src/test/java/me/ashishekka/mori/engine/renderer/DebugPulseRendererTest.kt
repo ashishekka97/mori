@@ -3,6 +3,7 @@ package me.ashishekka.mori.engine.renderer
 import io.mockk.mockk
 import io.mockk.verify
 import me.ashishekka.mori.engine.core.MoriEngineState
+import me.ashishekka.mori.engine.core.MoriEngineStateIndices
 import me.ashishekka.mori.engine.core.interfaces.EngineCanvas
 import org.junit.Before
 import org.junit.Test
@@ -29,7 +30,7 @@ class DebugPulseRendererTest {
     fun `render should draw core and atmospheric circles`() {
         // Given
         state.currentTimeNanos = 1_000_000_000L
-        state.energyBatteryLevel = 0.5f
+        state.setFieldValue(MoriEngineStateIndices.FACT_BATTERY_LEVEL, 0.5f)
         renderer.update(state)
 
         // When
@@ -45,7 +46,7 @@ class DebugPulseRendererTest {
     @Test
     fun `update should react to thermal stress with jitter`() {
         // Given high thermal stress
-        state.energyThermalStress = 1.0f
+        state.setFieldValue(MoriEngineStateIndices.FACT_THERMAL_STRESS, 1.0f)
         renderer.update(state)
 
         // When
@@ -70,7 +71,7 @@ class DebugPulseRendererTest {
     @Test
     fun `render should draw stardust based on vitality progress`() {
         // Given some steps progress
-        state.vitalityStepsProgress = 0.5f
+        state.setFieldValue(MoriEngineStateIndices.FACT_STEPS_PROGRESS, 0.5f)
         renderer.update(state)
 
         // When

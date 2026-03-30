@@ -1,8 +1,8 @@
 package me.ashishekka.mori.engine.core
 
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.lang.reflect.Modifier
 
 class MoriEngineStateTest {
 
@@ -16,6 +16,7 @@ class MoriEngineStateTest {
             Int::class.javaPrimitiveType,
             Long::class.javaPrimitiveType,
             Boolean::class.javaPrimitiveType,
+            FloatArray::class.java, // Fact Buffer
             // Also allow the object versions if Kotlin uses them for nullable/generic reasons,
             // but in MoriEngineState they should be primitives.
             java.lang.Float::class.java,
@@ -38,15 +39,30 @@ class MoriEngineStateTest {
     @Test
     fun `MoriEngineState should be a regular class with mutable fields, not a data class`() {
         val clazz = MoriEngineState::class.java
-
-        // Data classes in Kotlin have a 'copy' method.
-        // We want to avoid data classes for the EngineState to prevent accidental allocations via .copy()
-        val hasCopyMethod = clazz.methods.any { it.name == "copy" && it.isSynthetic.not() }
-
-        // Note: Kotlin data classes aren't explicitly marked in bytecode in a simple way
-        // without checking for componentN methods or the copy method.
         val isDataClass = clazz.declaredMethods.any { it.name.startsWith("component1") }
-
         assertTrue("MoriEngineState should not be a data class to avoid .copy() allocations.", !isDataClass)
+    }
+
+    @Test
+    fun `factBuffer should correctly store and retrieve values via indices`() {
+        val state = MoriEngineState()
+        val index = MoriEngineStateIndices.FACT_BATTERY_LEVEL
+        val testValue = 0.75f
+        
+        state.setFieldValue(index, testValue)
+        
+        assertEquals(testValue, state.factBuffer[index], 1e-6f)
+        assertEquals(testValue, state.getFieldValue(index), 1e-6f)
+    }
+
+    @Test
+    fun `timeSeconds should be a delegate to FACT_TIME_SECONDS`() {
+        val state = MoriEngineState()
+        val testValue = 123.456f
+        
+        state.timeSeconds = testValue
+        
+        assertEquals(testValue, state.factBuffer[MoriEngineStateIndices.FACT_TIME_SECONDS], 1e-6f)
+        assertEquals(testValue, state.timeSeconds, 1e-6f)
     }
 }

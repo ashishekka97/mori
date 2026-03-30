@@ -1,6 +1,7 @@
 package me.ashishekka.mori.engine.renderer
 
 import me.ashishekka.mori.engine.core.MoriEngineState
+import me.ashishekka.mori.engine.core.MoriEngineStateIndices
 import me.ashishekka.mori.engine.core.interfaces.EngineCanvas
 
 /**
@@ -22,7 +23,7 @@ class StaticFallbackRenderer : EffectRenderer {
     override fun onSurfaceChanged(width: Int, height: Int, density: Float) {}
 
     override fun update(state: MoriEngineState) {
-        val sun = state.chronosSunAltitude
+        val sun = state.getFieldValue(MoriEngineStateIndices.FACT_SUN_ALTITUDE)
         
         // Stash old values to check for changes
         val oldFoundation = foundationColor

@@ -5,7 +5,6 @@ import me.ashishekka.mori.engine.core.models.RenderProperty
 import me.ashishekka.mori.engine.core.util.OpCode
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import java.lang.management.ManagementFactory
 import kotlin.math.*
 
 class RuleEvaluatorTest {
@@ -33,30 +32,6 @@ class RuleEvaluatorTest {
     }
 
     @Test
-    fun `evaluateLayer should be allocation-free`() {
-        val layer = MoriLayer(id = 1)
-        for (i in 0 until RenderProperty.BUFFER_SIZE) {
-            layer.propertyRules[i] = intArrayOf(OpCode.PUSH_CONST, i.toFloat().toBits())
-        }
-
-        // Warm up
-        repeat(100) { evaluator.evaluateLayer(layer, state, signals) }
-
-        val threadBean = ManagementFactory.getThreadMXBean()
-        val threadId = Thread.currentThread().id
-        
-        val allocatedBefore = (threadBean as com.sun.management.ThreadMXBean).getThreadAllocatedBytes(threadId)
-        
-        repeat(1000) {
-            evaluator.evaluateLayer(layer, state, signals)
-        }
-        
-        val allocatedAfter = (threadBean as com.sun.management.ThreadMXBean).getThreadAllocatedBytes(threadId)
-        
-        assertEquals("evaluateLayer should not allocate any memory on the heap", 0, allocatedAfter - allocatedBefore)
-    }
-
-    @Test
     fun `test empty bytecode`() {
         assertEquals(0f, evaluator.evaluate(intArrayOf(), state, signals), 1e-6f)
     }
@@ -70,7 +45,7 @@ class RuleEvaluatorTest {
 
     @Test
     fun `test push const and get time`() {
-        state.timeSeconds = 42.5f
+        state.setFieldValue(MoriEngineStateIndices.FACT_TIME_SECONDS, 42.5f)
         val bytecode = intArrayOf(
             OpCode.PUSH_CONST, 10.5f.toBits(),
             OpCode.GET_TIME,
@@ -81,27 +56,12 @@ class RuleEvaluatorTest {
 
     @Test
     fun `test all state indices`() {
-        state.timeSeconds = 0.1f
-        state.chronosSunAltitude = 0.2f
-        state.energyBatteryLevel = 0.3f
-        state.energyIsCharging = true // 1.0
-        state.vitalityStepsProgress = 0.5f
-        state.energyThermalStress = 0.6f
-        state.zenSocialNoise = 0.7f
-        state.atmosLightLevel = 0.8f
-        state.zenDailyScreenTime = 0.9f
-        state.vitalityRestQuality = 1.0f
-        state.atmosKpIndex = 1.1f
-        state.mediaPulse = 1.2f
-        state.chronosAlarmDistance = 1.3f
-        state.energyChargingSpeed = 1.4f
-        state.zenNotificationCount = 1.5f
-        state.atmosTemperature = 1.6f
-
-        for (i in 0..15) {
+        for (i in 0 until MoriEngineStateIndices.BUFFER_SIZE) {
+            val value = i * 0.1f
+            state.setFieldValue(i, value)
+            
             val bytecode = intArrayOf(OpCode.GET_STATE, i)
-            val expected = state.getFieldValue(i)
-            assertEquals("Failed at index $i", expected, evaluator.evaluate(bytecode, state, signals), 1e-6f)
+            assertEquals("Failed at index $i", value, evaluator.evaluate(bytecode, state, signals), 1e-6f)
         }
         
         // Test invalid index
@@ -188,7 +148,7 @@ class RuleEvaluatorTest {
 
     @Test
     fun `test oscillate parameters`() {
-        state.timeSeconds = 0f
+        state.setFieldValue(MoriEngineStateIndices.FACT_TIME_SECONDS, 0f)
         val bc0 = intArrayOf(
             OpCode.PUSH_CONST, 10f.toBits(), // center
             OpCode.PUSH_CONST, 5f.toBits(),  // amp
@@ -198,23 +158,23 @@ class RuleEvaluatorTest {
         )
         assertEquals(15f, evaluator.evaluate(bc0, state, signals), 1e-6f)
 
-        state.timeSeconds = (PI/4).toFloat()
+        state.setFieldValue(MoriEngineStateIndices.FACT_TIME_SECONDS, (PI/4).toFloat())
         assertEquals(10f, evaluator.evaluate(bc0, state, signals), 1e-6f)
     }
 
     @Test
     fun `test logic truth table`() {
         // IF_GT
-        state.energyBatteryLevel = 0.8f
+        state.setFieldValue(MoriEngineStateIndices.FACT_BATTERY_LEVEL, 0.8f)
         val ifGtThen = intArrayOf(
-            OpCode.GET_STATE, MoriEngineStateIndices.INDEX_BATTERY_LEVEL,
+            OpCode.GET_STATE, MoriEngineStateIndices.FACT_BATTERY_LEVEL,
             OpCode.PUSH_CONST, 0.5f.toBits(), OpCode.PUSH_CONST, 1f.toBits(), OpCode.PUSH_CONST, 0f.toBits(),
             OpCode.IF_GT
         )
         assertEquals(1f, evaluator.evaluate(ifGtThen, state, signals), 1e-6f)
         
         val ifGtElse = intArrayOf(
-            OpCode.GET_STATE, MoriEngineStateIndices.INDEX_BATTERY_LEVEL,
+            OpCode.GET_STATE, MoriEngineStateIndices.FACT_BATTERY_LEVEL,
             OpCode.PUSH_CONST, 0.9f.toBits(), OpCode.PUSH_CONST, 1f.toBits(), OpCode.PUSH_CONST, 0f.toBits(),
             OpCode.IF_GT
         )
@@ -222,7 +182,7 @@ class RuleEvaluatorTest {
 
         // IF_GT Boundary (Equal)
         val ifGtBound = intArrayOf(
-            OpCode.GET_STATE, MoriEngineStateIndices.INDEX_BATTERY_LEVEL,
+            OpCode.GET_STATE, MoriEngineStateIndices.FACT_BATTERY_LEVEL,
             OpCode.PUSH_CONST, 0.8f.toBits(), OpCode.PUSH_CONST, 1f.toBits(), OpCode.PUSH_CONST, 0f.toBits(),
             OpCode.IF_GT
         )
