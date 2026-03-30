@@ -50,7 +50,7 @@ class RuleEvaluator(private val maxStackSize: Int = 32) {
                         push(Float.fromBits(bytecode[pc++]))
                     }
                     OpCode.GET_TIME -> {
-                        push(state.timeSeconds)
+                        push(state.getFieldValue(MoriEngineStateIndices.FACT_TIME_SECONDS))
                     }
                     OpCode.GET_STATE -> {
                         val index = bytecode[pc++]

@@ -47,9 +47,8 @@ class MoriWallpaperTest {
     @Test
     fun `synthesizePalette should use default fallbacks if no layers contribute`() {
         val emptyWallpaper = MoriWallpaper("empty", emptyList())
-        val state = MoriEngineState().apply {
-            chronosSunAltitude = -1.0f 
-        }
+        val state = MoriEngineState()
+        state.setFieldValue(MoriEngineStateIndices.FACT_SUN_ALTITUDE, -1.0f)
 
         emptyWallpaper.synthesizePalette(state)
 
@@ -63,12 +62,12 @@ class MoriWallpaperTest {
         val state = MoriEngineState()
 
         // Test Dark Mode
-        state.chronosSunAltitude = -0.5f
+        state.setFieldValue(MoriEngineStateIndices.FACT_SUN_ALTITUDE, -0.5f)
         wallpaper.synthesizePalette(state)
         assertEquals(true, state.isDarkState)
 
         // Test Light Mode
-        state.chronosSunAltitude = 0.8f
+        state.setFieldValue(MoriEngineStateIndices.FACT_SUN_ALTITUDE, 0.8f)
         wallpaper.synthesizePalette(state)
         assertEquals(false, state.isDarkState)
     }

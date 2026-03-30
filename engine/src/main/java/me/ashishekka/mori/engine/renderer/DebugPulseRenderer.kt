@@ -1,6 +1,7 @@
 package me.ashishekka.mori.engine.renderer
 
 import me.ashishekka.mori.engine.core.MoriEngineState
+import me.ashishekka.mori.engine.core.MoriEngineStateIndices
 import me.ashishekka.mori.engine.core.interfaces.EngineCanvas
 import kotlin.math.min
 import kotlin.math.sin
@@ -39,19 +40,25 @@ class DebugPulseRenderer : EffectRenderer {
         this.state = state
 
         val timeSeconds = state.currentTimeNanos / 1_000_000_000.0
-        val frequency = 0.5 + (state.energyBatteryLevel * 2.0)
-        val multiplier = if (state.energyIsCharging) 2.0 else 1.0
-        val intensity = if (state.zenIsDndActive) 0.5f else {
+        val batteryLevel = state.getFieldValue(MoriEngineStateIndices.FACT_BATTERY_LEVEL)
+        val isCharging = state.getFieldValue(MoriEngineStateIndices.FACT_IS_CHARGING) > 0.5f
+        val isDndActive = state.getFieldValue(MoriEngineStateIndices.FACT_CUSTOM_A) > 0.5f // Placeholder for DND
+        
+        val frequency = 0.5 + (batteryLevel * 2.0)
+        val multiplier = if (isCharging) 2.0 else 1.0
+        val intensity = if (isDndActive) 0.5f else {
             ((sin(timeSeconds * frequency * multiplier * Math.PI) + 1.0) / 2.0).toFloat()
         }
 
-        val alpha = (100 + (state.atmosLightLevel * 155)).toInt()
+        val lightLevel = state.getFieldValue(MoriEngineStateIndices.FACT_LIGHT_LEVEL)
+        val alpha = (100 + (lightLevel * 155)).toInt()
         val rgbIntensity = (intensity * 255).toInt()
         pulseIntensityValue = (alpha shl 24) or (rgbIntensity shl 16)
 
         // Pre-calculate jitter in the update phase
-        if (state.energyThermalStress > 0.3f) {
-            val shake = state.energyThermalStress * 20f
+        val thermalStress = state.getFieldValue(MoriEngineStateIndices.FACT_THERMAL_STRESS)
+        if (thermalStress > 0.3f) {
+            val shake = thermalStress * 20f
             jitterX = Random.nextFloat() * shake - (shake / 2)
             jitterY = Random.nextFloat() * shake - (shake / 2)
         } else {
@@ -83,7 +90,8 @@ class DebugPulseRenderer : EffectRenderer {
         canvas.drawCircle(width * 0.8f - driftX.toFloat(), height * 0.8f - driftY.toFloat(), min(width, height) * 0.6f, (alpha3 shl 24) or themeRgb, true)
 
         // Stardust
-        val numActiveParticles = (state.vitalityStepsProgress * maxParticles).toInt()
+        val stepsProgress = state.getFieldValue(MoriEngineStateIndices.FACT_STEPS_PROGRESS)
+        val numActiveParticles = (stepsProgress * maxParticles).toInt()
         val stardustColor = 0xFFFFFFFF.toInt()
         for (i in 0 until numActiveParticles) {
             val particleAlpha = (128 + sin(timeSeconds * 2.0 + particlePhase[i]) * 127).toInt()

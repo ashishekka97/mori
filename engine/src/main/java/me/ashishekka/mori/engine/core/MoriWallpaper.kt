@@ -68,19 +68,22 @@ class MoriWallpaper(
         state.dominantSurfaceColor = finalSurface ?: deriveSurface(state)
         state.dominantOnSurfaceColor = finalOnSurface ?: deriveOnSurface(state)
         
-        state.isDarkState = state.chronosSunAltitude <= 0.2f
+        val sunAltitude = state.getFieldValue(MoriEngineStateIndices.FACT_SUN_ALTITUDE)
+        state.isDarkState = sunAltitude <= 0.2f
     }
 
     /** Derives a glass-like surface color if not explicitly provided. */
     private fun deriveSurface(state: MoriEngineState): Int {
-        val isDark = state.chronosSunAltitude <= 0.2f
+        val sunAltitude = state.getFieldValue(MoriEngineStateIndices.FACT_SUN_ALTITUDE)
+        val isDark = sunAltitude <= 0.2f
         val surfaceAlpha = if (isDark) 0x4D000000 else 0x4DFFFFFF
         return (surfaceAlpha.toLong() and 0xFF000000L).toInt() or (state.dominantFoundationColor and 0x00FFFFFF)
     }
 
     /** Derives a high-contrast text/icon color if not explicitly provided. */
     private fun deriveOnSurface(state: MoriEngineState): Int {
-        val isDark = state.chronosSunAltitude <= 0.2f
+        val sunAltitude = state.getFieldValue(MoriEngineStateIndices.FACT_SUN_ALTITUDE)
+        val isDark = sunAltitude <= 0.2f
         return if (isDark) 0xFFFFFFFF.toInt() else 0xFF000000.toInt()
     }
 
