@@ -1,8 +1,11 @@
 package me.ashishekka.mori.engine.core
 
+import me.ashishekka.mori.engine.core.models.MoriLayer
+import me.ashishekka.mori.engine.core.models.RenderProperty
 import me.ashishekka.mori.engine.core.util.OpCode
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import java.lang.management.ManagementFactory
 import kotlin.math.*
 
 class RuleEvaluatorTest {
@@ -10,6 +13,48 @@ class RuleEvaluatorTest {
     private val evaluator = RuleEvaluator(maxStackSize = 32)
     private val state = MoriEngineState()
     private val signals = floatArrayOf(1.1f, 2.2f, 3.3f)
+
+    @Test
+    fun `evaluateLayer should populate buffer correctly`() {
+        val layer = MoriLayer(id = 1)
+        
+        // Define rules for X and Y
+        val xRule = intArrayOf(OpCode.PUSH_CONST, 100.5f.toBits())
+        val yRule = intArrayOf(OpCode.PUSH_CONST, 200.5f.toBits())
+        
+        layer.propertyRules[RenderProperty.INDEX_X] = xRule
+        layer.propertyRules[RenderProperty.INDEX_Y] = yRule
+        
+        evaluator.evaluateLayer(layer, state, signals)
+        
+        assertEquals(100.5f, layer.propertyBuffer[RenderProperty.INDEX_X], 1e-6f)
+        assertEquals(200.5f, layer.propertyBuffer[RenderProperty.INDEX_Y], 1e-6f)
+        assertEquals(0f, layer.propertyBuffer[RenderProperty.INDEX_SCALE_X], 1e-6f) // No rule
+    }
+
+    @Test
+    fun `evaluateLayer should be allocation-free`() {
+        val layer = MoriLayer(id = 1)
+        for (i in 0 until RenderProperty.BUFFER_SIZE) {
+            layer.propertyRules[i] = intArrayOf(OpCode.PUSH_CONST, i.toFloat().toBits())
+        }
+
+        // Warm up
+        repeat(100) { evaluator.evaluateLayer(layer, state, signals) }
+
+        val threadBean = ManagementFactory.getThreadMXBean()
+        val threadId = Thread.currentThread().id
+        
+        val allocatedBefore = (threadBean as com.sun.management.ThreadMXBean).getThreadAllocatedBytes(threadId)
+        
+        repeat(1000) {
+            evaluator.evaluateLayer(layer, state, signals)
+        }
+        
+        val allocatedAfter = (threadBean as com.sun.management.ThreadMXBean).getThreadAllocatedBytes(threadId)
+        
+        assertEquals("evaluateLayer should not allocate any memory on the heap", 0, allocatedAfter - allocatedBefore)
+    }
 
     @Test
     fun `test empty bytecode`() {

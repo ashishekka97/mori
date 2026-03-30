@@ -1,5 +1,7 @@
 package me.ashishekka.mori.engine.core
 
+import me.ashishekka.mori.engine.core.models.MoriLayer
+import me.ashishekka.mori.engine.core.models.RenderProperty
 import me.ashishekka.mori.engine.core.util.ColorUtils
 import me.ashishekka.mori.engine.core.util.OpCode
 import kotlin.math.*
@@ -27,11 +29,11 @@ class RuleEvaluator(private val maxStackSize: Int = 32) {
      * @return The final Float result (or 0.0f if bytecode is empty or malformed).
      */
     fun evaluate(
-        bytecode: IntArray,
+        bytecode: IntArray?,
         state: MoriEngineState,
         signals: FloatArray
     ): Float {
-        if (bytecode.isEmpty()) return 0f
+        if (bytecode == null || bytecode.isEmpty()) return 0f
 
         sp = -1 // Reset stack pointer
         var pc = 0 // Program Counter
@@ -201,6 +203,29 @@ class RuleEvaluator(private val maxStackSize: Int = 32) {
         }
 
         return if (sp >= 0) stack[sp] else 0f
+    }
+
+    /**
+     * Batch execution of rules for a given [MoriLayer].
+     * Writes the resulting properties directly into the [MoriLayer.propertyBuffer].
+     * 
+     * DESIGN PRINCIPLE:
+     * This loop is optimized for 0 allocations and high cache locality.
+     */
+    fun evaluateLayer(
+        layer: MoriLayer,
+        state: MoriEngineState,
+        signals: FloatArray
+    ) {
+        val rules = layer.propertyRules
+        val buffer = layer.propertyBuffer
+        for (i in 0 until RenderProperty.BUFFER_SIZE) {
+            val bytecode = rules[i]
+            // If there's a rule, update the buffer. If not, the previous value persists.
+            if (bytecode != null) {
+                buffer[i] = evaluate(bytecode, state, signals)
+            }
+        }
     }
 
     private fun push(value: Float) {

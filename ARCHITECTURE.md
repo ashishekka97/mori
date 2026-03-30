@@ -95,6 +95,10 @@ To ensure data integrity and zero-allocation synthesis, the engine follows a str
 *   **Property Buffers**: Results are written into flat memory buffers, ensuring 0 heap allocations during the hot path.
 *   **Cached Contributions**: Renderers use a caching strategy for `RendererPalette` objects to avoid per-frame allocations.
 
+### Zero-Meaning Design Principle
+*   **Semantic Isolation**: The Engine and Persona modules are strictly agnostic. They process "Facts" and "Properties" without knowing their semantic meaning (e.g., whether a value represents "Battery" or "Hunger").
+*   **Biome Interpretation**: All meaning is defined within the Biome's JSON DSL, which maps raw Facts to visual Properties via the Rule Engine.
+
 ### Perceptual Design
 *   **OKLab Synthesis**: All atmospheric color transitions are performed in OKLab space to prevent "muddy" desaturation during sunrise/sunset cycles.
 
