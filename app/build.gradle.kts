@@ -72,6 +72,7 @@ dependencies {
     implementation(project(":persona"))
     implementation(project(":engine"))
     implementation(project(":bridge"))
+    implementation(project(":biome"))
 
     // Testing & Debug
     testImplementation(libs.junit)

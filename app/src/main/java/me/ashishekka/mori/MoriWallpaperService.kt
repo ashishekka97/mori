@@ -3,6 +3,7 @@ package me.ashishekka.mori
 import android.service.wallpaper.WallpaperService
 import android.view.SurfaceHolder
 import kotlinx.coroutines.CoroutineScope
+import me.ashishekka.mori.app.WallpaperFactory
 import me.ashishekka.mori.bridge.metrics.MetricCalculator
 import me.ashishekka.mori.bridge.sync.StateSynchronizer
 import me.ashishekka.mori.engine.core.MoriEngine
@@ -24,6 +25,7 @@ class MoriWallpaperService : WallpaperService() {
     private val lifecycleManager: MoriLifecycleManager by inject()
     private val stateManager: StateManager by inject()
     private val metricCalculator: MetricCalculator by inject()
+    private val wallpaperFactory: WallpaperFactory by inject()
     private val engineScope: CoroutineScope by inject(named("EngineScope"))
 
     override fun onCreateEngine(): Engine {
@@ -49,7 +51,7 @@ class MoriWallpaperService : WallpaperService() {
                 }
                 
                 // UNIFIED: Use the formal Wallpaper Spec
-                moriEngine.setWallpaper(MoriWallpaper.createDebugWallpaper())
+                moriEngine.setWallpaper(wallpaperFactory.createDebugPrismWallpaper())
                 
                 moriEngine.start()
                 stateSynchronizer.start()

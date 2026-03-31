@@ -85,6 +85,9 @@ class MoriEngine(
     fun onDrawFrame(frameTimeNanos: Long = System.nanoTime()) {
         state.currentTimeNanos = frameTimeNanos
         
+        // Update timeSeconds for smooth DSL animations
+        state.timeSeconds = frameTimeNanos / 1_000_000_000f
+        
         // 1. UPDATE: Propagate the latest state to all layers first.
         layerManager.update(state)
         

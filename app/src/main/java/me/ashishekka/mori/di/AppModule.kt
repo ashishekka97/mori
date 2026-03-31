@@ -4,6 +4,8 @@ import android.view.Choreographer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import me.ashishekka.mori.app.WallpaperFactory
+import me.ashishekka.mori.biome.di.biomeModule
 import me.ashishekka.mori.bridge.di.bridgeModule
 import me.ashishekka.mori.engine.ChoreographerTicker
 import me.ashishekka.mori.engine.SurfaceHolderRenderSurface
@@ -19,8 +21,8 @@ import org.koin.dsl.module
  * Aggregates all sub-modules from other layers (Persona, Engine, etc.).
  */
 val appModule = module {
-    // Phase 1, 2 & 3: Includes Persona, Engine, and Bridge layers.
-    includes(personaModule, engineModule, bridgeModule)
+    // Phase 1, 2, 3 & 6: Includes Persona, Engine, Bridge, and Biome layers.
+    includes(personaModule, engineModule, bridgeModule, biomeModule)
 
     // Android Framework
     single { Choreographer.getInstance() }
@@ -35,4 +37,7 @@ val appModule = module {
 
     // Scopes
     single(named("EngineScope")) { CoroutineScope(Dispatchers.Default + Job()) }
+
+    // Factories
+    single { WallpaperFactory(get(), get()) }
 }

@@ -1,0 +1,19 @@
+{
+    "id": "prism_demo",
+    "name": "The Data-Driven Prism",
+    "description": "A validation demo for the Mori Rule Engine. Responds to Time, Battery, and Light Level.",
+    "layers": [
+        {
+            "id": 1,
+            "type": "RECT",
+            "expressions": {
+                "x": "500 + sin(time * 2) * 300",
+                "y": "500 + cos(time * 1.5) * 300",
+                "scale_x": "1 + fact[6] * 0.5",
+                "scale_y": "1 + fact[6] * 0.5",
+                "alpha": "fact[18]",
+                "rotation": "time * 90"
+            }
+        }
+    ]
+}

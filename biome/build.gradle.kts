@@ -30,8 +30,12 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.serialization.json)
 
+    // Dependency Injection (Koin)
+    implementation(libs.koin.android)
+
     // Mori Modules (Biome depends on Engine to build wallpapers)
     implementation(project(":engine"))
 
     testImplementation(libs.junit)
+    testImplementation(libs.mockk)
 }
