@@ -2,10 +2,13 @@ package me.ashishekka.mori.biome.provider
 
 import android.content.Context
 import android.content.res.AssetManager
+import android.util.Log
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Before
 import org.junit.Test
 import java.io.ByteArrayInputStream
 
@@ -14,6 +17,13 @@ class AssetBiomeProviderTest {
     private val mockContext = mockk<Context>()
     private val mockAssets = mockk<AssetManager>()
     private val provider = AssetBiomeProvider(mockContext)
+
+    @Before
+    fun setUp() {
+        mockkStatic(Log::class)
+        every { Log.e(any(), any()) } returns 0
+        every { Log.e(any(), any(), any()) } returns 0
+    }
 
     @Test
     fun `getBiome should load and decode valid JSON from assets`() {

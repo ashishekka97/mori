@@ -1,5 +1,6 @@
 package me.ashishekka.mori.biome.compiler
 
+import me.ashishekka.mori.engine.core.MoriEngineStateIndices
 import me.ashishekka.mori.engine.core.util.OpCode
 import java.util.*
 
@@ -10,8 +11,8 @@ import java.util.*
  * Example: "10 + 2 * sin(time)" -> [PUSH_CONST, 10, PUSH_CONST, 2, GET_TIME, SIN, MUL, ADD]
  * 
  * DESIGN PRINCIPLE:
- * This compiler is designed to be "Fail-Safe." If an expression is malformed,
- * it returns an empty bytecode array, allowing the Engine to safely skip it.
+ * This compiler is designed to be "Fail-Safe" and "Optimized." 
+ * It performs Constant Folding (e.g., "500 + 100" -> "600") and Index Guarding.
  */
 object ExpressionCompiler {
 
@@ -25,12 +26,56 @@ object ExpressionCompiler {
         return try {
             val tokens = tokenize(expression)
             val postfix = infixToPostfix(tokens)
-            val bytecode = generateBytecode(postfix)
+            val foldedPostfix = constantFold(postfix)
+            val bytecode = generateBytecode(foldedPostfix)
             if (validateBytecode(bytecode)) bytecode else intArrayOf()
         } catch (e: Exception) {
             // Logically malformed expression, return empty bytecode
             intArrayOf()
         }
+    }
+
+    /**
+     * Evaluates static math at compile time to reduce Engine workload.
+     * e.g., ["500", "100", "+"] -> ["600.0"]
+     */
+    private fun constantFold(postfix: List<String>): List<String> {
+        val stack = Stack<String>()
+        
+        postfix.forEach { token ->
+            when (token) {
+                "+", "-", "*", "/", "%" -> {
+                    if (stack.size >= 2) {
+                        val bStr = stack.pop()
+                        val aStr = stack.pop()
+                        val b = bStr.toFloatOrNull()
+                        val a = aStr.toFloatOrNull()
+                        
+                        if (a != null && b != null) {
+                            val result = when (token) {
+                                "+" -> a + b
+                                "-" -> a - b
+                                "*" -> a * b
+                                "/" -> if (b != 0f) a / b else 0f
+                                "%" -> if (b != 0f) a % b else 0f
+                                else -> 0f
+                            }
+                            stack.push(result.toString())
+                        } else {
+                            // Not constants, push back
+                            stack.push(aStr)
+                            stack.push(bStr)
+                            stack.push(token)
+                        }
+                    } else {
+                        stack.push(token)
+                    }
+                }
+                else -> stack.push(token)
+            }
+        }
+        
+        return stack.toList()
     }
 
     /**
@@ -93,8 +138,8 @@ object ExpressionCompiler {
 
     private fun tokenize(expression: String): List<String> {
         val tokens = mutableListOf<String>()
-        // Improved regex to capture all valid tokens including floats, identifiers, and operators
-        val regex = Regex("""([0-9]*\.?[0-9]+)|([a-zA-Z_][a-zA-Z0-9_]*)|(\[)|(\])|(\()|(\))|(\+|-|\*|/|%)|(,)""")
+        // Improved regex to capture floats, identifiers, operators, #HEX colors, and fact[n]
+        val regex = Regex("""(fact\[[0-9]+\])|([0-9]*\.?[0-9]+)|([a-zA-Z_][a-zA-Z0-9_]*)|(\#[a-fA-F0-9]{6,8})|(\[)|(\])|(\()|(\))|(\+|-|\*|/|%)|(,)""")
         regex.findAll(expression).forEach { match ->
             tokens.add(match.value)
         }
@@ -114,8 +159,8 @@ object ExpressionCompiler {
         while (i < tokens.size) {
             val token = tokens[i]
             when {
-                // Number
-                token.first().isDigit() || (token.length > 1 && token.first() == '.' && token[1].isDigit()) -> output.add(token)
+                // Number, Hex Color, or fact[n]
+                token.startsWith("fact[") || token.first().isDigit() || token.startsWith("#") || (token.length > 1 && token.first() == '.' && token[1].isDigit()) -> output.add(token)
                 
                 // Function or Fact
                 token.all { it.isLetter() || it == '_' } -> {
@@ -209,19 +254,37 @@ object ExpressionCompiler {
                 "ease_back" -> bytecode.add(OpCode.EASE_BACK)
                 "ease_elastic" -> bytecode.add(OpCode.EASE_ELASTIC)
                 
-                // --- Special: fact[n] ---
-                "fact" -> bytecode.add(OpCode.GET_STATE)
-                
                 else -> {
-                    // Constant Number
-                    val value = token.toFloatOrNull()
-                    if (value != null) {
-                        bytecode.add(OpCode.PUSH_CONST)
-                        bytecode.add(value.toBits())
+                    if (token.startsWith("fact[")) {
+                        val indexStr = token.substring(5, token.length - 1)
+                        val index = indexStr.toIntOrNull() ?: 0
+                        if (index < 0 || index >= MoriEngineStateIndices.BUFFER_SIZE) {
+                            throw IllegalArgumentException("Fact index out of bounds: $index")
+                        }
+                        bytecode.add(OpCode.GET_STATE)
+                        bytecode.add(index)
+                    } else if (token.startsWith("#")) {
+                        // Parse Hex Color directly to Int bits to prevent Float precision loss
+                        val hexStr = if (token.length == 7) "#FF" + token.substring(1) else token
+                        try {
+                            val colorInt = hexStr.substring(1).toLong(16).toInt()
+                            bytecode.add(OpCode.PUSH_CONST)
+                            bytecode.add(colorInt)
+                        } catch (e: Exception) {
+                            bytecode.add(OpCode.PUSH_CONST)
+                            bytecode.add(0f.toBits())
+                        }
                     } else {
-                        // Unknown or error fallback: Push 0
-                        bytecode.add(OpCode.PUSH_CONST)
-                        bytecode.add(0f.toBits())
+                        // Constant Number
+                        val value = token.toFloatOrNull()
+                        if (value != null) {
+                            bytecode.add(OpCode.PUSH_CONST)
+                            bytecode.add(value.toBits())
+                        } else {
+                            // Unknown or error fallback: Push 0
+                            bytecode.add(OpCode.PUSH_CONST)
+                            bytecode.add(0f.toBits())
+                        }
                     }
                 }
             }

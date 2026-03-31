@@ -9,7 +9,13 @@ interface EngineCanvas {
     fun drawColor(colorInt: Int)
     fun drawRect(left: Float, top: Float, right: Float, bottom: Float, color: Int, isFilled: Boolean = true, thickness: Float = 4f)
     fun drawCircle(centerX: Float, centerY: Float, radius: Float, color: Int, isFilled: Boolean = true, thickness: Float = 4f)
-    // Future: drawBitmap, etc.
+    fun drawPolygon(points: FloatArray, pointCount: Int, color: Int, isFilled: Boolean = true, thickness: Float = 4f)
+    
+    fun save()
+    fun restore()
+    fun rotate(degrees: Float, pivotX: Float = 0f, pivotY: Float = 0f)
+    fun translate(dx: Float, dy: Float)
+    fun scale(sx: Float, sy: Float, pivotX: Float = 0f, pivotY: Float = 0f)
 }
 
 /**

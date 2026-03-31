@@ -30,16 +30,43 @@ class DslEffectRendererTest {
         renderer.render(mockCanvas)
 
         // Then
-        // Default size is 100x100
+        // Default size is 100x100, drawn around 0,0 due to translate
         verify {
+            mockCanvas.translate(eq(500f), eq(600f))
             mockCanvas.drawRect(
-                450f, // 500 - 50
-                550f, // 600 - 50
-                550f, // 500 + 50
-                650f, // 600 + 50
+                eq(-50f), // 100 / 2
+                eq(-50f),
+                eq(50f),
+                eq(50f),
                 any(),
-                true
+                eq(true),
+                eq(0f)
             )
+        }
+    }
+
+    @Test
+    fun `render should draw stroke if stroke_width is defined`() {
+        val layer = MoriLayer(id = 1)
+        layer.propertyRules[RenderProperty.INDEX_X] = intArrayOf(OpCode.PUSH_CONST, 100f.toBits())
+        layer.propertyRules[RenderProperty.INDEX_Y] = intArrayOf(OpCode.PUSH_CONST, 100f.toBits())
+        layer.propertyRules[RenderProperty.INDEX_STROKE_WIDTH] = intArrayOf(OpCode.PUSH_CONST, 5f.toBits())
+        
+        val renderer = DslEffectRenderer(layer, evaluator)
+
+        // When
+        renderer.update(state)
+        renderer.render(mockCanvas)
+
+        // Then
+        // Verify FILL pass
+        verify {
+            mockCanvas.translate(eq(100f), eq(100f))
+            mockCanvas.drawRect(eq(-50f), eq(-50f), eq(50f), eq(50f), any(), eq(true), eq(5f))
+        }
+        // Verify STROKE pass
+        verify {
+            mockCanvas.drawRect(eq(-50f), eq(-50f), eq(50f), eq(50f), any(), eq(false), eq(5f))
         }
     }
 
@@ -60,17 +87,19 @@ class DslEffectRendererTest {
         renderer.render(mockCanvas)
 
         // Then
-        // Scaled size is 200x200 (100 * 2.0)
-        // Alpha 0.5 is 127 (approx)
-        val expectedColor = (127 shl 24) or (0xFFFFFF)
+        // Scale is applied via canvas.scale
+        val expectedColor = (127 shl 24) or 0xFFFFFF
         verify {
+            mockCanvas.translate(eq(100f), eq(100f))
+            mockCanvas.scale(eq(2f), eq(2f), eq(0f), eq(0f))
             mockCanvas.drawRect(
-                0f,   // 100 - 100
-                0f,   // 100 - 100
-                200f, // 100 + 100
-                200f, // 100 + 100
-                expectedColor,
-                true
+                eq(-50f),
+                eq(-50f),
+                eq(50f),
+                eq(50f),
+                eq(expectedColor),
+                eq(true),
+                eq(0f)
             )
         }
     }

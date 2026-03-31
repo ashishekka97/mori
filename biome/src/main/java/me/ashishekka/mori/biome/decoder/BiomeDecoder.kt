@@ -4,6 +4,7 @@ import kotlinx.serialization.json.Json
 import me.ashishekka.mori.biome.compiler.ExpressionCompiler
 import me.ashishekka.mori.biome.models.BiomeModel
 import me.ashishekka.mori.engine.core.MoriWallpaper
+import me.ashishekka.mori.engine.core.models.LayerType
 import me.ashishekka.mori.engine.core.models.MoriLayer
 import me.ashishekka.mori.engine.core.models.RenderProperty
 
@@ -45,7 +46,11 @@ object BiomeDecoder {
         
         return model.layers.mapNotNull { layerModel ->
             try {
-                val engineLayer = MoriLayer(id = layerModel.id)
+                val engineLayer = MoriLayer(
+                    id = layerModel.id,
+                    type = LayerType.fromString(layerModel.type),
+                    zOrder = layerModel.zOrder
+                )
                 
                 layerModel.expressions.forEach { (propertyName, expression) ->
                     val propertyIndex = mapPropertyNameToIndex(propertyName)
@@ -70,6 +75,9 @@ object BiomeDecoder {
             "scale_x" -> RenderProperty.INDEX_SCALE_X
             "scale_y" -> RenderProperty.INDEX_SCALE_Y
             "rotation" -> RenderProperty.INDEX_ROTATION
+            "width" -> RenderProperty.INDEX_WIDTH
+            "height" -> RenderProperty.INDEX_HEIGHT
+            "stroke_width" -> RenderProperty.INDEX_STROKE_WIDTH
             "alpha" -> RenderProperty.INDEX_ALPHA
             "color_primary" -> RenderProperty.INDEX_COLOR_PRIMARY
             "color_secondary" -> RenderProperty.INDEX_COLOR_SECONDARY
@@ -77,6 +85,7 @@ object BiomeDecoder {
             "custom_b" -> RenderProperty.INDEX_CUSTOM_B
             "custom_c" -> RenderProperty.INDEX_CUSTOM_C
             "custom_d" -> RenderProperty.INDEX_CUSTOM_D
+            "custom_e" -> RenderProperty.INDEX_CUSTOM_E
             else -> -1
         }
     }

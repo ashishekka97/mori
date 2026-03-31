@@ -1,18 +1,48 @@
 {
     "id": "prism_demo",
-    "name": "The Data-Driven Prism",
-    "description": "A validation demo for the Mori Rule Engine. Responds to Time, Battery, and Light Level.",
+    "name": "The True Spectral Prism",
+    "description": "A 3D spinning Tetrahedron showcasing VIBGYOR color shifting, synchronized facets, and crisp outlines.",
     "layers": [
         {
             "id": 1,
-            "type": "RECT",
+            "type": "TRIANGLE",
+            "zOrder": 10,
             "expressions": {
-                "x": "500 + sin(time * 2) * 300",
-                "y": "500 + cos(time * 1.5) * 300",
-                "scale_x": "1 + fact[6] * 0.5",
-                "scale_y": "1 + fact[6] * 0.5",
-                "alpha": "fact[18]",
-                "rotation": "time * 90"
+                "x": "500",
+                "y": "500",
+                "width": "sin(time * 1.5) * 350",
+                "height": "400",
+                "stroke_width": "6",
+                "alpha": "0.7",
+                "color_primary": "mix_oklab(#FF0000, #00FF00, (sin(time * 0.5) + 1) / 2)"
+            }
+        },
+        {
+            "id": 2,
+            "type": "TRIANGLE",
+            "zOrder": 20,
+            "expressions": {
+                "x": "500",
+                "y": "500",
+                "width": "sin(time * 1.5 + 2.094) * 350",
+                "height": "400",
+                "stroke_width": "6",
+                "alpha": "0.7",
+                "color_primary": "mix_oklab(#00FF00, #0000FF, (sin(time * 0.5) + 1) / 2)"
+            }
+        },
+        {
+            "id": 3,
+            "type": "TRIANGLE",
+            "zOrder": 30,
+            "expressions": {
+                "x": "500",
+                "y": "500",
+                "width": "sin(time * 1.5 + 4.188) * 350",
+                "height": "400",
+                "stroke_width": "6",
+                "alpha": "0.7",
+                "color_primary": "mix_oklab(#0000FF, #FF0000, (sin(time * 0.5) + 1) / 2)"
             }
         }
     ]

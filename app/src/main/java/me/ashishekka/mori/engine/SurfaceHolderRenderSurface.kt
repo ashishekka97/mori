@@ -2,6 +2,7 @@ package me.ashishekka.mori.engine
 
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.graphics.Path
 import android.service.wallpaper.WallpaperService
 import me.ashishekka.mori.engine.core.interfaces.EngineCanvas
 import me.ashishekka.mori.engine.core.interfaces.RenderSurface
@@ -12,6 +13,7 @@ import me.ashishekka.mori.engine.core.interfaces.RenderSurface
 class AndroidEngineCanvas(val nativeCanvas: Canvas) : EngineCanvas {
     
     private val paint = Paint()
+    private val path = Path()
 
     override fun drawColor(colorInt: Int) {
         nativeCanvas.drawColor(colorInt)
@@ -29,6 +31,49 @@ class AndroidEngineCanvas(val nativeCanvas: Canvas) : EngineCanvas {
         paint.style = if (isFilled) Paint.Style.FILL else Paint.Style.STROKE
         paint.strokeWidth = if (isFilled) 0f else thickness
         nativeCanvas.drawCircle(centerX, centerY, radius, paint)
+    }
+
+    override fun drawPolygon(points: FloatArray, pointCount: Int, color: Int, isFilled: Boolean, thickness: Float) {
+        if (pointCount < 4 || points.size < pointCount) return
+        
+        paint.color = color
+        paint.style = if (isFilled) Paint.Style.FILL else Paint.Style.STROKE
+        paint.strokeWidth = if (isFilled) 0f else thickness
+        
+        path.reset()
+        path.moveTo(points[0], points[1])
+        
+        var i = 2
+        while (i < pointCount - 1) {
+            path.lineTo(points[i], points[i + 1])
+            i += 2
+        }
+        
+        if (isFilled) {
+            path.close()
+        }
+        
+        nativeCanvas.drawPath(path, paint)
+    }
+
+    override fun save() {
+        nativeCanvas.save()
+    }
+
+    override fun restore() {
+        nativeCanvas.restore()
+    }
+
+    override fun rotate(degrees: Float, pivotX: Float, pivotY: Float) {
+        nativeCanvas.rotate(degrees, pivotX, pivotY)
+    }
+
+    override fun translate(dx: Float, dy: Float) {
+        nativeCanvas.translate(dx, dy)
+    }
+
+    override fun scale(sx: Float, sy: Float, pivotX: Float, pivotY: Float) {
+        nativeCanvas.scale(sx, sy, pivotX, pivotY)
     }
 }
 
