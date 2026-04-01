@@ -33,5 +33,16 @@ class StateHandoverTest {
         assertEquals(1.0f, engine.getFieldValue(MoriEngineStateIndices.FACT_IS_CHARGING))
         assertEquals(world.energyThermalStress, engine.getFieldValue(MoriEngineStateIndices.FACT_THERMAL_STRESS))
         assertEquals(world.atmosLightLevel, engine.getFieldValue(MoriEngineStateIndices.FACT_LIGHT_LEVEL))
+
+        // --- Platform Metadata ---
+        val engineWithSurface = MoriEngineState().apply {
+            surfaceWidth = 1000
+            surfaceHeight = 2000
+        }
+        StateHandover.sync(world, engineWithSurface)
+        
+        assertEquals(2.0f, engineWithSurface.getFieldValue(MoriEngineStateIndices.FACT_ASPECT_RATIO)) // 2000/1000
+        assertEquals(0.0f, engineWithSurface.getFieldValue(MoriEngineStateIndices.FACT_IS_LANDSCAPE)) // Portrait
+        assertEquals(0.5f, engineWithSurface.getFieldValue(MoriEngineStateIndices.FACT_FIELD_RATIO)) // 1000/2000
     }
 }

@@ -46,15 +46,17 @@ object MoriEngineStateIndices {
     const val FACT_ALARM_DISTANCE = 22
     const val FACT_NOTIFICATION_COUNT = 23
     
-    // --- Expansion Slots (24-31) ---
-    const val FACT_CUSTOM_A = 24
-    const val FACT_CUSTOM_B = 25
-    const val FACT_CUSTOM_C = 26
-    const val FACT_CUSTOM_D = 27
-    const val FACT_CUSTOM_E = 28
-    const val FACT_CUSTOM_F = 29
-    const val FACT_CUSTOM_G = 30
-    const val FACT_CUSTOM_H = 31
+    // --- Platform Metadata (24-26) ---
+    const val FACT_ASPECT_RATIO = 24
+    const val FACT_IS_LANDSCAPE = 25
+    const val FACT_FIELD_RATIO = 26
+
+    // --- Expansion Slots (27-31) ---
+    const val FACT_CUSTOM_A = 27
+    const val FACT_CUSTOM_B = 28
+    const val FACT_CUSTOM_C = 29
+    const val FACT_CUSTOM_D = 30
+    const val FACT_CUSTOM_E = 31
 
     const val BUFFER_SIZE = 32
 }
