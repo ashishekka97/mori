@@ -10,6 +10,8 @@ package me.ashishekka.mori.engine.core.models
  */
 class MoriLayer(
     val id: Int,
+    val type: LayerType = LayerType.RECT,
+    val zOrder: Int = 0,
     /** 
      * The executable machine code for each property in [RenderProperty].
      * If a rule is null, the corresponding property value remains unchanged or defaults to 0.

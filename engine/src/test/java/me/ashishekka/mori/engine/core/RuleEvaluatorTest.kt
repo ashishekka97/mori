@@ -210,13 +210,27 @@ class RuleEvaluatorTest {
         assert(n2 >= 0f)
 
         // MIX_OKLAB
-        val red = 0xFFFF0000.toInt().toFloat()
-        val blue = 0xFF0000FF.toInt().toFloat()
-        assertEquals(red, evaluator.evaluate(intArrayOf(OpCode.PUSH_CONST, red.toBits(), OpCode.PUSH_CONST, blue.toBits(), OpCode.PUSH_CONST, 0.0f.toBits(), OpCode.MIX_OKLAB), state, signals), 1e-6f)
-        assertEquals(blue, evaluator.evaluate(intArrayOf(OpCode.PUSH_CONST, red.toBits(), OpCode.PUSH_CONST, blue.toBits(), OpCode.PUSH_CONST, 1.0f.toBits(), OpCode.MIX_OKLAB), state, signals), 1e-6f)
+        val redInt = 0xFFFF0000.toInt()
+        val blueInt = 0xFF0000FF.toInt()
         
-        val resultMid = evaluator.evaluate(intArrayOf(OpCode.PUSH_CONST, red.toBits(), OpCode.PUSH_CONST, blue.toBits(), OpCode.PUSH_CONST, 0.5f.toBits(), OpCode.MIX_OKLAB), state, signals).toInt()
-        assertEquals(0xFF43165C.toInt(), resultMid)
+        val redFloat = java.lang.Float.intBitsToFloat(redInt)
+        val blueFloat = java.lang.Float.intBitsToFloat(blueInt)
+
+        assertEquals(
+            redFloat, 
+            evaluator.evaluate(intArrayOf(OpCode.PUSH_CONST, redInt, OpCode.PUSH_CONST, blueInt, OpCode.PUSH_CONST, 0.0f.toBits(), OpCode.MIX_OKLAB), state, signals), 
+            1e-6f
+        )
+        assertEquals(
+            blueFloat, 
+            evaluator.evaluate(intArrayOf(OpCode.PUSH_CONST, redInt, OpCode.PUSH_CONST, blueInt, OpCode.PUSH_CONST, 1.0f.toBits(), OpCode.MIX_OKLAB), state, signals), 
+            1e-6f
+        )
+        
+        val resultMidBits = java.lang.Float.floatToRawIntBits(
+            evaluator.evaluate(intArrayOf(OpCode.PUSH_CONST, redInt, OpCode.PUSH_CONST, blueInt, OpCode.PUSH_CONST, 0.5f.toBits(), OpCode.MIX_OKLAB), state, signals)
+        )
+        assertEquals(0xFF43165C.toInt(), resultMidBits)
     }
 
     @Test

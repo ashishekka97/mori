@@ -47,7 +47,7 @@ class RuleEvaluator(private val maxStackSize: Int = 32) {
                     // --- 0x00: Data Ingress ---
                     OpCode.PUSH_CONST -> {
                         // The next Int in bytecode is the Float bits representation
-                        push(Float.fromBits(bytecode[pc++]))
+                        push(java.lang.Float.intBitsToFloat(bytecode[pc++]))
                     }
                     OpCode.GET_TIME -> {
                         push(state.getFieldValue(MoriEngineStateIndices.FACT_TIME_SECONDS))
@@ -172,9 +172,9 @@ class RuleEvaluator(private val maxStackSize: Int = 32) {
                     }
                     OpCode.MIX_OKLAB -> {
                         val t = pop()
-                        val colorTo = pop().toInt()
-                        val colorFrom = pop().toInt()
-                        push(ColorUtils.lerpColorOklab(colorFrom, colorTo, t).toFloat())
+                        val colorTo = java.lang.Float.floatToRawIntBits(pop())
+                        val colorFrom = java.lang.Float.floatToRawIntBits(pop())
+                        push(java.lang.Float.intBitsToFloat(ColorUtils.lerpColorOklab(colorFrom, colorTo, t)))
                     }
 
                     // --- 0x60: Motion Easing ---

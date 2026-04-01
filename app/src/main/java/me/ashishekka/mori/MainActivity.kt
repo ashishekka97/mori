@@ -38,6 +38,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import me.ashishekka.mori.app.WallpaperFactory
 import me.ashishekka.mori.app.components.PulseBackdrop
 import me.ashishekka.mori.persona.lifecycle.MoriLifecycleManager
 import me.ashishekka.mori.persona.state.StateManager
@@ -50,6 +51,7 @@ class MainActivity : ComponentActivity() {
 
     private val stateManager: StateManager by inject()
     private val lifecycleManager: MoriLifecycleManager by inject()
+    private val wallpaperFactory: WallpaperFactory by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,7 +68,10 @@ class MainActivity : ComponentActivity() {
             }
 
             // A single PulseBackdrop now owns the theme for the entire screen.
-            PulseBackdrop(worldState = worldState) {
+            PulseBackdrop(
+                worldState = worldState,
+                wallpaper = remember { wallpaperFactory.createDebugPrismWallpaper() }
+            ) {
                 AnimatedContent(
                     targetState = showGallery,
                     transitionSpec = {

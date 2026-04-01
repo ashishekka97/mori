@@ -1,5 +1,6 @@
 package me.ashishekka.mori.di
 
+import android.content.Context
 import android.service.wallpaper.WallpaperService
 import android.view.Choreographer
 import kotlinx.coroutines.CoroutineScope
@@ -30,7 +31,8 @@ class AppModuleTest : KoinTest {
                 SolarCalculator::class,
                 LunarCalculator::class,
                 CoroutineScope::class,
-                Choreographer::class
+                Choreographer::class,
+                Context::class
             )
         )
     }

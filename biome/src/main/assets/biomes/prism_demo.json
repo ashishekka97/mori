@@ -1,0 +1,49 @@
+{
+    "id": "prism_demo",
+    "name": "The True Spectral Prism",
+    "description": "A 3D spinning Tetrahedron showcasing VIBGYOR color shifting, synchronized facets, and crisp outlines.",
+    "layers": [
+        {
+            "id": 1,
+            "type": "TRIANGLE",
+            "zOrder": 10,
+            "expressions": {
+                "x": "500",
+                "y": "500",
+                "width": "sin(time * 1.5) * 350",
+                "height": "400",
+                "stroke_width": "6",
+                "alpha": "0.7",
+                "color_primary": "mix_oklab(#FF0000, #00FF00, (sin(time * 0.5) + 1) / 2)"
+            }
+        },
+        {
+            "id": 2,
+            "type": "TRIANGLE",
+            "zOrder": 20,
+            "expressions": {
+                "x": "500",
+                "y": "500",
+                "width": "sin(time * 1.5 + 2.094) * 350",
+                "height": "400",
+                "stroke_width": "6",
+                "alpha": "0.7",
+                "color_primary": "mix_oklab(#00FF00, #0000FF, (sin(time * 0.5) + 1) / 2)"
+            }
+        },
+        {
+            "id": 3,
+            "type": "TRIANGLE",
+            "zOrder": 30,
+            "expressions": {
+                "x": "500",
+                "y": "500",
+                "width": "sin(time * 1.5 + 4.188) * 350",
+                "height": "400",
+                "stroke_width": "6",
+                "alpha": "0.7",
+                "color_primary": "mix_oklab(#0000FF, #FF0000, (sin(time * 0.5) + 1) / 2)"
+            }
+        }
+    ]
+}
