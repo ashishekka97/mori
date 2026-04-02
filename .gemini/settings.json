@@ -1,5 +1,10 @@
 {
   "context": {
     "fileName": "AGENTS.md"
+  },
+  "general": {
+    "plan": {
+      "directory": ".gemini/plans"
+    }
   }
 }

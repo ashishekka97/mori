@@ -138,16 +138,18 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 *Goal: Connect the Brain to high-performance assets.*
 
 ### 7.1 Asset Management
+- [ ] **7.1.0 Asset Ingress Architecture:** Define how `:app` loads bitmaps and hands them to `:engine` via `:bridge`.
 - [ ] **7.1.1 Bitmap Texture Atlas:** Implement a system to pack multiple assets into a single GPU texture.
 - [ ] **7.1.2 Asset Registry:** Manage asset lifecycles and "Ready" state handshakes.
 
 ### 7.2 The Shader Bridge
 - [ ] **7.2.1 AGSL Integration:** Enable custom shaders in the platform-agnostic `EngineCanvas`.
 - [ ] **7.2.2 Uniform Mapping:** Automate the handover of Property Buffer values to GPU Uniforms.
+- [ ] **7.2.3 Shader Throttling:** Implement energy-aware shader complexity scaling (Battery/Thermal).
 
 ### 7.3 Phase 7 Finalization
 - [ ] **7.3.1 DslEffectRenderer:** Build the single, optimized renderer that interprets the full DSL.
-- [ ] **7.3.2 Demo: "The Hazy Horizon":** Validate atlas batching and dynamic shader uniforms.
+- [ ] **7.3.2 The Childhood Canvas (Interactive Tutorial & Demo):** Validate the full pipeline with a classic mountain/sun/river/house scene and a step-by-step artist guide.
 - [ ] **7.3.3 Phase 7 Finalization:** Documentation, Retrospective, and Tagging.
 
 ---
