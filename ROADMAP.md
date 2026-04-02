@@ -138,7 +138,7 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 *Goal: Connect the Brain to high-performance assets.*
 
 ### 7.1 Asset Management
-- [ ] **7.1.0 Asset Ingress Architecture:** Define how `:app` loads bitmaps and hands them to `:engine` via `:bridge`.
+- [x] **7.1.0 Asset Ingress Architecture:** Define how `:app` loads bitmaps and hands them to `:engine` via `:bridge`.
 - [ ] **7.1.1 Bitmap Texture Atlas:** Implement a system to pack multiple assets into a single GPU texture.
 - [ ] **7.1.2 Asset Registry:** Manage asset lifecycles and "Ready" state handshakes.
 

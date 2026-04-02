@@ -1,5 +1,6 @@
 package me.ashishekka.mori.engine.core
 
+import me.ashishekka.mori.engine.core.interfaces.AssetRegistry
 import me.ashishekka.mori.engine.core.interfaces.EngineTicker
 import me.ashishekka.mori.engine.core.interfaces.RenderSurface
 import me.ashishekka.mori.engine.core.models.ScaleMode
@@ -17,6 +18,7 @@ class MoriEngine(
     private val ticker: EngineTicker,
     private val renderSurface: RenderSurface,
     private val layerManager: LayerManager,
+    val assetRegistry: AssetRegistry,
     private val fallbackRenderer: EffectRenderer = StaticFallbackRenderer()
 ) {
 

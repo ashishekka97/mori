@@ -2,8 +2,10 @@ package me.ashishekka.mori.bridge.di
 
 import kotlinx.coroutines.CoroutineScope
 import me.ashishekka.mori.bridge.metrics.MetricCalculator
+import me.ashishekka.mori.bridge.sync.AssetRegistryImpl
 import me.ashishekka.mori.bridge.sync.StateSynchronizer
 import me.ashishekka.mori.engine.core.MoriEngine
+import me.ashishekka.mori.engine.core.interfaces.AssetRegistry
 import org.koin.dsl.module
 
 /**
@@ -12,6 +14,7 @@ import org.koin.dsl.module
  */
 val bridgeModule = module {
     single { MetricCalculator() }
+    single<AssetRegistry> { AssetRegistryImpl() }
 
     factory { (scope: CoroutineScope, engine: MoriEngine) ->
         StateSynchronizer(

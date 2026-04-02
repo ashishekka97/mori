@@ -1,10 +1,15 @@
 package me.ashishekka.mori.app
 
 import me.ashishekka.mori.biome.decoder.BiomeDecoder
+import me.ashishekka.mori.biome.models.BiomeModel
 import me.ashishekka.mori.biome.provider.AssetBiomeProvider
+import me.ashishekka.mori.biome.provider.BiomeProvider
 import me.ashishekka.mori.engine.core.MoriWallpaper
 import me.ashishekka.mori.engine.core.RuleEvaluator
+import me.ashishekka.mori.engine.core.interfaces.AssetRegistry
+import me.ashishekka.mori.engine.core.models.AssetType
 import me.ashishekka.mori.engine.renderer.DslEffectRenderer
+import me.ashishekka.mori.engine.renderer.EffectRenderer
 import me.ashishekka.mori.engine.renderer.StaticFallbackRenderer
 
 /**
@@ -13,14 +18,29 @@ import me.ashishekka.mori.engine.renderer.StaticFallbackRenderer
  * (:biome for decoding, :engine for rendering).
  */
 class WallpaperFactory(
-    private val provider: AssetBiomeProvider,
-    private val evaluator: RuleEvaluator
+    private val provider: BiomeProvider,
+    private val evaluator: RuleEvaluator,
+    private val assetRegistry: AssetRegistry
 ) {
     fun createDebugPrismWallpaper(): MoriWallpaper {
-        val model = provider.getBiome("prism_demo")
+        val biomeId = "prism_demo"
+        val model = provider.getBiome(biomeId) ?: return MoriWallpaper.createDebugWallpaper()
+        
+        // Register Resources from the Biome Provider
+        model.resources.forEach { res ->
+            val type = when (res.type.uppercase()) {
+                "BITMAP" -> AssetType.BITMAP
+                "SHADER" -> AssetType.SHADER
+                else -> AssetType.UNKNOWN
+            }
+            provider.openAsset(biomeId, res.path)?.let { stream ->
+                assetRegistry.registerAsset(res.id, type, stream)
+            }
+        }
+
         val engineLayers = BiomeDecoder.compileToLayers(model)
         
-        val renderers = mutableListOf<me.ashishekka.mori.engine.renderer.EffectRenderer>()
+        val renderers = mutableListOf<EffectRenderer>()
         renderers.add(StaticFallbackRenderer())
         
         engineLayers.forEach { layer ->

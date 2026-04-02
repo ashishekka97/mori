@@ -1,5 +1,6 @@
 package me.ashishekka.mori.engine.di
 
+import me.ashishekka.mori.engine.core.interfaces.AssetRegistry
 import me.ashishekka.mori.engine.core.interfaces.EngineTicker
 import me.ashishekka.mori.engine.core.interfaces.RenderSurface
 import me.ashishekka.mori.engine.renderer.EffectRenderer
@@ -15,8 +16,10 @@ class EngineModuleTest : KoinTest {
             extraTypes = listOf(
                 EngineTicker::class,
                 RenderSurface::class,
+                AssetRegistry::class,
                 EffectRenderer::class
             )
         )
     }
 }
+

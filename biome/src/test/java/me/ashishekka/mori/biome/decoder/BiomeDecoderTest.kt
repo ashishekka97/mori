@@ -51,6 +51,39 @@ class BiomeDecoderTest {
         assertNotNull(layer.propertyRules[RenderProperty.INDEX_ALPHA])
     }
 
+    @Test
+    fun `decode should parse resources and resId correctly`() {
+        val resourceJson = """
+            {
+                "id": "resource_biome",
+                "name": "Resource Biome",
+                "resources": [
+                    { "id": 101, "path": "textures/cloud.png", "type": "BITMAP" }
+                ],
+                "layers": [
+                    {
+                        "id": 1,
+                        "type": "RECT",
+                        "resId": 101,
+                        "expressions": {
+                            "x": "500"
+                        }
+                    }
+                ]
+            }
+        """.trimIndent()
+        
+        val model = BiomeDecoder.decode(resourceJson)
+        assertNotNull(model)
+        assertEquals(1, model?.resources?.size)
+        assertEquals(101, model?.resources?.get(0)?.id)
+        assertEquals("textures/cloud.png", model?.resources?.get(0)?.path)
+        
+        val engineLayers = BiomeDecoder.compileToLayers(model)
+        assertEquals(1, engineLayers.size)
+        assertEquals(101, engineLayers[0].resId)
+    }
+
     // --- ROBUSTNESS TESTS ---
 
     @Test

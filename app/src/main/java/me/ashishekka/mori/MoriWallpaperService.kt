@@ -8,6 +8,7 @@ import me.ashishekka.mori.bridge.metrics.MetricCalculator
 import me.ashishekka.mori.bridge.sync.StateSynchronizer
 import me.ashishekka.mori.engine.core.MoriEngine
 import me.ashishekka.mori.engine.core.MoriWallpaper
+import me.ashishekka.mori.engine.core.interfaces.AssetRegistry
 import me.ashishekka.mori.engine.core.interfaces.EngineTicker
 import me.ashishekka.mori.engine.core.interfaces.RenderSurface
 import me.ashishekka.mori.engine.core.models.ScaleMode
@@ -35,8 +36,9 @@ class MoriWallpaperService : WallpaperService() {
     private inner class MoriEngineImpl : Engine() {
 
         private val ticker: EngineTicker by inject()
+        private val assetRegistry: AssetRegistry by inject()
         private val renderSurface: RenderSurface by inject { parametersOf(this) }
-        private val moriEngine: MoriEngine by inject { parametersOf(ticker, renderSurface) }
+        private val moriEngine: MoriEngine by inject { parametersOf(ticker, renderSurface, assetRegistry) }
         private val stateSynchronizer: StateSynchronizer by inject { parametersOf(engineScope, moriEngine) }
 
         private var isLifecycleStarted = false
