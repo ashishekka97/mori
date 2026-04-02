@@ -56,6 +56,10 @@ class AndroidEngineCanvas(val nativeCanvas: Canvas) : EngineCanvas {
         nativeCanvas.drawPath(path, paint)
     }
 
+    override fun drawBitmap(resId: Int, left: Float, top: Float, alpha: Float) {
+        // Phase 7.1.1: Implementation will look up the Bitmap from the TextureAtlas using resId.
+    }
+
     override fun save() {
         nativeCanvas.save()
     }

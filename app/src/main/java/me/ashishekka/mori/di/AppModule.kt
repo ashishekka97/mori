@@ -39,5 +39,5 @@ val appModule = module {
     single(named("EngineScope")) { CoroutineScope(Dispatchers.Default + Job()) }
 
     // Factories
-    single { WallpaperFactory(get(), get()) }
+    single { WallpaperFactory(get(), get(), get()) }
 }

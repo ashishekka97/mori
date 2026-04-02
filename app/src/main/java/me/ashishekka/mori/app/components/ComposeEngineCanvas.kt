@@ -90,6 +90,10 @@ class ComposeEngineCanvas : EngineCanvas {
         }
     }
 
+    override fun drawBitmap(resId: Int, left: Float, top: Float, alpha: Float) {
+        // Phase 7.1.1: Implementation will draw from the TextureAtlas.
+    }
+
     override fun save() {
         // No-op in Compose (DrawScope handles state via withTransform)
     }

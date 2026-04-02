@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import me.ashishekka.mori.engine.core.interfaces.AssetRegistry
 import me.ashishekka.mori.engine.core.interfaces.EngineCanvas
 import me.ashishekka.mori.engine.core.interfaces.EngineTicker
 import me.ashishekka.mori.engine.core.interfaces.RenderSurface
@@ -21,6 +22,7 @@ class MoriEngineTest {
     private lateinit var ticker: EngineTicker
     private lateinit var renderSurface: RenderSurface
     private lateinit var layerManager: LayerManager
+    private lateinit var assetRegistry: AssetRegistry
     private lateinit var fallbackRenderer: EffectRenderer
     private lateinit var engine: MoriEngine
 
@@ -29,8 +31,9 @@ class MoriEngineTest {
         ticker = mockk(relaxed = true)
         renderSurface = mockk(relaxed = true)
         layerManager = mockk(relaxed = true)
+        assetRegistry = mockk(relaxed = true)
         fallbackRenderer = mockk(relaxed = true)
-        engine = MoriEngine(ticker, renderSurface, layerManager, fallbackRenderer)
+        engine = MoriEngine(ticker, renderSurface, layerManager, assetRegistry, fallbackRenderer)
     }
 
     @Test

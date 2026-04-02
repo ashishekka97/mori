@@ -11,6 +11,13 @@ interface EngineCanvas {
     fun drawCircle(centerX: Float, centerY: Float, radius: Float, color: Int, isFilled: Boolean = true, thickness: Float = 4f)
     fun drawPolygon(points: FloatArray, pointCount: Int, color: Int, isFilled: Boolean = true, thickness: Float = 4f)
     
+    /** 
+     * Draws a pre-loaded bitmap asset. 
+     * The implementation in the platform layer (e.g., Android) will look up 
+     * the actual Bitmap using the [AssetRegistry].
+     */
+    fun drawBitmap(resId: Int, left: Float, top: Float, alpha: Float = 1.0f)
+    
     fun save()
     fun restore()
     fun rotate(degrees: Float, pivotX: Float = 0f, pivotY: Float = 0f)

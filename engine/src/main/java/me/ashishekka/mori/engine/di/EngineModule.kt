@@ -2,6 +2,7 @@ package me.ashishekka.mori.engine.di
 
 import me.ashishekka.mori.engine.core.MoriEngine
 import me.ashishekka.mori.engine.core.RuleEvaluator
+import me.ashishekka.mori.engine.core.interfaces.AssetRegistry
 import me.ashishekka.mori.engine.core.interfaces.EngineTicker
 import me.ashishekka.mori.engine.core.interfaces.RenderSurface
 import me.ashishekka.mori.engine.renderer.LayerManager
@@ -19,11 +20,12 @@ val engineModule = module {
     factory { LayerManager() }
 
     // The core rendering engine
-    factory { (ticker: EngineTicker, renderSurface: RenderSurface) ->
+    factory { (ticker: EngineTicker, renderSurface: RenderSurface, assetRegistry: AssetRegistry) ->
         MoriEngine(
             ticker = ticker,
             renderSurface = renderSurface,
-            layerManager = get()
+            layerManager = get(),
+            assetRegistry = assetRegistry
         )
     }
 }
