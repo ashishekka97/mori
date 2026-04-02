@@ -179,6 +179,7 @@ The `fact[n]` array is the artist's window into the real world. All values are n
 | **2** | `time_p`  | `0..1` | Day progress (0.0 = Midnight, 1.0 = 23:59).   |
 | **3** | `moon_p`  | `0..1` | Moon phase (0.0 = New, 1.0 = Full).           |
 | **4** | `season`  | `0..1` | Season progress (0.0 = Spring, 1.0 = Winter). |
+| **5** | `is_weekend`| `0/1` | 1.0 if it is the weekend, else 0.0.           |
 
 ### 4.2 Energy (Power & Thermals)
 | Index | Name | Range | Description |
@@ -191,9 +192,16 @@ The `fact[n]` array is the artist's window into the real world. All values are n
 | Index | Name | Range | Description |
 | :---: | :--- | :---: | :--- |
 | **9** | `steps_p` | `0..1` | Progress toward daily step goal. |
-| **16**| `dnd`       | `0/1` | 1.0 if Do Not Disturb is active. |
-| **18**| `light` | `0..1` | Ambient light intensity. |
-| **19**| `pocket`| `0/1` | 1.0 if proximity sensor is blocked. |
+| **10**| `activity`| `0..1` | Current physical activity level. |
+| **11**| `sleep`   | `0..1` | Quality of rest. |
+| **12**| `stand_p` | `0..1` | Progress toward daily stand goal. |
+| **13**| `congestion`| `0..1` | Device usage intensity. |
+| **14**| `social`  | `0..1` | Notification frequency summaries. |
+| **15**| `context` | `0..1` | App switching frequency. |
+| **16**| `dnd`     | `0/1` | 1.0 if Do Not Disturb is active. |
+| **17**| `idle_time`| `0..1` | Time since last device interaction. |
+| **18**| `light`   | `0..1` | Ambient light intensity. |
+| **19**| `pocket`  | `0/1` | 1.0 if proximity sensor is blocked. |
 
 ### 4.4 Platform Metadata
 | Index | Name | Description |

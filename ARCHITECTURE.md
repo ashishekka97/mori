@@ -68,12 +68,21 @@ graph TD
 
 ## 3. The Rule Engine (Phase 6)
 
-The logic core of Mori is a stack-based Virtual Machine. It decouples visual behavior from Kotlin code by executing pre-compiled bytecode. For a complete list of supported mathematical operations and high-value macros, refer to the **[Instruction Set Architecture (SPEC_ISA.md)](SPEC_ISA.md)**.
+The logic core of Mori is a high-performance, stack-based Virtual Machine. It decouples visual behavior from Kotlin code by executing pre-compiled bytecode. For a complete list of supported mathematical operations and high-value macros, refer to the **[Instruction Set Architecture (SPEC_ISA.md)](SPEC_ISA.md)**.
 
 ### Execution Model
-*   **Initialization**: JSON biomes are parsed once into primitive `IntArray` bytecode.
+*   **Initialization**: JSON biomes are parsed once into primitive `IntArray` bytecode by the `BiomeDecoder`.
 *   **Hot-Path**: On every frame, the `RuleEvaluator` executes this bytecode to calculate visual properties (Position, Rotation, Alpha, etc.).
-*   **Purity**: The evaluator is a pure function that requires 0 object allocations during the frame cycle.
+*   **Purity**: The evaluator is a pure function that requires 0 object allocations during the frame cycle. It uses a pre-allocated `FloatArray` stack for all operations.
+*   **Atomic Safety**: The VM includes guards for division-by-zero, stack overflow, and illegal operations, ensuring the engine remains stable even with malformed biome logic.
+
+### 3.1 The Property Buffer (The VRAM Model)
+Mori uses a "Flat Memory" bridge between the Rule Engine and the Renderers. Instead of passing complex objects, the results of rule evaluations are written into a fixed-size `FloatArray` called the `PropertyBuffer`.
+
+*   **Size**: Fixed at 16 slots (`RenderProperty.BUFFER_SIZE`).
+*   **Mapping**: Standard indices for X, Y, Scale, Rotation, Alpha, and Colors.
+*   **Custom Slots**: 5 "Semantic Expansion" slots (INDEX_CUSTOM_A-E) for biome-specific logic or shader uniforms.
+*   **Efficiency**: Renderers read directly from these buffers, ensuring high cache locality and 0 heap allocations during the drawing phase.
 
 ---
 
@@ -117,6 +126,12 @@ To ensure data integrity and zero-allocation synthesis, the engine follows a str
 
 ### Phase 5: Pulse Design System
 *   **Decisions**: Unified the entire app UI under a single engine-driven `PulseTheme`. Refactored `PulseButton` to ensure 100% theme compliance.
+
+### Phase 6: The Rule Engine (The Brain)
+*   **Decisions**: Established the **Zero-Meaning Design Principle**, where the Engine and Persona modules process raw "Facts" without semantic knowledge. Transitioned the entire engine to a stack-based VM architecture.
+*   **Architectural Shifts**: Shifted from hardcoded Kotlin logic to a declarative JSON-driven system. Introduced the "VRAM Model" for property handovers.
+*   **Performance**: Achieved 100% zero-allocation status for the evaluation loop. All per-frame object creation has been eliminated.
+*   **State of the Machine**: Mori is now a fully data-driven platform. The engine is "dumb," and all visual behavior is defined via external DSLs, making it extremely portable and efficient.
 
 ---
 
