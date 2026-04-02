@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntSize
+import java.io.InputStream
 import me.ashishekka.mori.bridge.sync.StateHandover
 import me.ashishekka.mori.engine.core.MoriEngine
 import me.ashishekka.mori.engine.core.MoriWallpaper
@@ -48,7 +49,7 @@ fun PulseBackdrop(
     val renderSurface = remember { ComposeRenderSurface(composeCanvas) }
     val assetRegistry = remember { 
         object : AssetRegistry {
-            override fun registerAsset(resId: Int, type: AssetType, stream: java.io.InputStream) {}
+            override fun registerAsset(resId: Int, type: AssetType, stream: InputStream) {}
             override fun getAssetWidth(resId: Int): Int = 0
             override fun getAssetHeight(resId: Int): Int = 0
             override fun releaseAsset(resId: Int) {}
