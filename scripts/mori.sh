@@ -21,9 +21,14 @@ if [ "$choice" == "1" ]; then
     echo ""
     
     # 2. Automated Task Initialization (Non-interactive)
-    # This uses the -p flag to perform setup (Issue/Branch) without human turns.
-    echo "🏗️  Automating Setup (Issue & Branch) for Task $task_id..."
-    gemini -p "Use the 'gh' CLI to create a new issue for task $task_id from ROADMAP.md. Then, use 'git' to sync with main and create a fresh feature branch for this task. Output ONLY the branch name when done."
+    # This uses the -p flag to perform setup (Sync, Issue & Branch) without human turns.
+    echo "🏗️  Automating Setup (Sync, Issue & Branch) for Task $task_id..."
+    gemini -p "1. Sync: 'git checkout main && git pull origin main'.
+               2. Validate: If Task $task_id is already checked [x] in ROADMAP.md, stop and warn the user.
+               3. Issue: Check if a GitHub Issue for Task $task_id already exists using 'gh issue list'. If not, create one from ROADMAP.md.
+               4. Branch: Create a fresh feature branch 'feature/$task_id-...' from main.
+               Output ONLY the branch name when done."
+
     
     # 3. Interactive Coding Session
     # We pass the Task ID to start the implementation.
