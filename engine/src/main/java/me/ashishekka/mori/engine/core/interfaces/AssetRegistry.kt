@@ -1,4 +1,6 @@
 package me.ashishekka.mori.engine.core.interfaces
+import me.ashishekka.mori.engine.core.models.AssetType
+import java.io.InputStream
 
 /**
  * Contract for a system that manages high-performance visual assets (Bitmaps/Shaders).
@@ -7,9 +9,20 @@ interface AssetRegistry {
     /**
      * Pre-loads an asset into GPU memory (e.g., into the Texture Atlas).
      * @param resId The internal ID used by the Engine layers.
-     * @param stream The source data for the asset (Bitmap or Shader source).
+     * @param type The type of asset (BITMAP or SHADER).
+     * @param stream The source data for the asset.
      */
-    fun registerAsset(resId: Int, stream: java.io.InputStream)
+    fun registerAsset(resId: Int, type: AssetType, stream: InputStream)
+
+    /**
+     * Returns the base width of the asset in pixels.
+     */
+    fun getAssetWidth(resId: Int): Int
+
+    /**
+     * Returns the base height of the asset in pixels.
+     */
+    fun getAssetHeight(resId: Int): Int
 
     /**
      * Releases an asset from memory.

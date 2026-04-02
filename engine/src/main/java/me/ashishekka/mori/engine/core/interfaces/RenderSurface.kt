@@ -12,11 +12,11 @@ interface EngineCanvas {
     fun drawPolygon(points: FloatArray, pointCount: Int, color: Int, isFilled: Boolean = true, thickness: Float = 4f)
     
     /** 
-     * Draws a pre-loaded bitmap asset. 
+     * Draws a pre-loaded bitmap asset within the specified virtual bounds.
      * The implementation in the platform layer (e.g., Android) will look up 
      * the actual Bitmap using the [AssetRegistry].
      */
-    fun drawBitmap(resId: Int, left: Float, top: Float, alpha: Float = 1.0f)
+    fun drawBitmap(resId: Int, left: Float, top: Float, right: Float, bottom: Float, alpha: Float = 1.0f)
     
     fun save()
     fun restore()

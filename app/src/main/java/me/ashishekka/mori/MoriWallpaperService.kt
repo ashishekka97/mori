@@ -36,7 +36,7 @@ class MoriWallpaperService : WallpaperService() {
     private inner class MoriEngineImpl : Engine() {
 
         private val ticker: EngineTicker by inject()
-        private val assetRegistry: me.ashishekka.mori.engine.core.interfaces.AssetRegistry by inject()
+        private val assetRegistry: AssetRegistry by inject()
         private val renderSurface: RenderSurface by inject { parametersOf(this) }
         private val moriEngine: MoriEngine by inject { parametersOf(ticker, renderSurface, assetRegistry) }
         private val stateSynchronizer: StateSynchronizer by inject { parametersOf(engineScope, moriEngine) }

@@ -90,7 +90,7 @@ class ComposeEngineCanvas : EngineCanvas {
         }
     }
 
-    override fun drawBitmap(resId: Int, left: Float, top: Float, alpha: Float) {
+    override fun drawBitmap(resId: Int, left: Float, top: Float, right: Float, bottom: Float, alpha: Float) {
         // Phase 7.1.1: Implementation will draw from the TextureAtlas.
     }
 

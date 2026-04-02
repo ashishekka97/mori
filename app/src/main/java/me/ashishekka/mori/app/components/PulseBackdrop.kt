@@ -24,6 +24,7 @@ import me.ashishekka.mori.bridge.sync.StateHandover
 import me.ashishekka.mori.engine.core.MoriEngine
 import me.ashishekka.mori.engine.core.MoriWallpaper
 import me.ashishekka.mori.engine.core.interfaces.AssetRegistry
+import me.ashishekka.mori.engine.core.models.AssetType
 import me.ashishekka.mori.engine.core.models.ScaleMode
 import me.ashishekka.mori.engine.renderer.LayerManager
 import me.ashishekka.mori.persona.state.WorldState
@@ -47,7 +48,9 @@ fun PulseBackdrop(
     val renderSurface = remember { ComposeRenderSurface(composeCanvas) }
     val assetRegistry = remember { 
         object : AssetRegistry {
-            override fun registerAsset(resId: Int, stream: java.io.InputStream) {}
+            override fun registerAsset(resId: Int, type: AssetType, stream: java.io.InputStream) {}
+            override fun getAssetWidth(resId: Int): Int = 0
+            override fun getAssetHeight(resId: Int): Int = 0
             override fun releaseAsset(resId: Int) {}
             override fun clear() {}
             override fun isReady(resId: Int): Boolean = false
