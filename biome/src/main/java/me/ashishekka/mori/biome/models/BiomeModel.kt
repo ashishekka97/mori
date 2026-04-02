@@ -11,5 +11,6 @@ data class BiomeModel(
     val id: String,
     val name: String,
     val description: String? = null,
+    val resources: List<ResourceModel> = emptyList(),
     val layers: List<LayerModel> = emptyList()
 )

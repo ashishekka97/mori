@@ -49,7 +49,8 @@ object BiomeDecoder {
                 val engineLayer = MoriLayer(
                     id = layerModel.id,
                     type = LayerType.fromString(layerModel.type),
-                    zOrder = layerModel.zOrder
+                    zOrder = layerModel.zOrder,
+                    resId = layerModel.resId
                 )
                 
                 layerModel.expressions.forEach { (propertyName, expression) ->
