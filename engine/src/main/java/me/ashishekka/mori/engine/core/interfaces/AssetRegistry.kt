@@ -25,6 +25,21 @@ interface AssetRegistry {
     fun getAssetHeight(resId: Int): Int
 
     /**
+     * Returns the x-coordinate of the asset within the texture atlas.
+     */
+    fun getAssetLeft(resId: Int): Int
+
+    /**
+     * Returns the y-coordinate of the asset within the texture atlas.
+     */
+    fun getAssetTop(resId: Int): Int
+
+    /**
+     * Returns the platform-specific texture atlas object (e.g., Bitmap).
+     */
+    fun getAtlas(): Any?
+
+    /**
      * Releases an asset from memory.
      */
     fun releaseAsset(resId: Int)

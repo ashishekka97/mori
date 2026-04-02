@@ -45,18 +45,21 @@ fun PulseBackdrop(
     content: @Composable () -> Unit = {}
 ) {
     val ticker = remember { ComposeEngineTicker() }
-    val composeCanvas = remember { ComposeEngineCanvas() }
-    val renderSurface = remember { ComposeRenderSurface(composeCanvas) }
     val assetRegistry = remember { 
         object : AssetRegistry {
             override fun registerAsset(resId: Int, type: AssetType, stream: InputStream) {}
             override fun getAssetWidth(resId: Int): Int = 0
             override fun getAssetHeight(resId: Int): Int = 0
+            override fun getAssetLeft(resId: Int): Int = 0
+            override fun getAssetTop(resId: Int): Int = 0
+            override fun getAtlas(): Any? = null
             override fun releaseAsset(resId: Int) {}
             override fun clear() {}
             override fun isReady(resId: Int): Boolean = false
         }
     }
+    val composeCanvas = remember { ComposeEngineCanvas(assetRegistry) }
+    val renderSurface = remember { ComposeRenderSurface(composeCanvas) }
     val moriEngine = remember { 
         MoriEngine(ticker, renderSurface, LayerManager(), assetRegistry).apply {
             this.targetScaleMode = scaleMode

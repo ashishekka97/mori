@@ -6,16 +6,18 @@ import android.view.SurfaceHolder
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import me.ashishekka.mori.engine.core.interfaces.AssetRegistry
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class SurfaceHolderRenderSurfaceTest {
 
+    private val mockAssetRegistry = mockk<AssetRegistry>(relaxed = true)
     private val mockServiceEngine = mockk<WallpaperService.Engine>()
     private val mockSurfaceHolder = mockk<SurfaceHolder>()
     private val mockNativeCanvas = mockk<Canvas>()
-    private val renderSurface = SurfaceHolderRenderSurface(mockServiceEngine)
+    private val renderSurface = SurfaceHolderRenderSurface(mockServiceEngine, mockAssetRegistry)
 
     @Test
     fun `lockCanvas should return AndroidEngineCanvas wrapping native canvas`() {
@@ -36,7 +38,7 @@ class SurfaceHolderRenderSurfaceTest {
     fun `unlockCanvasAndPost should call surfaceHolder unlock`() {
         // Given
         every { mockServiceEngine.surfaceHolder } returns mockSurfaceHolder
-        val mockAndroidCanvas = AndroidEngineCanvas(mockNativeCanvas)
+        val mockAndroidCanvas = AndroidEngineCanvas(mockNativeCanvas, mockAssetRegistry)
 
         // When
         renderSurface.unlockCanvasAndPost(mockAndroidCanvas)

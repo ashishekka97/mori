@@ -1,19 +1,27 @@
 package me.ashishekka.mori.engine
 
+import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
+import android.graphics.Rect
 import android.service.wallpaper.WallpaperService
+import me.ashishekka.mori.engine.core.interfaces.AssetRegistry
 import me.ashishekka.mori.engine.core.interfaces.EngineCanvas
 import me.ashishekka.mori.engine.core.interfaces.RenderSurface
 
 /**
  * Android implementation of [EngineCanvas] wrapping a native [Canvas].
  */
-class AndroidEngineCanvas(val nativeCanvas: Canvas) : EngineCanvas {
+class AndroidEngineCanvas(
+    val nativeCanvas: Canvas,
+    private val assetRegistry: AssetRegistry
+) : EngineCanvas {
     
     private val paint = Paint()
     private val path = Path()
+    private val srcRect = Rect()
+    private val dstRect = android.graphics.RectF()
 
     override fun drawColor(colorInt: Int) {
         nativeCanvas.drawColor(colorInt)
@@ -57,7 +65,20 @@ class AndroidEngineCanvas(val nativeCanvas: Canvas) : EngineCanvas {
     }
 
     override fun drawBitmap(resId: Int, left: Float, top: Float, right: Float, bottom: Float, alpha: Float) {
-        // Phase 7.1.1: Implementation will look up the Bitmap from the TextureAtlas using resId.
+        val atlas = assetRegistry.getAtlas() as? Bitmap ?: return
+        
+        val aLeft = assetRegistry.getAssetLeft(resId)
+        val aTop = assetRegistry.getAssetTop(resId)
+        val aWidth = assetRegistry.getAssetWidth(resId)
+        val aHeight = assetRegistry.getAssetHeight(resId)
+        
+        if (aWidth <= 0 || aHeight <= 0) return
+
+        srcRect.set(aLeft, aTop, aLeft + aWidth, aTop + aHeight)
+        dstRect.set(left, top, right, bottom)
+        
+        paint.alpha = (alpha * 255).toInt()
+        nativeCanvas.drawBitmap(atlas, srcRect, dstRect, paint)
     }
 
     override fun save() {
@@ -85,7 +106,8 @@ class AndroidEngineCanvas(val nativeCanvas: Canvas) : EngineCanvas {
  * Android implementation of [RenderSurface] using a [WallpaperService.Engine]'s SurfaceHolder.
  */
 class SurfaceHolderRenderSurface(
-    private val serviceEngine: WallpaperService.Engine
+    private val serviceEngine: WallpaperService.Engine,
+    private val assetRegistry: AssetRegistry
 ) : RenderSurface {
 
     override fun lockCanvas(): EngineCanvas? {
@@ -94,7 +116,7 @@ class SurfaceHolderRenderSurface(
         } catch (e: Exception) {
             null
         }
-        return nativeCanvas?.let { AndroidEngineCanvas(it) }
+        return nativeCanvas?.let { AndroidEngineCanvas(it, assetRegistry) }
     }
 
     override fun unlockCanvasAndPost(canvas: EngineCanvas) {
