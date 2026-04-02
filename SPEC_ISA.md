@@ -40,19 +40,31 @@ This document defines the primitive "Machine Code" of the Mori Rule Engine. Thes
 
 | Index | Field | Description | Category |
 | :--- | :--- | :--- | :--- |
-| `0` | `timeSeconds` | Continuous frame-time. | Environmental |
-| `1` | `sunAltitude` | -1.0 (Midnight) to 1.0 (Noon). | Environmental |
-| `2` | `batteryLevel` | 0.0 to 1.0. | Environmental |
-| `3` | `isCharging` | 0.0 (False) or 1.0 (True). | Environmental |
-| `4` | `stepsProgress`| 0.0 to 1.0 (Daily Goal). | Human Pulse |
-| `5` | `thermalStress`| 0.0 (Cold) to 1.0 (Shutdown). | Device Pulse |
-| `6` | `socialNoise` | 0.0 (Calm) to 1.0 (Congested). | Digital Noise |
-| `7` | `lightLevel` | 0.0 (Dark) to 1.0 (Bright). | Environmental |
-| `8` | `dailyScreenTime`| 0.0 to 1.0 (Target limit). | Personal Focus |
-| `9` | `restQuality` | 0.0 to 1.0 (Sleep depth). | Human Pulse |
-| `10`| `kpIndex` | 0.0 to 1.0 (Aurora Strength).| Global Pulse |
-| `11`| `mediaPulse` | 0.0 to 1.0 (Active Beat). | Current Vibe |
-| `12`| `alarmDistance`| 1.0 to 0.0 (Time to alarm). | Future Pulse |
-| `13`| `chargingSpeed`| 0.0 to 1.0 (Fast/Slow). | Device Pulse |
-| `14`| `notificationCount`| 0.0 to 1.0 (Unread density).| Digital Noise |
-| `15`| `temperature` | Normalized (-30C..+40C). | Environmental |
+| `0` | `timeSeconds` | Continuous frame-time. | Chronos |
+| `1` | `sunAltitude` | -1.0 (Midnight) to 1.0 (Noon). | Chronos |
+| `2` | `timeProgress` | Day progress (0.0 = Midnight, 1.0 = 23:59). | Chronos |
+| `3` | `moonPhase` | 0.0 = New, 1.0 = Full. | Chronos |
+| `4` | `seasonProgress`| 0.0 = Spring, 1.0 = Winter. | Chronos |
+| `5` | `isWeekend`| 0.0 (False) or 1.0 (True). | Chronos |
+| `6` | `batteryLevel` | Device charge percentage (0.0 to 1.0). | Energy |
+| `7` | `isCharging` | 0.0 (False) or 1.0 (True). | Energy |
+| `8` | `thermalStress`| 0.0 (Cool) to 1.0 (Shutdown). | Energy |
+| `9` | `stepsProgress` | 0.0 to 1.0 (Daily Goal). | Vitality |
+| `10`| `activityIntensity` | Current physical activity level. | Vitality |
+| `11`| `sleepClarity` | Quality of rest (0.0 to 1.0). | Vitality |
+| `12`| `standGoalProgress`| 0.0 to 1.0. | Vitality |
+| `13`| `digitalCongestion`| Device usage intensity. | Zen |
+| `14`| `socialNoise`| Notification frequency summaries. | Zen |
+| `15`| `contextSwitching` | App switching frequency. | Zen |
+| `16`| `isDndActive` | 0.0 (False) or 1.0 (True). | Zen |
+| `17`| `lastInteractionAge` | Time since last device interaction. | Zen |
+| `18`| `lightLevel` | 0.0 (Dark) to 1.0 (Bright). | Atmos |
+| `19`| `isPocketed` | 0.0 (False) or 1.0 (True). | Atmos |
+| `20`| `kpIndex` | Geomagnetic activity index. | Legacy/Extra |
+| `21`| `mediaPulse` | Current media pulse (if audio is playing). | Legacy/Extra |
+| `22`| `alarmDistance`| Time until the next alarm. | Legacy/Extra |
+| `23`| `notificationCount`| Unread notification count. | Legacy/Extra |
+| `24`| `aspectRatio` | Physical aspect ratio (`height / width`). | Platform Metadata |
+| `25`| `isLandscape` | 0.0 (False) or 1.0 (True). | Platform Metadata |
+| `26`| `fieldRatio` | Field ratio (`width / height`). | Platform Metadata |
+| `27-31`| `custom` | Reserved for Biome-specific signals. | Expansion Slots |
