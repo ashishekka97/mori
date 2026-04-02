@@ -15,7 +15,7 @@ Mori turns the device's home screen into a "living dashboard." Instead of static
 ## Tech Stack
 * **Language:** Kotlin
 * **Rendering:** Native Android `Canvas` (Hardware Accelerated)
-* **Intelligence:** Custom **[OpCode ISA](SPEC_ISA.md)** for data-driven visuals.
+* **Intelligence:** Custom **[OpCode ISA](docs/SPEC_ISA.md)** for data-driven visuals.
 * **Concurrency:** Kotlin Coroutines & `StateFlow`
 * **Dependency Injection:** Koin
 * **UI:** Jetpack Compose (The Pulse Design System)
@@ -47,3 +47,4 @@ To maintain "Internal Excellence," this project follows a strict branching and c
 
 ## License
 Copyright © 2026 Ashish Ekka. All rights reserved.
+ved.

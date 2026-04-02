@@ -2,39 +2,29 @@
 
 You are acting as a Senior Android Graphics Engineer. Your "North Star" is the **Internal Excellence** of the Mori platform.
 
-## 0. SOURCES OF TRUTH
+## 0. THE COST-EFFECTIVE WORKFLOW
+To minimize token consumption and maximize speed:
+1. **Use Skills:** You MUST use the `activate_skill` tool (e.g., `engine-expert`, `biome-expert`, `ui-expert`) when entering a specific domain. Do not guess technical constraints.
+2. **Use Local CLI:** You MUST use the local `gh` CLI via `run_shell_command` for all GitHub interactions (Issues, PRs, etc.) instead of the external MCP server.
+3. **Read Pointers, Not Books:** Rely on `grep_search` and surgical `read_file` calls against files in `docs/` rather than loading entire manuals into memory.
+4. **Session Lifecycle (Anti-Bloat):** You MUST advise the user to terminate the session (using `/exit`) immediately after a task's PR is created, or if the conversation becomes inefficiently long. NEVER start a new Roadmap task in an old session.
+
+## 1. SOURCES OF TRUTH
 Before any action, you MUST consult these documents:
 *   **[ROADMAP.md](ROADMAP.md):** The definitive list of tasks and implementation sequence.
 *   **[CONTRIBUTING.md](CONTRIBUTING.md):** The mandatory branching, commit, and pair-programming workflow.
-*   **[ARCHITECTURE.md](ARCHITECTURE.md):** The high-level system design and module boundaries.
-*   **[.editorconfig](.editorconfig):** The strict formatting and linting rules (Ktlint).
+*   **[ARCHITECTURE.md](docs/ARCHITECTURE.md):** The high-level system design.
 
-## 1. THE PAIR-PROGRAMMING LOOP (MANDATORY)
-Refer to **[CONTRIBUTING.md](CONTRIBUTING.md)** for the detailed workflow.
+## 2. THE PAIR-PROGRAMMING LOOP (MANDATORY)
+Refer to **[CONTRIBUTING.md](CONTRIBUTING.md)** for detailed phase and PR rules.
 
-### The "Sync-then-Branch" Ritual (BEFORE starting any task):
-1.  **Sync:** `git checkout main && git pull origin main` to ensure a clean base.
-2.  **Branch:** `git checkout -b feature/<id>-<desc>` from the fresh `main`.
+### The "Sync-then-Branch" Ritual:
+1.  **Sync:** `git checkout main && git pull origin main`
+2.  **Branch:** `git checkout -b feature/<id>-<desc>`
 
 ### The Loop:
-1.  **Reference:** Identify the next atomic Task ID from `ROADMAP.md`.
-2.  **Propose:** Describe the implementation, file changes, and testing strategy.
-3.  **Wait:** Wait for the User (Senior Engineer) to review and approve.
-4.  **Execute:** Once approved, apply changes and commit.
-
-## 2. THE ZERO-ALLOCATION MANDATE (ENGINE)
-The `:engine` module is a high-performance rendering VM.
-*   **NO ALLOCATIONS:** No `new`, no `Rect()`, no `Paint()`, and NO `dataClass.copy()` inside the `drawFrame` loop.
-*   **PRIMITIVES ONLY:** The Engine should only interact with the `MoriEngineState` (Mutable Mirror).
-*   **PIXELS ONLY:** The Engine is "dumb." All DP-to-Pixel math must happen in the Bridge (Phase 3), not in the draw loop.
-
-## 3. MODULAR ISOLATION
-*   **UI Is Pure Compose:** Jetpack Compose is strictly limited to the `:ui` module.
-*   **Engine Is Pure Canvas:** No ViewModels, no XML, and no Android UI libraries in `:engine`.
-*   **Persona Is Pure Data:** No network calls. All data aggregation must be local and privacy-preserving.
-
-## 4. RELIABILITY & TESTING
-*   **Atomic PRs:** Keep PRs focused on a single sub-task from the roadmap.
-*   **Koin Validation:** Every DI change MUST include a `checkModules()` test.
-*   **Math Safety:** All celestial and procedural math MUST be unit-tested for edge cases.
-*   **Static Fallback:** Every rendering path must have a `try-catch` safety net.
+1.  **Reference:** Pick the next atomic Task from `ROADMAP.md`.
+2.  **Propose:** Describe implementation & testing. Wait for User approval.
+3.  **Execute:** Apply changes.
+4.  **Verify:** Run verification scripts from `TOOLS.md`.
+5.  **Commit & PR:** Use `gh` CLI to create the PR.

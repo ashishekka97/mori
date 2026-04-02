@@ -34,7 +34,7 @@ Before touching a single line of code in a new Phase:
 
 ### The Task Pre-Flight Ritual (Realignment)
 Because issues are created at the start of a phase, they can become short-sighted as the implementation evolves. Before starting implementation of any task:
-1. **Realignment Review:** Review the issue's technical spec against the `ARCHITECTURE.md` and current codebase.
+1. **Realignment Review:** Review the issue's technical spec against the `docs/ARCHITECTURE.md` and current codebase.
 2. **Pre-Flight Update:** If the architectural approach has shifted or technical debt is expanding beyond budget, rewrite the issue spec *before* coding.
 3. **Tactical Task Creation:** If a realignment requires significant refactoring or a shift in strategy, explicitly create a new "Tactical Realignment" task in `ROADMAP.md` right before the current task to handle the architectural correction.
 
@@ -51,7 +51,7 @@ To ensure long-term "Context Forensics":
 *   **The Phase Finalization Task:** Every Phase ends with a mandatory "Finalization" task in `ROADMAP.md`.
     *   **Branch:** `feature/phase-<number>-finalization`
     *   **PR Title:** `feat(meta): Phase <Number> Finalization - <Phase Name>`
-*   **The Retrospective:** The final PR of a Phase must update `ARCHITECTURE.md` with a **"Phase Retrospective"** (Key decisions, architectural shifts, and "State of the Machine").
+*   **The Retrospective:** The final PR of a Phase must update `docs/DECISIONS.md` with a **"Phase Retrospective"** (Key decisions, architectural shifts, and "State of the Machine").
 *   **Tagging:** Upon merging the final PR of a Phase, the `main` branch must be tagged (e.g., `v0.1.0-phase1`).
 
 ## 5. Engineering Standards
