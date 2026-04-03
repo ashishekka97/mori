@@ -25,9 +25,6 @@ class WallpaperFactory(
     val assetRegistry: AssetRegistry
 ) {
     suspend fun loadWallpaper(biomeId: String): MoriWallpaper = withContext(Dispatchers.IO) {
-        // Clear before load to ensure a clean slate
-        assetRegistry.clear()
-        
         val model = provider.getBiome(biomeId) ?: return@withContext MoriWallpaper.createDebugWallpaper()
         
         // Register Resources from the Biome Provider

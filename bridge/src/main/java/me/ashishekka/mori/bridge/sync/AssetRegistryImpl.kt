@@ -23,7 +23,24 @@ class AssetRegistryImpl : AssetRegistry {
     private val assetBounds = mutableMapOf<Int, AtlasRegion>()
     private val shaders = mutableMapOf<Int, Any>()
     private val paths = mutableMapOf<Int, Path>()
+    
+    private var referenceCount = 0
 
+    @Synchronized
+    override fun retain() {
+        referenceCount++
+    }
+
+    @Synchronized
+    override fun release() {
+        referenceCount--
+        if (referenceCount <= 0) {
+            clear()
+            referenceCount = 0
+        }
+    }
+
+    @Synchronized
     override fun registerAsset(resId: Int, type: AssetType, stream: InputStream) {
         if (loadedAssets.contains(resId)) {
             // Already loaded, just close the stream and return.

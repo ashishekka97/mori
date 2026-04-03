@@ -37,6 +37,16 @@ interface AssetRegistry {
     fun clear()
 
     /**
+     * Increments the reference count of the registry to prevent it from being cleared.
+     */
+    fun retain()
+
+    /**
+     * Decrements the reference count. If it reaches 0, clear() is called.
+     */
+    fun release()
+
+    /**
      * Returns the platform-specific compiled shader object (e.g., RuntimeShader).
      */
     fun getShader(resId: Int): Any?
