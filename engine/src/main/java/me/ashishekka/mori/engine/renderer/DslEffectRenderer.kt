@@ -74,9 +74,12 @@ class DslEffectRenderer(
         }
 
         // 2. Build final colors with alpha
-        val alphaInt = (alpha.coerceIn(0f, 1f) * 255).toInt()
-        val finalColor = (alphaInt shl 24) or (paintColor and 0x00FFFFFF)
-        val finalStrokeColor = (alphaInt shl 24) or (strokeColor and 0x00FFFFFF)
+        val paintAlpha = (paintColor ushr 24) and 0xFF
+        val strokeAlpha = (strokeColor ushr 24) and 0xFF
+        val globalAlpha = alpha.coerceIn(0f, 1f)
+        
+        val finalColor = ((paintAlpha * globalAlpha).toInt() shl 24) or (paintColor and 0x00FFFFFF)
+        val finalStrokeColor = ((strokeAlpha * globalAlpha).toInt() shl 24) or (strokeColor and 0x00FFFFFF)
 
         // 3. Transform and Draw
         canvas.save()

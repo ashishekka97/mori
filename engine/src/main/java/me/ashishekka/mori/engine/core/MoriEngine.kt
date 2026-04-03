@@ -29,6 +29,10 @@ class MoriEngine(
     var currentWallpaper: MoriWallpaper? = null
         private set
 
+    init {
+        assetRegistry.retain()
+    }
+
     var targetFps: Int = 60
         set(value) {
             field = value.coerceIn(1, 120)
@@ -164,6 +168,6 @@ class MoriEngine(
 
     fun onDestroy() {
         stop()
-        assetRegistry.clear()
+        assetRegistry.release()
     }
 }

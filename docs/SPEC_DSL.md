@@ -31,7 +31,7 @@ Each entry in the `layers` array defines a single visual element or logic proces
 ### 1.3 Performance Budget: The Golden Rule
 To ensure maximum battery efficiency and maintain 60fps on all devices, the Mori Engine follows a strict **Power Budget**:
 
-*   **Layer Count:** Maximum **16 layers** per biome. Any layers defined beyond this limit in the JSON will be ignored by the Engine.
+*   **Layer Count:** Maximum **32 layers** per biome. Any layers defined beyond this limit in the JSON will be ignored by the Engine.
 *   **Z-Order Range:** Supports standard signed integers. Layers are sorted and drawn from most-negative (bottom-most) to most-positive (top-most).
 *   **Duplicate IDs:** Layer IDs must be unique within a single Biome. If duplicates occur, the Engine will process them in their array order.
 
@@ -263,7 +263,7 @@ To maintain **Internal Excellence**, Mori biomes should be designed with the fol
 
 ### 6.3 Drawing Performance
 1.  **Z-Order Stability:** Avoid using dynamic expressions for `zOrder`. Sorting layers is an expensive operation; keep Z-orders static for maximum performance.
-2.  **The Golden Rule of 16:** Stay within the **16-layer limit** to guarantee 60fps and low battery impact across all Android devices.
+3.  **The Golden Rule of 32:** Stay within the **32-layer limit** to guarantee 60fps and low battery impact across all Android devices.
 3.  **Primitive Paths:** Prefer `RECT` and `CIRCLE` over `TRIANGLE` (Polygon) for simple UI elements, as they utilize the GPU's optimized hardware paths.
 
 ---

@@ -22,12 +22,9 @@ import me.ashishekka.mori.engine.renderer.StaticFallbackRenderer
 class WallpaperFactory(
     private val provider: BiomeProvider,
     private val evaluator: RuleEvaluator,
-    private val assetRegistry: AssetRegistry
+    val assetRegistry: AssetRegistry
 ) {
     suspend fun loadWallpaper(biomeId: String): MoriWallpaper = withContext(Dispatchers.IO) {
-        // Clear before load to ensure a clean slate
-        assetRegistry.clear()
-        
         val model = provider.getBiome(biomeId) ?: return@withContext MoriWallpaper.createDebugWallpaper()
         
         // Register Resources from the Biome Provider
@@ -35,6 +32,7 @@ class WallpaperFactory(
             val type = when (res.type.uppercase()) {
                 "BITMAP" -> AssetType.BITMAP
                 "SHADER" -> AssetType.SHADER
+                "PATH" -> AssetType.PATH
                 else -> AssetType.UNKNOWN
             }
             provider.openAsset(biomeId, res.path)?.let { stream ->
@@ -58,7 +56,7 @@ class WallpaperFactory(
     }
 
     fun createDebugPrismWallpaper(): MoriWallpaper {
-        val biomeId = "prism_demo"
+        val biomeId = "childhood_canvas"
         val model = provider.getBiome(biomeId) ?: return MoriWallpaper.createDebugWallpaper()
         
         // Register Resources from the Biome Provider
@@ -66,6 +64,7 @@ class WallpaperFactory(
             val type = when (res.type.uppercase()) {
                 "BITMAP" -> AssetType.BITMAP
                 "SHADER" -> AssetType.SHADER
+                "PATH" -> AssetType.PATH
                 else -> AssetType.UNKNOWN
             }
             provider.openAsset(biomeId, res.path)?.let { stream ->
@@ -83,7 +82,7 @@ class WallpaperFactory(
         }
 
         return MoriWallpaper(
-            id = "prism_demo",
+            id = "childhood_canvas",
             layers = renderers
         )
     }

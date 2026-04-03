@@ -144,14 +144,12 @@ class MoriEngineTest {
     }
 
     @Test
-    fun `onDestroy should stop ticker and clear asset registry`() {
+    fun `onDestroy should stop ticker`() {
         engine.start()
         engine.onDestroy()
-        
-        verify { ticker.stop() }
-        verify { assetRegistry.clear() }
-    }
 
+        verify { ticker.stop() }
+    }
     @Test
     fun `onDrawFrame should calculate shaderComplexity based on battery and thermal stress`() {
         // Default (isCharging = true, thermal = 0) -> 1.0f

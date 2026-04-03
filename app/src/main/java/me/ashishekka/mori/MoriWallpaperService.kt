@@ -55,7 +55,7 @@ class MoriWallpaperService : WallpaperService() {
                 
                 // UNIFIED: Use the formal Wallpaper Spec
                 engineScope.launch {
-                    val wallpaper = wallpaperFactory.loadWallpaper("prism_demo")
+                    val wallpaper = wallpaperFactory.loadWallpaper("childhood_canvas")
                     moriEngine.setWallpaper(wallpaper)
                 }
                 

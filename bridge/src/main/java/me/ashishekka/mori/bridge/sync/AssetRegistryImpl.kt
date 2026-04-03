@@ -23,7 +23,24 @@ class AssetRegistryImpl : AssetRegistry {
     private val assetBounds = mutableMapOf<Int, AtlasRegion>()
     private val shaders = mutableMapOf<Int, Any>()
     private val paths = mutableMapOf<Int, Path>()
+    
+    private var referenceCount = 0
 
+    @Synchronized
+    override fun retain() {
+        referenceCount++
+    }
+
+    @Synchronized
+    override fun release() {
+        referenceCount--
+        if (referenceCount <= 0) {
+            clear()
+            referenceCount = 0
+        }
+    }
+
+    @Synchronized
     override fun registerAsset(resId: Int, type: AssetType, stream: InputStream) {
         if (loadedAssets.contains(resId)) {
             // Already loaded, just close the stream and return.
@@ -60,13 +77,13 @@ class AssetRegistryImpl : AssetRegistry {
                 }
             }
             AssetType.PATH -> {
-                val pathString = stream.readBytes().toString(Charset.defaultCharset())
+                val pathString = stream.readBytes().toString(Charset.defaultCharset()).trim()
                 try {
                     val path = PathParser.createPathFromPathData(pathString)
                     paths[resId] = path
                     loadedAssets.add(resId)
                 } catch (e: Exception) {
-                    // Malformed path data, do not mark as loaded
+                    android.util.Log.e("Mori", "Malformed path data for $resId: $pathString", e)
                 }
             }
             else -> {

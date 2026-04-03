@@ -40,24 +40,13 @@ fun PulseBackdrop(
     modifier: Modifier = Modifier,
     worldState: WorldState = WorldState(),
     wallpaper: MoriWallpaper = remember { MoriWallpaper.createDebugWallpaper() },
+    assetRegistry: AssetRegistry,
     scaleMode: ScaleMode = ScaleMode.FIT,
     referenceWidth: Float = 1000f,
     referenceHeight: Float = 1100f,
     content: @Composable () -> Unit = {}
 ) {
     val ticker = remember { ComposeEngineTicker() }
-    val assetRegistry = remember { 
-        object : AssetRegistry {
-            override fun registerAsset(resId: Int, type: AssetType, stream: InputStream) {}
-            override fun getAtlasRegion(resId: Int): AtlasRegion = AtlasRegion.EMPTY
-            override fun getAtlas(): Any? = null
-            override fun getShader(resId: Int): Any? = null
-            override fun getStoredPath(resId: Int): Any? = null
-            override fun releaseAsset(resId: Int) {}
-            override fun clear() {}
-            override fun isReady(resId: Int): Boolean = false
-        }
-    }
     val composeCanvas = remember { ComposeEngineCanvas(assetRegistry) }
     val renderSurface = remember { ComposeRenderSurface(composeCanvas) }
     val moriEngine = remember { 
