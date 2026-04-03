@@ -6,7 +6,7 @@ Welcome to the Mori Artist's Guide. In this tutorial, you will build a "Hello Wo
 
 ## The Power Budget & Primitives
 Mori is a zero-allocation engine designed for 60fps and minimal battery drain. 
-*   **The Rule of 16:** You have a strict limit of 16 layers per biome.
+*   **The Rule of 32:** You have a strict limit of 32 layers per biome.
 *   **The Solution:** Build complex scenes using basic overlapping primitives (`RECT`, `TRIANGLE`, `CIRCLE`).
 
 ## Chapter 1: The Sky & Sun (Coordinate Space & Facts)
