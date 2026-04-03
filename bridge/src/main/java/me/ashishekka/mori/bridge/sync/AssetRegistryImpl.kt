@@ -60,7 +60,7 @@ class AssetRegistryImpl : AssetRegistry {
                 }
             }
             AssetType.PATH -> {
-                val pathString = stream.readBytes().toString(Charset.defaultCharset())
+                val pathString = stream.readBytes().toString(Charset.defaultCharset()).trim()
                 try {
                     val path = PathParser.createPathFromPathData(pathString)
                     paths[resId] = path

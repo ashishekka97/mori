@@ -135,7 +135,7 @@
         "x": "250",
         "y": "650",
         "width": "40",
-        "color_primary": "if_gt(fact[16], 0.5, #FF8C00, #FFD700)"
+        "color_primary": "if_gt(fact[16], 0.5, #222222, #FFD700)"
       }
     },
     {
@@ -182,7 +182,7 @@
       "expressions": {
         "x": "400",
         "y": "720",
-        "width": "8",
+        "width": "10",
         "color_primary": "#FFFF00",
         "alpha": "if_gt(fact[1], 0.0, 0.0, oscillate(0.5, 0.5, 1.0, 0))"
       }
@@ -193,8 +193,8 @@
       "zOrder": 10,
       "expressions": {
         "x": "600",
-        "y": "750",
-        "width": "6",
+        "y": "720",
+        "width": "10",
         "color_primary": "#FFFF00",
         "alpha": "if_gt(fact[1], 0.0, 0.0, oscillate(0.5, 0.5, 0.8, 3.14))"
       }
