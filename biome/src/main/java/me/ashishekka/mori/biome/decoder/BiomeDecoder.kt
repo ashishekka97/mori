@@ -4,6 +4,7 @@ import kotlinx.serialization.json.Json
 import me.ashishekka.mori.biome.compiler.ExpressionCompiler
 import me.ashishekka.mori.biome.models.BiomeModel
 import me.ashishekka.mori.engine.core.MoriWallpaper
+import me.ashishekka.mori.engine.core.models.AssetType
 import me.ashishekka.mori.engine.core.models.LayerType
 import me.ashishekka.mori.engine.core.models.MoriLayer
 import me.ashishekka.mori.engine.core.models.RenderProperty
@@ -43,6 +44,15 @@ object BiomeDecoder {
      */
     fun compileToLayers(model: BiomeModel?): List<MoriLayer> {
         if (model == null) return emptyList()
+
+        val resourceTypes = model.resources.associate { resource ->
+            val assetType = try {
+                AssetType.valueOf(resource.type.uppercase())
+            } catch (e: Exception) {
+                AssetType.UNKNOWN
+            }
+            resource.id to assetType
+        }
         
         return model.layers.mapNotNull { layerModel ->
             try {
@@ -50,7 +60,8 @@ object BiomeDecoder {
                     id = layerModel.id,
                     type = LayerType.fromString(layerModel.type),
                     zOrder = layerModel.zOrder,
-                    resId = layerModel.resId
+                    resId = layerModel.resId,
+                    assetType = layerModel.resId?.let { resourceTypes[it] } ?: AssetType.UNKNOWN
                 )
                 
                 layerModel.expressions.forEach { (propertyName, expression) ->

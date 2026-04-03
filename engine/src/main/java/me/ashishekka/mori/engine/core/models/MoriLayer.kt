@@ -13,6 +13,7 @@ class MoriLayer(
     val type: LayerType = LayerType.RECT,
     val zOrder: Int = 0,
     val resId: Int? = null,
+    val assetType: AssetType = AssetType.UNKNOWN,
     /** 
      * The executable machine code for each property in [RenderProperty].
      * If a rule is null, the corresponding property value remains unchanged or defaults to 0.
