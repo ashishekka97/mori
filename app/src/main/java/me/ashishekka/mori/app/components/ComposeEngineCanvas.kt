@@ -1,6 +1,9 @@
 package me.ashishekka.mori.app.components
 
+import android.graphics.Bitmap
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -8,6 +11,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
+import me.ashishekka.mori.engine.core.interfaces.AssetRegistry
 import me.ashishekka.mori.engine.core.interfaces.EngineCanvas
 
 /**
@@ -15,7 +21,9 @@ import me.ashishekka.mori.engine.core.interfaces.EngineCanvas
  * This is designed for zero-allocation performance by reusing the same instance
  * and updating its [drawScope] on every frame.
  */
-class ComposeEngineCanvas : EngineCanvas {
+class ComposeEngineCanvas(
+    private val assetRegistry: AssetRegistry
+) : EngineCanvas {
     var drawScope: DrawScope? = null
     
     private val path = Path()
@@ -28,6 +36,9 @@ class ComposeEngineCanvas : EngineCanvas {
     private var scaleY: Float = 1f
     private var scalePivotX: Float = 0f
     private var scalePivotY: Float = 0f
+    
+    private var cachedAtlas: Bitmap? = null
+    private var cachedImageBitmap: ImageBitmap? = null
     
     private val hasTransform: Boolean
         get() = rotationDegrees != 0f || translateX != 0f || translateY != 0f || scaleX != 1f || scaleY != 1f
@@ -91,7 +102,29 @@ class ComposeEngineCanvas : EngineCanvas {
     }
 
     override fun drawBitmap(resId: Int, left: Float, top: Float, right: Float, bottom: Float, alpha: Float) {
-        // Phase 7.1.1: Implementation will draw from the TextureAtlas.
+        val atlas = assetRegistry.getAtlas() as? Bitmap ?: return
+        
+        // Cache ImageBitmap to avoid re-wrapping if the atlas hasn't changed
+        if (atlas !== cachedAtlas) {
+            cachedAtlas = atlas
+            cachedImageBitmap = atlas.asImageBitmap()
+        }
+        
+        val imageBitmap = cachedImageBitmap ?: return
+        val region = assetRegistry.getAtlasRegion(resId)
+        
+        if (region.width <= 0 || region.height <= 0) return
+
+        drawScope?.applyTransformAndDraw {
+            drawImage(
+                image = imageBitmap,
+                srcOffset = IntOffset(region.left, region.top),
+                srcSize = IntSize(region.width, region.height),
+                dstOffset = IntOffset(left.toInt(), top.toInt()),
+                dstSize = IntSize((right - left).toInt(), (bottom - top).toInt()),
+                alpha = alpha
+            )
+        }
     }
 
     override fun save() {

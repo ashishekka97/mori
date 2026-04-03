@@ -1,5 +1,6 @@
 package me.ashishekka.mori.engine.core.interfaces
 import me.ashishekka.mori.engine.core.models.AssetType
+import me.ashishekka.mori.engine.core.models.AtlasRegion
 import java.io.InputStream
 
 /**
@@ -15,14 +16,15 @@ interface AssetRegistry {
     fun registerAsset(resId: Int, type: AssetType, stream: InputStream)
 
     /**
-     * Returns the base width of the asset in pixels.
+     * Returns the [AtlasRegion] for a given [resId].
+     * If the asset is not registered, returns [AtlasRegion.EMPTY].
      */
-    fun getAssetWidth(resId: Int): Int
+    fun getAtlasRegion(resId: Int): AtlasRegion
 
     /**
-     * Returns the base height of the asset in pixels.
+     * Returns the platform-specific texture atlas object (e.g., Bitmap).
      */
-    fun getAssetHeight(resId: Int): Int
+    fun getAtlas(): Any?
 
     /**
      * Releases an asset from memory.

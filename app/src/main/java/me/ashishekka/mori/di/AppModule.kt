@@ -32,7 +32,7 @@ val appModule = module {
     
     // RenderSurface is special because it needs the Engine instance
     factory<RenderSurface> { (engine: android.service.wallpaper.WallpaperService.Engine) -> 
-        SurfaceHolderRenderSurface(engine) 
+        SurfaceHolderRenderSurface(engine, get()) 
     }
 
     // Scopes
