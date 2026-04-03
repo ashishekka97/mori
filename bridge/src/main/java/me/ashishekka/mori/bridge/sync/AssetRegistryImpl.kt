@@ -18,6 +18,12 @@ class AssetRegistryImpl : AssetRegistry {
     private val assetBounds = mutableMapOf<Int, AtlasRegion>()
 
     override fun registerAsset(resId: Int, type: AssetType, stream: InputStream) {
+        if (loadedAssets.contains(resId)) {
+            // Already loaded, just close the stream and return.
+            try { stream.close() } catch (e: Exception) {}
+            return
+        }
+
         if (type == AssetType.BITMAP) {
             val bitmap = BitmapFactory.decodeStream(stream)
             if (bitmap != null) {

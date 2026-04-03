@@ -143,5 +143,6 @@ class MoriEngine(
 
     fun onDestroy() {
         stop()
+        assetRegistry.clear()
     }
 }
