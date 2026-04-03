@@ -23,6 +23,8 @@ object ShaderUniforms {
     const val CUSTOM_D = "u_custom_d"
     const val CUSTOM_E = "u_custom_e"
 
+    const val COMPLEXITY = "u_complexity"
+
     val UNIFORM_NAMES = arrayOf(
         X, Y, SCALE_X, SCALE_Y, ROTATION, WIDTH, HEIGHT, STROKE_WIDTH,
         ALPHA, COLOR_PRIMARY, COLOR_SECONDARY,

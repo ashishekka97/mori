@@ -151,4 +151,35 @@ class MoriEngineTest {
         verify { ticker.stop() }
         verify { assetRegistry.clear() }
     }
+
+    @Test
+    fun `onDrawFrame should calculate shaderComplexity based on battery and thermal stress`() {
+        // Default (isCharging = true, thermal = 0) -> 1.0f
+        engine.state.setFieldValue(MoriEngineStateIndices.FACT_IS_CHARGING, 1.0f)
+        engine.state.setFieldValue(MoriEngineStateIndices.FACT_THERMAL_STRESS, 0.0f)
+        engine.onDrawFrame()
+        assertEquals(1.0f, engine.state.shaderComplexity)
+
+        // Thermal stress > 0.4 -> capped at 0.2f
+        engine.state.setFieldValue(MoriEngineStateIndices.FACT_THERMAL_STRESS, 0.5f)
+        engine.onDrawFrame()
+        assertEquals(0.2f, engine.state.shaderComplexity)
+
+        // Thermal stress > 0.2 -> capped at 0.5f
+        engine.state.setFieldValue(MoriEngineStateIndices.FACT_THERMAL_STRESS, 0.3f)
+        engine.onDrawFrame()
+        assertEquals(0.5f, engine.state.shaderComplexity)
+
+        // Battery < 15% and not charging -> capped at 0.3f
+        engine.state.setFieldValue(MoriEngineStateIndices.FACT_THERMAL_STRESS, 0.0f)
+        engine.state.setFieldValue(MoriEngineStateIndices.FACT_IS_CHARGING, 0.0f)
+        engine.state.setFieldValue(MoriEngineStateIndices.FACT_BATTERY_LEVEL, 0.10f)
+        engine.onDrawFrame()
+        assertEquals(0.3f, engine.state.shaderComplexity)
+
+        // Battery < 50% and not charging -> capped at 0.7f
+        engine.state.setFieldValue(MoriEngineStateIndices.FACT_BATTERY_LEVEL, 0.40f)
+        engine.onDrawFrame()
+        assertEquals(0.7f, engine.state.shaderComplexity)
+    }
 }

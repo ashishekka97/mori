@@ -23,7 +23,7 @@ interface EngineCanvas {
      * @param resId The registered ID of the shader asset.
      * @param uniforms The 16-slot PropertyBuffer from the Rule Engine.
      */
-    fun drawShader(resId: Int, left: Float, top: Float, right: Float, bottom: Float, uniforms: FloatArray)
+    fun drawShader(resId: Int, left: Float, top: Float, right: Float, bottom: Float, uniforms: FloatArray, complexity: Float = 1.0f)
     
     fun save()
     fun restore()

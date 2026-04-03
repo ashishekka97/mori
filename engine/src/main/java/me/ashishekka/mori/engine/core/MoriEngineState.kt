@@ -45,6 +45,9 @@ class MoriEngineState {
     // === TIME (Global Sync) ===
     var currentTimeNanos: Long = 0L
 
+    // === PERFORMANCE ===
+    var shaderComplexity: Float = 1.0f
+
     /**
      * Helper to fetch a value by its index from the [factBuffer].
      * Used by the RuleEvaluator to maintain 100% zero-allocation access.

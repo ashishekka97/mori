@@ -90,6 +90,27 @@ class MoriEngine(
         // Update timeSeconds for smooth DSL animations
         state.timeSeconds = frameTimeNanos / 1_000_000_000f
         
+        // Calculate dynamic shader throttling (Zero-Meaning execution)
+        val batteryLevel = state.getFieldValue(MoriEngineStateIndices.FACT_BATTERY_LEVEL)
+        val isCharging = state.getFieldValue(MoriEngineStateIndices.FACT_IS_CHARGING) > 0.5f
+        val thermalStress = state.getFieldValue(MoriEngineStateIndices.FACT_THERMAL_STRESS)
+
+        var complexity = 1.0f
+        if (thermalStress > 0.4f) {
+            complexity = min(complexity, 0.2f)
+        } else if (thermalStress > 0.2f) {
+            complexity = min(complexity, 0.5f)
+        }
+
+        if (!isCharging) {
+            if (batteryLevel < 0.15f) {
+                complexity = min(complexity, 0.3f)
+            } else if (batteryLevel < 0.50f) {
+                complexity = min(complexity, 0.7f)
+            }
+        }
+        state.shaderComplexity = complexity
+
         // 1. UPDATE: Propagate the latest state to all layers first.
         layerManager.update(state)
         
