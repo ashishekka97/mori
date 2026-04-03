@@ -54,13 +54,62 @@ class AssetRegistryImplTest {
     }
 
     @Test
+    fun `registerAsset should be idempotent`() {
+        // Given
+        val resId = 1
+        val mockStream = mockk<InputStream>(relaxed = true)
+        val mockBitmap = mockk<Bitmap>(relaxed = true) {
+            every { width } returns 10
+            every { height } returns 10
+        }
+        every { BitmapFactory.decodeStream(any()) } returns mockBitmap
+        
+        // Mock the atlas
+        val expectedRegion = AtlasRegion(5, 5, 10, 10)
+        mockkConstructor(BitmapTextureAtlas::class)
+        every { anyConstructed<BitmapTextureAtlas>().pack(any()) } returns expectedRegion
+
+        // When - Register first time
+        registry.registerAsset(resId, AssetType.BITMAP, mockStream)
+        
+        // Then - Register second time with different stream
+        val secondStream = mockk<InputStream>(relaxed = true)
+        registry.registerAsset(resId, AssetType.BITMAP, secondStream)
+
+        // Verify BitmapFactory was only called once for this resId
+        verify(exactly = 1) { BitmapFactory.decodeStream(mockStream) }
+        verify(exactly = 0) { BitmapFactory.decodeStream(secondStream) }
+        
+        // Verify second stream was closed
+        verify(exactly = 1) { secondStream.close() }
+        
+        assertEquals(expectedRegion, registry.getAtlasRegion(resId))
+    }
+
+    @Test
     fun `isReady should return false for unregistered assets`() {
         assert(!registry.isReady(999))
     }
 
     @Test
-    fun `clear should reset loaded assets`() {
+    fun `clear should reset everything`() {
+        // Given
+        val resId = 1
+        val mockStream = mockk<InputStream>(relaxed = true)
+        val mockBitmap = mockk<Bitmap>(relaxed = true)
+        every { BitmapFactory.decodeStream(any()) } returns mockBitmap
+        mockkConstructor(BitmapTextureAtlas::class)
+        every { anyConstructed<BitmapTextureAtlas>().pack(any()) } returns AtlasRegion(0, 0, 1, 1)
+
+        registry.registerAsset(resId, AssetType.BITMAP, mockStream)
+        assert(registry.isReady(resId))
+
+        // When
         registry.clear()
-        assert(!registry.isReady(1))
+
+        // Then
+        assert(!registry.isReady(resId))
+        assertEquals(AtlasRegion.EMPTY, registry.getAtlasRegion(resId))
+        verify { anyConstructed<BitmapTextureAtlas>().clear() }
     }
 }

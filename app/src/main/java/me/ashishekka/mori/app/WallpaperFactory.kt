@@ -1,5 +1,7 @@
 package me.ashishekka.mori.app
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import me.ashishekka.mori.biome.decoder.BiomeDecoder
 import me.ashishekka.mori.biome.models.BiomeModel
 import me.ashishekka.mori.biome.provider.AssetBiomeProvider
@@ -22,6 +24,39 @@ class WallpaperFactory(
     private val evaluator: RuleEvaluator,
     private val assetRegistry: AssetRegistry
 ) {
+    suspend fun loadWallpaper(biomeId: String): MoriWallpaper = withContext(Dispatchers.IO) {
+        // Clear before load to ensure a clean slate
+        assetRegistry.clear()
+        
+        val model = provider.getBiome(biomeId) ?: return@withContext MoriWallpaper.createDebugWallpaper()
+        
+        // Register Resources from the Biome Provider
+        model.resources.forEach { res ->
+            val type = when (res.type.uppercase()) {
+                "BITMAP" -> AssetType.BITMAP
+                "SHADER" -> AssetType.SHADER
+                else -> AssetType.UNKNOWN
+            }
+            provider.openAsset(biomeId, res.path)?.let { stream ->
+                assetRegistry.registerAsset(res.id, type, stream)
+            }
+        }
+
+        val engineLayers = BiomeDecoder.compileToLayers(model)
+        
+        val renderers = mutableListOf<EffectRenderer>()
+        renderers.add(StaticFallbackRenderer())
+        
+        engineLayers.forEach { layer ->
+            renderers.add(DslEffectRenderer(layer, evaluator))
+        }
+
+        MoriWallpaper(
+            id = biomeId,
+            layers = renderers
+        )
+    }
+
     fun createDebugPrismWallpaper(): MoriWallpaper {
         val biomeId = "prism_demo"
         val model = provider.getBiome(biomeId) ?: return MoriWallpaper.createDebugWallpaper()

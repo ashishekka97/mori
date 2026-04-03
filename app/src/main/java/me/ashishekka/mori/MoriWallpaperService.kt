@@ -3,6 +3,7 @@ package me.ashishekka.mori
 import android.service.wallpaper.WallpaperService
 import android.view.SurfaceHolder
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import me.ashishekka.mori.app.WallpaperFactory
 import me.ashishekka.mori.bridge.metrics.MetricCalculator
 import me.ashishekka.mori.bridge.sync.StateSynchronizer
@@ -53,7 +54,10 @@ class MoriWallpaperService : WallpaperService() {
                 }
                 
                 // UNIFIED: Use the formal Wallpaper Spec
-                moriEngine.setWallpaper(wallpaperFactory.createDebugPrismWallpaper())
+                engineScope.launch {
+                    val wallpaper = wallpaperFactory.loadWallpaper("prism_demo")
+                    moriEngine.setWallpaper(wallpaper)
+                }
                 
                 moriEngine.start()
                 stateSynchronizer.start()

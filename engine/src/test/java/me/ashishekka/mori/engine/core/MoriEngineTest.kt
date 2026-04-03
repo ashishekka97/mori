@@ -142,4 +142,13 @@ class MoriEngineTest {
         assertEquals(0f, engine.state.viewportSafeX)
         assertEquals(-500f, engine.state.viewportSafeY)
     }
+
+    @Test
+    fun `onDestroy should stop ticker and clear asset registry`() {
+        engine.start()
+        engine.onDestroy()
+        
+        verify { ticker.stop() }
+        verify { assetRegistry.clear() }
+    }
 }
