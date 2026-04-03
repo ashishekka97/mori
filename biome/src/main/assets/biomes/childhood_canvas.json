@@ -3,8 +3,8 @@
   "name": "Hello World: Papercraft Scenery",
   "description": "A dynamic papercraft landscape built with basic primitives, reacting to time and device state.",
   "resources": [
-    { "id": 1, "path": "childhood_canvas/river_curve.path", "type": "PATH" },
-    { "id": 2, "path": "childhood_canvas/smoke_wisp.path", "type": "PATH" }
+    { "id": 1, "path": "river_curve.path", "type": "PATH" },
+    { "id": 2, "path": "smoke_wisp.path", "type": "PATH" }
   ],
   "layers": [
     {
