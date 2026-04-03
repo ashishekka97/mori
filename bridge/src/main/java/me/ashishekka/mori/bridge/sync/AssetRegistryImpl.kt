@@ -66,7 +66,7 @@ class AssetRegistryImpl : AssetRegistry {
                     paths[resId] = path
                     loadedAssets.add(resId)
                 } catch (e: Exception) {
-                    // Malformed path data, do not mark as loaded
+                    android.util.Log.e("Mori", "Malformed path data for $resId: $pathString", e)
                 }
             }
             else -> {

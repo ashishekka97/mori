@@ -22,7 +22,7 @@ import me.ashishekka.mori.engine.renderer.StaticFallbackRenderer
 class WallpaperFactory(
     private val provider: BiomeProvider,
     private val evaluator: RuleEvaluator,
-    private val assetRegistry: AssetRegistry
+    val assetRegistry: AssetRegistry
 ) {
     suspend fun loadWallpaper(biomeId: String): MoriWallpaper = withContext(Dispatchers.IO) {
         // Clear before load to ensure a clean slate

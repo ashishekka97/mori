@@ -70,7 +70,8 @@ class MainActivity : ComponentActivity() {
             // A single PulseBackdrop now owns the theme for the entire screen.
             PulseBackdrop(
                 worldState = worldState,
-                wallpaper = remember { wallpaperFactory.createDebugPrismWallpaper() }
+                wallpaper = remember { wallpaperFactory.createDebugPrismWallpaper() },
+                assetRegistry = wallpaperFactory.assetRegistry
             ) {
                 AnimatedContent(
                     targetState = showGallery,

@@ -21,6 +21,8 @@ class AssetRegistryImplTest {
     fun setUp() {
         mockkStatic(Bitmap::class)
         mockkStatic(BitmapFactory::class)
+        mockkStatic(android.util.Log::class)
+        every { android.util.Log.e(any(), any(), any()) } returns 0
         every { Bitmap.createBitmap(any<Int>(), any<Int>(), any<Bitmap.Config>()) } returns mockk(relaxed = true)
         registry = AssetRegistryImpl()
     }
