@@ -136,12 +136,18 @@ class ComposeEngineCanvas(
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
         val shader = assetRegistry.getShader(resId) as? RuntimeShader ?: return
 
-        shader.setFloatUniform(ShaderUniforms.ALPHA, uniforms[RenderProperty.INDEX_ALPHA])
-        shader.setFloatUniform(ShaderUniforms.CUSTOM_A, uniforms[RenderProperty.INDEX_CUSTOM_A])
-        shader.setFloatUniform(ShaderUniforms.CUSTOM_B, uniforms[RenderProperty.INDEX_CUSTOM_B])
-        shader.setFloatUniform(ShaderUniforms.CUSTOM_C, uniforms[RenderProperty.INDEX_CUSTOM_C])
-        shader.setFloatUniform(ShaderUniforms.CUSTOM_D, uniforms[RenderProperty.INDEX_CUSTOM_D])
-        shader.setFloatUniform(ShaderUniforms.CUSTOM_E, uniforms[RenderProperty.INDEX_CUSTOM_E])
+        for (i in 0 until RenderProperty.BUFFER_SIZE) {
+            try {
+                if (i == RenderProperty.INDEX_COLOR_PRIMARY || i == RenderProperty.INDEX_COLOR_SECONDARY) {
+                    val colorInt = java.lang.Float.floatToRawIntBits(uniforms[i])
+                    shader.setColorUniform(ShaderUniforms.UNIFORM_NAMES[i], colorInt)
+                } else {
+                    shader.setFloatUniform(ShaderUniforms.UNIFORM_NAMES[i], uniforms[i])
+                }
+            } catch (e: IllegalArgumentException) {
+                // Ignore uniforms that are not defined in the AGSL shader
+            }
+        }
 
         drawScope?.applyTransformAndDraw {
             drawRect(
