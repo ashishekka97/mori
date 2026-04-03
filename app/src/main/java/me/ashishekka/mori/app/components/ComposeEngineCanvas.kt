@@ -1,8 +1,11 @@
 package me.ashishekka.mori.app.components
 
 import android.graphics.Bitmap
+import android.graphics.RuntimeShader
+import android.os.Build
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Fill
@@ -123,6 +126,26 @@ class ComposeEngineCanvas(
                 dstOffset = IntOffset(left.toInt(), top.toInt()),
                 dstSize = IntSize((right - left).toInt(), (bottom - top).toInt()),
                 alpha = alpha
+            )
+        }
+    }
+
+    override fun drawShader(resId: Int, left: Float, top: Float, right: Float, bottom: Float, uniforms: FloatArray) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+        val shader = assetRegistry.getShader(resId) as? RuntimeShader ?: return
+
+        shader.setFloatUniform("u_alpha", uniforms[4]) // INDEX_ALPHA
+        shader.setFloatUniform("u_custom_a", uniforms[11]) // INDEX_CUSTOM_A
+        shader.setFloatUniform("u_custom_b", uniforms[12]) // INDEX_CUSTOM_B
+        shader.setFloatUniform("u_custom_c", uniforms[13]) // INDEX_CUSTOM_C
+        shader.setFloatUniform("u_custom_d", uniforms[14]) // INDEX_CUSTOM_D
+        shader.setFloatUniform("u_custom_e", uniforms[15]) // INDEX_CUSTOM_E
+
+        drawScope?.applyTransformAndDraw {
+            drawRect(
+                brush = ShaderBrush(shader),
+                topLeft = Offset(left, top),
+                size = Size(right - left, bottom - top)
             )
         }
     }

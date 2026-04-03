@@ -2,10 +2,13 @@ package me.ashishekka.mori.bridge.sync
 
 import android.graphics.BitmapFactory
 import android.graphics.Rect
+import android.graphics.RuntimeShader
+import android.os.Build
 import me.ashishekka.mori.engine.core.interfaces.AssetRegistry
 import me.ashishekka.mori.engine.core.models.AssetType
 import me.ashishekka.mori.engine.core.models.AtlasRegion
 import java.io.InputStream
+import java.nio.charset.Charset
 
 /**
  * Implementation of [AssetRegistry] that lives in the :bridge module.
@@ -16,6 +19,7 @@ class AssetRegistryImpl : AssetRegistry {
     private val loadedAssets = mutableSetOf<Int>()
     private val atlas by lazy { BitmapTextureAtlas() }
     private val assetBounds = mutableMapOf<Int, AtlasRegion>()
+    private val shaders = mutableMapOf<Int, Any>()
 
     override fun registerAsset(resId: Int, type: AssetType, stream: InputStream) {
         if (loadedAssets.contains(resId)) {
@@ -34,8 +38,22 @@ class AssetRegistryImpl : AssetRegistry {
                 }
                 bitmap.recycle()
             }
+        } else if (type == AssetType.SHADER) {
+            val shaderString = stream.readBytes().toString(Charset.defaultCharset())
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                try {
+                    val shader = RuntimeShader(shaderString)
+                    shaders[resId] = shader
+                    loadedAssets.add(resId)
+                } catch (e: IllegalArgumentException) {
+                    // Malformed shader string, do not mark as loaded
+                }
+            } else {
+                // For older SDKs, we might not support AGSL, but we still track it as "loaded" 
+                // so we don't keep trying to load it. The canvas will just ignore it.
+                loadedAssets.add(resId)
+            }
         } else {
-            // For other asset types (e.g. SHADERS), we just track registration for now.
             loadedAssets.add(resId)
         }
         
@@ -48,10 +66,13 @@ class AssetRegistryImpl : AssetRegistry {
     }
 
     override fun getAtlas(): Any? = atlas.getAtlasBitmap()
+    
+    override fun getShader(resId: Int): Any? = shaders[resId]
 
     override fun releaseAsset(resId: Int) {
         loadedAssets.remove(resId)
         assetBounds.remove(resId)
+        shaders.remove(resId)
         // Note: Removing from the atlas is not supported in this simple packer.
         // We assume assets are loaded once per biome session.
     }
@@ -59,6 +80,7 @@ class AssetRegistryImpl : AssetRegistry {
     override fun clear() {
         loadedAssets.clear()
         assetBounds.clear()
+        shaders.clear()
         atlas.clear()
     }
 

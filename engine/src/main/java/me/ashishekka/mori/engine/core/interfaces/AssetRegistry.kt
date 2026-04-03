@@ -37,6 +37,11 @@ interface AssetRegistry {
     fun clear()
 
     /**
+     * Returns the platform-specific compiled shader object (e.g., RuntimeShader).
+     */
+    fun getShader(resId: Int): Any?
+
+    /**
      * Returns true if the asset is loaded and ready to be drawn.
      */
     fun isReady(resId: Int): Boolean

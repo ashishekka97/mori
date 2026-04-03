@@ -6,6 +6,8 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.Rect
 import android.graphics.RectF
+import android.graphics.RuntimeShader
+import android.os.Build
 import android.service.wallpaper.WallpaperService
 import me.ashishekka.mori.engine.core.interfaces.AssetRegistry
 import me.ashishekka.mori.engine.core.interfaces.EngineCanvas
@@ -76,6 +78,26 @@ class AndroidEngineCanvas(
         
         paint.alpha = (alpha * 255).toInt()
         nativeCanvas.drawBitmap(atlas, src, dst, paint)
+    }
+
+    override fun drawShader(resId: Int, left: Float, top: Float, right: Float, bottom: Float, uniforms: FloatArray) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+        val shader = assetRegistry.getShader(resId) as? RuntimeShader ?: return
+
+        // Basic uniform mapping
+        // Task 7.2.2 will expand this, but for now we map the core properties
+        // based on the PropertyBuffer indices defined in the Rule Engine.
+        shader.setFloatUniform("u_alpha", uniforms[4]) // INDEX_ALPHA
+        // Custom expansion slots
+        shader.setFloatUniform("u_custom_a", uniforms[11]) // INDEX_CUSTOM_A
+        shader.setFloatUniform("u_custom_b", uniforms[12]) // INDEX_CUSTOM_B
+        shader.setFloatUniform("u_custom_c", uniforms[13]) // INDEX_CUSTOM_C
+        shader.setFloatUniform("u_custom_d", uniforms[14]) // INDEX_CUSTOM_D
+        shader.setFloatUniform("u_custom_e", uniforms[15]) // INDEX_CUSTOM_E
+
+        paint.shader = shader
+        nativeCanvas.drawRect(left, top, right, bottom, paint)
+        paint.shader = null
     }
 
     override fun save() {

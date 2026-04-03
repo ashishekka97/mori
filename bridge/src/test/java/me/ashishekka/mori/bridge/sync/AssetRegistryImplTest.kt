@@ -7,6 +7,8 @@ import me.ashishekka.mori.engine.core.models.AssetType
 import me.ashishekka.mori.engine.core.models.AtlasRegion
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import java.io.InputStream
@@ -32,7 +34,7 @@ class AssetRegistryImplTest {
     fun `registerAsset should store coordinates in AtlasRegion via packer`() {
         // Given
         val resId = 1
-        val mockStream = mockk<InputStream>(relaxed = true)
+        val mockStream = java.io.ByteArrayInputStream("shader".toByteArray())
         val mockBitmap = mockk<Bitmap>(relaxed = true) {
             every { width } returns 10
             every { height } returns 10
@@ -54,10 +56,23 @@ class AssetRegistryImplTest {
     }
 
     @Test
+    fun `registerAsset with SHADER should mark as ready`() {
+        // Given
+        val resId = 4
+        val mockStream = java.io.ByteArrayInputStream("shader".toByteArray())
+        
+        // When
+        registry.registerAsset(resId, AssetType.SHADER, mockStream)
+
+        // Then
+        assertTrue(registry.isReady(resId))
+    }
+
+    @Test
     fun `registerAsset should be idempotent`() {
         // Given
         val resId = 1
-        val mockStream = mockk<InputStream>(relaxed = true)
+        val mockStream = java.io.ByteArrayInputStream("shader".toByteArray())
         val mockBitmap = mockk<Bitmap>(relaxed = true) {
             every { width } returns 10
             every { height } returns 10
@@ -95,7 +110,7 @@ class AssetRegistryImplTest {
     fun `clear should reset everything`() {
         // Given
         val resId = 1
-        val mockStream = mockk<InputStream>(relaxed = true)
+        val mockStream = java.io.ByteArrayInputStream("shader".toByteArray())
         val mockBitmap = mockk<Bitmap>(relaxed = true)
         every { BitmapFactory.decodeStream(any()) } returns mockBitmap
         mockkConstructor(BitmapTextureAtlas::class)
