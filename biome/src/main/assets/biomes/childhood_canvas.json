@@ -1,0 +1,203 @@
+{
+  "id": "childhood_canvas",
+  "name": "Hello World: Papercraft Scenery",
+  "description": "A dynamic papercraft landscape built with basic primitives, reacting to time and device state.",
+  "resources": [
+    { "id": 1, "path": "childhood_canvas/river_curve.path", "type": "PATH" },
+    { "id": 2, "path": "childhood_canvas/smoke_wisp.path", "type": "PATH" }
+  ],
+  "layers": [
+    {
+      "id": 1,
+      "type": "RECT",
+      "zOrder": -20,
+      "expressions": {
+        "x": "500",
+        "y": "500",
+        "width": "1000",
+        "height": "2000",
+        "color_primary": "mix_oklab(#0D0221, #87CEEB, (fact[1] + 1) / 2)"
+      }
+    },
+    {
+      "id": 2,
+      "type": "TRIANGLE",
+      "zOrder": -15,
+      "expressions": {
+        "x": "300",
+        "y": "700",
+        "width": "400",
+        "height": "300",
+        "color_primary": "#4F7942"
+      }
+    },
+    {
+      "id": 3,
+      "type": "TRIANGLE",
+      "zOrder": -15,
+      "expressions": {
+        "x": "700",
+        "y": "750",
+        "width": "500",
+        "height": "400",
+        "color_primary": "#4F7942"
+      }
+    },
+    {
+      "id": 4,
+      "type": "CIRCLE",
+      "zOrder": -10,
+      "expressions": {
+        "x": "850",
+        "y": "remap(fact[1], -1.0, 1.0, 1200, 200)",
+        "width": "150",
+        "color_primary": "if_gt(fact[1], 0.0, #FFD700, #F4F6F0)"
+      }
+    },
+    {
+      "id": 5,
+      "type": "TRIANGLE",
+      "zOrder": -5,
+      "expressions": {
+        "x": "400",
+        "y": "850",
+        "width": "300",
+        "height": "200",
+        "color_primary": "#8FBC8F"
+      }
+    },
+    {
+      "id": 6,
+      "type": "TRIANGLE",
+      "zOrder": -5,
+      "expressions": {
+        "x": "650",
+        "y": "900",
+        "width": "400",
+        "height": "300",
+        "color_primary": "#8FBC8F"
+      }
+    },
+    {
+      "id": 7,
+      "type": "RECT",
+      "zOrder": -1,
+      "expressions": {
+        "x": "500",
+        "y": "500 + (fact[24] * 500) - 250",
+        "width": "1000",
+        "height": "500",
+        "color_primary": "#3CB371"
+      }
+    },
+    {
+      "id": 8,
+      "type": "PATH",
+      "res_id": 1,
+      "zOrder": 0,
+      "expressions": {
+        "x": "500",
+        "y": "800",
+        "stroke_width": "40 + oscillate(0, 10, 0.5, 0)",
+        "color_secondary": "#4682B4",
+        "color_primary": "#00000000"
+      }
+    },
+    {
+      "id": 9,
+      "type": "RECT",
+      "zOrder": 10,
+      "expressions": {
+        "x": "250",
+        "y": "700",
+        "width": "150",
+        "height": "150",
+        "color_primary": "#CD853F"
+      }
+    },
+    {
+      "id": 10,
+      "type": "TRIANGLE",
+      "zOrder": 11,
+      "expressions": {
+        "x": "250",
+        "y": "625",
+        "width": "150",
+        "height": "100",
+        "color_primary": "#808080"
+      }
+    },
+    {
+      "id": 11,
+      "type": "CIRCLE",
+      "zOrder": 12,
+      "expressions": {
+        "x": "250",
+        "y": "700",
+        "width": "50",
+        "color_primary": "if_gt(fact[16], 0.5, #FFA500, #FFFFE0)"
+      }
+    },
+    {
+      "id": 12,
+      "type": "PATH",
+      "res_id": 2,
+      "zOrder": 13,
+      "expressions": {
+        "x": "220",
+        "y": "580",
+        "stroke_width": "8",
+        "color_secondary": "#F0F8FF",
+        "color_primary": "#00000000",
+        "alpha": "if_gt(fact[7], 0.5, 1.0, 0.0)"
+      }
+    },
+    {
+      "id": 13,
+      "type": "RECT",
+      "zOrder": 10,
+      "expressions": {
+        "x": "750",
+        "y": "700",
+        "width": "30",
+        "height": "150",
+        "color_primary": "#8B4513"
+      }
+    },
+    {
+      "id": 14,
+      "type": "CIRCLE",
+      "zOrder": 11,
+      "expressions": {
+        "x": "750",
+        "y": "600",
+        "width": "lerp(100, 300, fact[9])",
+        "color_primary": "#228B22"
+      }
+    },
+    {
+      "id": 15,
+      "type": "CIRCLE",
+      "zOrder": 20,
+      "expressions": {
+        "x": "550",
+        "y": "850",
+        "width": "10",
+        "color_primary": "#FFFF00",
+        "alpha": "if_gt(fact[1], 0.0, 0.0, oscillate(0.5, 0.5, 1.0, 0))"
+      }
+    },
+    {
+      "id": 16,
+      "type": "CIRCLE",
+      "zOrder": 20,
+      "expressions": {
+        "x": "650",
+        "y": "820",
+        "width": "8",
+        "color_primary": "#FFFF00",
+        "alpha": "if_gt(fact[1], 0.0, 0.0, oscillate(0.5, 0.5, 1.0, 3.14))"
+      }
+    }
+  ]
+}
