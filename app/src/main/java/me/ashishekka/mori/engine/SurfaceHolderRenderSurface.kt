@@ -5,6 +5,7 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.Rect
+import android.graphics.RectF
 import android.service.wallpaper.WallpaperService
 import me.ashishekka.mori.engine.core.interfaces.AssetRegistry
 import me.ashishekka.mori.engine.core.interfaces.EngineCanvas
@@ -21,7 +22,7 @@ class AndroidEngineCanvas(
     private val paint = Paint()
     private val path = Path()
     private val srcRect = Rect()
-    private val dstRect = android.graphics.RectF()
+    private val dstRect = RectF()
 
     override fun drawColor(colorInt: Int) {
         nativeCanvas.drawColor(colorInt)
@@ -71,7 +72,7 @@ class AndroidEngineCanvas(
         if (region.width <= 0 || region.height <= 0) return
 
         val src = Rect(region.left, region.top, region.left + region.width, region.top + region.height)
-        val dst = android.graphics.RectF(left, top, right, bottom)
+        val dst = RectF(left, top, right, bottom)
         
         paint.alpha = (alpha * 255).toInt()
         nativeCanvas.drawBitmap(atlas, src, dst, paint)
