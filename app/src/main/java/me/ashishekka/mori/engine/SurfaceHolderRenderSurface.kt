@@ -82,9 +82,15 @@ class AndroidEngineCanvas(
         nativeCanvas.drawBitmap(atlas, src, dst, paint)
     }
 
-    override fun drawShader(resId: Int, left: Float, top: Float, right: Float, bottom: Float, uniforms: FloatArray) {
+    override fun drawShader(resId: Int, left: Float, top: Float, right: Float, bottom: Float, uniforms: FloatArray, complexity: Float) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
         val shader = assetRegistry.getShader(resId) as? RuntimeShader ?: return
+
+        try {
+            shader.setFloatUniform(ShaderUniforms.COMPLEXITY, complexity)
+        } catch (e: IllegalArgumentException) {
+            // Ignore
+        }
 
         for (i in 0 until RenderProperty.BUFFER_SIZE) {
             try {

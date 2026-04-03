@@ -136,7 +136,7 @@ class ComposeEngineCanvasTest {
         val uniforms = FloatArray(16)
         
         // In JVM tests SDK_INT evaluates to 0
-        canvas.drawShader(1, 0f, 0f, 100f, 100f, uniforms)
+        canvas.drawShader(1, 0f, 0f, 100f, 100f, uniforms, 1.0f)
         
         verify(exactly = 0) { mockDrawScope.drawRect(brush = any(), topLeft = any(), size = any(), alpha = any(), style = any(), colorFilter = any(), blendMode = any()) }
     }

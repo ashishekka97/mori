@@ -56,7 +56,7 @@ class SurfaceHolderRenderSurfaceTest {
 
         // When
         // In JVM tests, Build.VERSION.SDK_INT evaluates to 0, so it should return early
-        mockAndroidCanvas.drawShader(1, 0f, 0f, 100f, 100f, uniforms)
+        mockAndroidCanvas.drawShader(1, 0f, 0f, 100f, 100f, uniforms, 1.0f)
 
         // Then
         // Verify that nativeCanvas.drawRect is NOT called
