@@ -32,7 +32,7 @@ Mori uses a strict multi-module architecture to enforce separation of concerns a
 *   **`:biome`** - **The Logic.** Interprets declarative configurations and compiles them to bytecode.
 *   **`:ui`** - **The Face.** Built with the **Pulse Design System**. Handles dashboard and UX.
 
-For a deeper dive, see the **[Architecture Guide](ARCHITECTURE.md)** and the **[ISA Specification](SPEC_ISA.md)**.
+For a deeper dive, see the **[Architecture Guide](docs/ARCHITECTURE.md)** and the **[ISA Specification](docs/SPEC_ISA.md)**.
 
 ---
 
