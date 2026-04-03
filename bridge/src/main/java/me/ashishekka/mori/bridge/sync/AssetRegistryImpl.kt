@@ -21,9 +21,9 @@ class AssetRegistryImpl : AssetRegistry {
         if (type == AssetType.BITMAP) {
             val bitmap = BitmapFactory.decodeStream(stream)
             if (bitmap != null) {
-                val rect = atlas.pack(bitmap)
-                if (rect != null) {
-                    assetBounds[resId] = AtlasRegion(rect.left, rect.top, rect.width(), rect.height())
+                val region = atlas.pack(bitmap)
+                if (region != null) {
+                    assetBounds[resId] = region
                     loadedAssets.add(resId)
                 }
                 bitmap.recycle()

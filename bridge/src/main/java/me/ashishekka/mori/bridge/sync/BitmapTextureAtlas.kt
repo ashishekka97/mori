@@ -3,7 +3,7 @@ package me.ashishekka.mori.bridge.sync
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.Rect
+import me.ashishekka.mori.engine.core.models.AtlasRegion
 
 /**
  * A simple shelf-packer for packing multiple bitmaps into a single large atlas.
@@ -23,21 +23,16 @@ class BitmapTextureAtlas(
     private val packer = TextureAtlasPacker(width, height, padding)
 
     /**
-     * Packs a new bitmap into the atlas and returns its position as an Android Rect.
+     * Packs a new bitmap into the atlas and returns its position as an AtlasRegion.
      * Returns null if there is no space left in the atlas.
      */
-    fun pack(bitmap: Bitmap): Rect? {
-        val packedRect = packer.pack(bitmap.width, bitmap.height) ?: return null
+    fun pack(bitmap: Bitmap): AtlasRegion? {
+        val region = packer.pack(bitmap.width, bitmap.height) ?: return null
         
         // Draw the bitmap into the atlas at the location determined by the packer
-        canvas.drawBitmap(bitmap, packedRect.left.toFloat(), packedRect.top.toFloat(), null)
+        canvas.drawBitmap(bitmap, region.left.toFloat(), region.top.toFloat(), null)
 
-        return Rect(
-            packedRect.left, 
-            packedRect.top, 
-            packedRect.left + packedRect.width, 
-            packedRect.top + packedRect.height
-        )
+        return region
     }
 
     /**

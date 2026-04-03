@@ -1,5 +1,7 @@
 package me.ashishekka.mori.bridge.sync
 
+import me.ashishekka.mori.engine.core.models.AtlasRegion
+
 /**
  * Platform-agnostic shelf-packing logic.
  * Decoupled from Android's Bitmap/Rect for easy unit testing.
@@ -13,13 +15,11 @@ class TextureAtlasPacker(
     private var currentY = 0
     private var currentRowHeight = 0
 
-    data class PackedRect(val left: Int, val top: Int, val width: Int, val height: Int)
-
     /**
      * Finds a spot for a rectangle of given [itemWidth] and [itemHeight].
      * Returns the coordinates of the packed rectangle, or null if it doesn't fit.
      */
-    fun pack(itemWidth: Int, itemHeight: Int): PackedRect? {
+    fun pack(itemWidth: Int, itemHeight: Int): AtlasRegion? {
         // Check if we need to move to the next row
         if (currentX + itemWidth + padding > width) {
             currentX = 0
@@ -32,13 +32,13 @@ class TextureAtlasPacker(
             return null
         }
 
-        val rect = PackedRect(currentX, currentY, itemWidth, itemHeight)
+        val region = AtlasRegion(currentX, currentY, itemWidth, itemHeight)
 
         // Update packing state
         currentX += itemWidth + padding
         currentRowHeight = maxOf(currentRowHeight, itemHeight)
 
-        return rect
+        return region
     }
 
     fun clear() {
