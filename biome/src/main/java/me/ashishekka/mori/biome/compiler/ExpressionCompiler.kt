@@ -248,6 +248,7 @@ object ExpressionCompiler {
                 "step" -> bytecode.add(OpCode.STEP)
                 "lerp" -> bytecode.add(OpCode.LERP)
                 "oscillate" -> bytecode.add(OpCode.OSCILLATE)
+                "if_gt" -> bytecode.add(OpCode.IF_GT)
                 "noise" -> bytecode.add(OpCode.NOISE)
                 "mix_oklab" -> bytecode.add(OpCode.MIX_OKLAB)
                 "ease_in_out" -> bytecode.add(OpCode.EASE_IN_OUT)
