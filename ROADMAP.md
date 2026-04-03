@@ -149,9 +149,9 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 
 ### 7.3 Phase 7 Finalization
 - [x] **7.3.1 DslEffectRenderer:** Build the single, optimized renderer that interprets the full DSL.
-- [ ] **7.3.2 Tactical Realignment: High-Performance SVG** Implement the PATH layer type using high-performance, platform-agnostic GPU drawing paths.
-- [ ] **7.3.2 The Childhood Canvas (Interactive Tutorial & Demo):** Validate the full pipeline with a classic mountain/sun/river/house scene and a step-by-step artist guide.
-- [ ] **7.3.3 Phase 7 Finalization:** Documentation, Retrospective, and Tagging.
+- [x] **7.3.2 Tactical Realignment: High-Performance SVG:** Implement the `PATH` layer type using high-performance, platform-agnostic GPU drawing paths.
+- [ ] **7.3.3 The Childhood Canvas (Interactive Tutorial & Demo):** Validate the full pipeline with a classic mountain/sun/river/house scene and a step-by-step artist guide.
+- [ ] **7.3.4 Phase 7 Finalization:** Documentation, Retrospective, and Tagging.
 
 ---
 

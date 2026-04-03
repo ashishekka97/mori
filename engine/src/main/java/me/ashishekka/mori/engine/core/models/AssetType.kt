@@ -6,5 +6,6 @@ package me.ashishekka.mori.engine.core.models
 enum class AssetType {
     BITMAP,
     SHADER,
+    PATH,
     UNKNOWN
 }
