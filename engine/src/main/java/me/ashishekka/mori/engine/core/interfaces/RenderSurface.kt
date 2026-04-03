@@ -17,6 +17,13 @@ interface EngineCanvas {
      * the actual Bitmap using the [AssetRegistry].
      */
     fun drawBitmap(resId: Int, left: Float, top: Float, right: Float, bottom: Float, alpha: Float = 1.0f)
+
+    /**
+     * Draws a custom AGSL shader.
+     * @param resId The registered ID of the shader asset.
+     * @param uniforms The 16-slot PropertyBuffer from the Rule Engine.
+     */
+    fun drawShader(resId: Int, left: Float, top: Float, right: Float, bottom: Float, uniforms: FloatArray)
     
     fun save()
     fun restore()

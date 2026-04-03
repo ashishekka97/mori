@@ -6,10 +6,14 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.Rect
 import android.graphics.RectF
+import android.graphics.RuntimeShader
+import android.os.Build
 import android.service.wallpaper.WallpaperService
 import me.ashishekka.mori.engine.core.interfaces.AssetRegistry
 import me.ashishekka.mori.engine.core.interfaces.EngineCanvas
 import me.ashishekka.mori.engine.core.interfaces.RenderSurface
+import me.ashishekka.mori.engine.core.models.RenderProperty
+import me.ashishekka.mori.engine.core.models.ShaderUniforms
 
 /**
  * Android implementation of [EngineCanvas] wrapping a native [Canvas].
@@ -76,6 +80,26 @@ class AndroidEngineCanvas(
         
         paint.alpha = (alpha * 255).toInt()
         nativeCanvas.drawBitmap(atlas, src, dst, paint)
+    }
+
+    override fun drawShader(resId: Int, left: Float, top: Float, right: Float, bottom: Float, uniforms: FloatArray) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+        val shader = assetRegistry.getShader(resId) as? RuntimeShader ?: return
+
+        // Basic uniform mapping
+        // Task 7.2.2 will expand this, but for now we map the core properties
+        // based on the PropertyBuffer indices defined in the Rule Engine.
+        shader.setFloatUniform(ShaderUniforms.ALPHA, uniforms[RenderProperty.INDEX_ALPHA])
+        // Custom expansion slots
+        shader.setFloatUniform(ShaderUniforms.CUSTOM_A, uniforms[RenderProperty.INDEX_CUSTOM_A])
+        shader.setFloatUniform(ShaderUniforms.CUSTOM_B, uniforms[RenderProperty.INDEX_CUSTOM_B])
+        shader.setFloatUniform(ShaderUniforms.CUSTOM_C, uniforms[RenderProperty.INDEX_CUSTOM_C])
+        shader.setFloatUniform(ShaderUniforms.CUSTOM_D, uniforms[RenderProperty.INDEX_CUSTOM_D])
+        shader.setFloatUniform(ShaderUniforms.CUSTOM_E, uniforms[RenderProperty.INDEX_CUSTOM_E])
+
+        paint.shader = shader
+        nativeCanvas.drawRect(left, top, right, bottom, paint)
+        paint.shader = null
     }
 
     override fun save() {

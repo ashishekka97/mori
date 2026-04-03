@@ -1,8 +1,11 @@
 package me.ashishekka.mori.app.components
 
 import android.graphics.Bitmap
+import android.graphics.RuntimeShader
+import android.os.Build
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Fill
@@ -15,6 +18,8 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import me.ashishekka.mori.engine.core.interfaces.AssetRegistry
 import me.ashishekka.mori.engine.core.interfaces.EngineCanvas
+import me.ashishekka.mori.engine.core.models.RenderProperty
+import me.ashishekka.mori.engine.core.models.ShaderUniforms
 
 /**
  * A bridge between Mori's platform-agnostic [EngineCanvas] and Compose's [DrawScope].
@@ -123,6 +128,26 @@ class ComposeEngineCanvas(
                 dstOffset = IntOffset(left.toInt(), top.toInt()),
                 dstSize = IntSize((right - left).toInt(), (bottom - top).toInt()),
                 alpha = alpha
+            )
+        }
+    }
+
+    override fun drawShader(resId: Int, left: Float, top: Float, right: Float, bottom: Float, uniforms: FloatArray) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+        val shader = assetRegistry.getShader(resId) as? RuntimeShader ?: return
+
+        shader.setFloatUniform(ShaderUniforms.ALPHA, uniforms[RenderProperty.INDEX_ALPHA])
+        shader.setFloatUniform(ShaderUniforms.CUSTOM_A, uniforms[RenderProperty.INDEX_CUSTOM_A])
+        shader.setFloatUniform(ShaderUniforms.CUSTOM_B, uniforms[RenderProperty.INDEX_CUSTOM_B])
+        shader.setFloatUniform(ShaderUniforms.CUSTOM_C, uniforms[RenderProperty.INDEX_CUSTOM_C])
+        shader.setFloatUniform(ShaderUniforms.CUSTOM_D, uniforms[RenderProperty.INDEX_CUSTOM_D])
+        shader.setFloatUniform(ShaderUniforms.CUSTOM_E, uniforms[RenderProperty.INDEX_CUSTOM_E])
+
+        drawScope?.applyTransformAndDraw {
+            drawRect(
+                brush = ShaderBrush(shader),
+                topLeft = Offset(left, top),
+                size = Size(right - left, bottom - top)
             )
         }
     }

@@ -143,7 +143,7 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 - [x] **7.1.2 Asset Registry:** Manage asset lifecycles and "Ready" state handshakes.
 
 ### 7.2 The Shader Bridge
-- [ ] **7.2.1 AGSL Integration:** Enable custom shaders in the platform-agnostic `EngineCanvas`.
+- [x] **7.2.1 AGSL Integration:** Enable custom shaders in the platform-agnostic `EngineCanvas`.
 - [ ] **7.2.2 Uniform Mapping:** Automate the handover of Property Buffer values to GPU Uniforms.
 - [ ] **7.2.3 Shader Throttling:** Implement energy-aware shader complexity scaling (Battery/Thermal).
 

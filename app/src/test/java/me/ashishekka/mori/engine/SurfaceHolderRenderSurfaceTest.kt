@@ -48,6 +48,21 @@ class SurfaceHolderRenderSurfaceTest {
         verify { mockSurfaceHolder.unlockCanvasAndPost(mockNativeCanvas) }
     }
 
+    @Test
+    fun `drawShader should return early if SDK is below Tiramisu`() {
+        // Given
+        val mockAndroidCanvas = AndroidEngineCanvas(mockNativeCanvas, mockAssetRegistry)
+        val uniforms = FloatArray(16)
+
+        // When
+        // In JVM tests, Build.VERSION.SDK_INT evaluates to 0, so it should return early
+        mockAndroidCanvas.drawShader(1, 0f, 0f, 100f, 100f, uniforms)
+
+        // Then
+        // Verify that nativeCanvas.drawRect is NOT called
+        verify(exactly = 0) { mockNativeCanvas.drawRect(any(), any(), any(), any(), any()) }
+    }
+
     private fun assertEquals(expected: Any?, actual: Any?) {
         org.junit.Assert.assertEquals(expected, actual)
     }
