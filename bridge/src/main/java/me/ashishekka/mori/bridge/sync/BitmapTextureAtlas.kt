@@ -2,7 +2,6 @@ package me.ashishekka.mori.bridge.sync
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.Rect
 
 /**
  * A simple shelf-packer for packing multiple bitmaps into a single large atlas.
@@ -19,40 +18,24 @@ class BitmapTextureAtlas(
 ) {
     private val atlas: Bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
     private val canvas: Canvas = Canvas(atlas)
-    
-    private var currentX = 0
-    private var currentY = 0
-    private var currentRowHeight = 0
+    private val packer = TextureAtlasPacker(width, height, padding)
 
     /**
-     * Packs a new bitmap into the atlas and returns its position.
+     * Packs a new bitmap into the atlas and returns its position as an Android Rect.
      * Returns null if there is no space left in the atlas.
      */
-    fun pack(bitmap: Bitmap): Rect? {
-        // Check if we need to move to the next row
-        if (currentX + bitmap.width + padding > width) {
-            currentX = 0
-            currentY += currentRowHeight + padding
-            currentRowHeight = 0
-        }
-
-        // Check if we have vertical space left
-        if (currentY + bitmap.height + padding > height) {
-            android.util.Log.e("Mori", "BitmapTextureAtlas is FULL! Cannot pack bitmap ${bitmap.width}x${bitmap.height}")
-            return null
-        }
-
-        // Define the destination rectangle in the atlas
-        val rect = Rect(currentX, currentY, currentX + bitmap.width, currentY + bitmap.height)
+    fun pack(bitmap: Bitmap): android.graphics.Rect? {
+        val packedRect = packer.pack(bitmap.width, bitmap.height) ?: return null
         
-        // Draw the bitmap into the atlas
-        canvas.drawBitmap(bitmap, currentX.toFloat(), currentY.toFloat(), null)
+        // Draw the bitmap into the atlas at the location determined by the packer
+        canvas.drawBitmap(bitmap, packedRect.left.toFloat(), packedRect.top.toFloat(), null)
 
-        // Update packing state
-        currentX += bitmap.width + padding
-        currentRowHeight = maxOf(currentRowHeight, bitmap.height)
-
-        return rect
+        return android.graphics.Rect(
+            packedRect.left, 
+            packedRect.top, 
+            packedRect.left + packedRect.width, 
+            packedRect.top + packedRect.height
+        )
     }
 
     /**
@@ -65,8 +48,6 @@ class BitmapTextureAtlas(
      */
     fun clear() {
         atlas.eraseColor(android.graphics.Color.TRANSPARENT)
-        currentX = 0
-        currentY = 0
-        currentRowHeight = 0
+        packer.clear()
     }
 }

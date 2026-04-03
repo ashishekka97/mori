@@ -74,11 +74,11 @@ class AndroidEngineCanvas(
         
         if (aWidth <= 0 || aHeight <= 0) return
 
-        srcRect.set(aLeft, aTop, aLeft + aWidth, aTop + aHeight)
-        dstRect.set(left, top, right, bottom)
+        val src = Rect(aLeft, aTop, aLeft + aWidth, aTop + aHeight)
+        val dst = android.graphics.RectF(left, top, right, bottom)
         
         paint.alpha = (alpha * 255).toInt()
-        nativeCanvas.drawBitmap(atlas, srcRect, dstRect, paint)
+        nativeCanvas.drawBitmap(atlas, src, dst, paint)
     }
 
     override fun save() {
