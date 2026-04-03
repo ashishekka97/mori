@@ -15,7 +15,7 @@
         "x": "500",
         "y": "500",
         "width": "1000",
-        "height": "2000",
+        "height": "4000",
         "color_primary": "mix_oklab(#0D0221, #87CEEB, (fact[1] + 1) / 2)"
       }
     },
@@ -84,9 +84,9 @@
       "zOrder": -5,
       "expressions": {
         "x": "500",
-        "y": "fact[24] * 500",
+        "y": "fact[24] * 500 + 500",
         "width": "1000",
-        "height": "1000",
+        "height": "2000",
         "color_primary": "#3CB371"
       }
     },
