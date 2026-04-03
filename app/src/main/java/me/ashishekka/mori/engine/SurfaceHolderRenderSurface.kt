@@ -66,15 +66,11 @@ class AndroidEngineCanvas(
 
     override fun drawBitmap(resId: Int, left: Float, top: Float, right: Float, bottom: Float, alpha: Float) {
         val atlas = assetRegistry.getAtlas() as? Bitmap ?: return
+        val region = assetRegistry.getAtlasRegion(resId)
         
-        val aLeft = assetRegistry.getAssetLeft(resId)
-        val aTop = assetRegistry.getAssetTop(resId)
-        val aWidth = assetRegistry.getAssetWidth(resId)
-        val aHeight = assetRegistry.getAssetHeight(resId)
-        
-        if (aWidth <= 0 || aHeight <= 0) return
+        if (region.width <= 0 || region.height <= 0) return
 
-        val src = Rect(aLeft, aTop, aLeft + aWidth, aTop + aHeight)
+        val src = Rect(region.left, region.top, region.left + region.width, region.top + region.height)
         val dst = android.graphics.RectF(left, top, right, bottom)
         
         paint.alpha = (alpha * 255).toInt()

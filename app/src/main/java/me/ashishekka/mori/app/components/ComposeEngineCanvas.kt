@@ -111,19 +111,15 @@ class ComposeEngineCanvas(
         }
         
         val imageBitmap = cachedImageBitmap ?: return
+        val region = assetRegistry.getAtlasRegion(resId)
         
-        val aLeft = assetRegistry.getAssetLeft(resId)
-        val aTop = assetRegistry.getAssetTop(resId)
-        val aWidth = assetRegistry.getAssetWidth(resId)
-        val aHeight = assetRegistry.getAssetHeight(resId)
-        
-        if (aWidth <= 0 || aHeight <= 0) return
+        if (region.width <= 0 || region.height <= 0) return
 
         drawScope?.applyTransformAndDraw {
             drawImage(
                 image = imageBitmap,
-                srcOffset = IntOffset(aLeft, aTop),
-                srcSize = IntSize(aWidth, aHeight),
+                srcOffset = IntOffset(region.left, region.top),
+                srcSize = IntSize(region.width, region.height),
                 dstOffset = IntOffset(left.toInt(), top.toInt()),
                 dstSize = IntSize((right - left).toInt(), (bottom - top).toInt()),
                 alpha = alpha

@@ -4,6 +4,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Rect
 import me.ashishekka.mori.engine.core.interfaces.AssetRegistry
 import me.ashishekka.mori.engine.core.models.AssetType
+import me.ashishekka.mori.engine.core.models.AtlasRegion
 import java.io.InputStream
 
 /**
@@ -13,8 +14,8 @@ import java.io.InputStream
 class AssetRegistryImpl : AssetRegistry {
     
     private val loadedAssets = mutableSetOf<Int>()
-    private val atlas = BitmapTextureAtlas()
-    private val assetBounds = mutableMapOf<Int, Rect>()
+    private val atlas by lazy { BitmapTextureAtlas() }
+    private val assetBounds = mutableMapOf<Int, AtlasRegion>()
 
     override fun registerAsset(resId: Int, type: AssetType, stream: InputStream) {
         if (type == AssetType.BITMAP) {
@@ -22,7 +23,7 @@ class AssetRegistryImpl : AssetRegistry {
             if (bitmap != null) {
                 val rect = atlas.pack(bitmap)
                 if (rect != null) {
-                    assetBounds[resId] = rect
+                    assetBounds[resId] = AtlasRegion(rect.left, rect.top, rect.width(), rect.height())
                     loadedAssets.add(resId)
                 }
                 bitmap.recycle()
@@ -36,13 +37,9 @@ class AssetRegistryImpl : AssetRegistry {
         try { stream.close() } catch (e: Exception) {}
     }
 
-    override fun getAssetWidth(resId: Int): Int = assetBounds[resId]?.width() ?: 0
-
-    override fun getAssetHeight(resId: Int): Int = assetBounds[resId]?.height() ?: 0
-
-    override fun getAssetLeft(resId: Int): Int = assetBounds[resId]?.left ?: 0
-
-    override fun getAssetTop(resId: Int): Int = assetBounds[resId]?.top ?: 0
+    override fun getAtlasRegion(resId: Int): AtlasRegion {
+        return assetBounds[resId] ?: AtlasRegion.EMPTY
+    }
 
     override fun getAtlas(): Any? = atlas.getAtlasBitmap()
 

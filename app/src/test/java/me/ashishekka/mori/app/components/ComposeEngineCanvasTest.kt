@@ -7,6 +7,8 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import me.ashishekka.mori.engine.core.interfaces.AssetRegistry
+import me.ashishekka.mori.engine.core.models.AtlasRegion
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.Test

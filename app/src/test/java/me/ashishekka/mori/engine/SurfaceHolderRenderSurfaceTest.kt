@@ -7,6 +7,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import me.ashishekka.mori.engine.core.interfaces.AssetRegistry
+import me.ashishekka.mori.engine.core.models.AtlasRegion
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
