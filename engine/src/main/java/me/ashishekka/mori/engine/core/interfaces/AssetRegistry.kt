@@ -42,6 +42,11 @@ interface AssetRegistry {
     fun getShader(resId: Int): Any?
 
     /**
+     * Returns the platform-specific path geometry object (e.g., Path).
+     */
+    fun getStoredPath(resId: Int): Any?
+
+    /**
      * Returns true if the asset is loaded and ready to be drawn.
      */
     fun isReady(resId: Int): Boolean

@@ -52,6 +52,7 @@ fun PulseBackdrop(
             override fun getAtlasRegion(resId: Int): AtlasRegion = AtlasRegion.EMPTY
             override fun getAtlas(): Any? = null
             override fun getShader(resId: Int): Any? = null
+            override fun getStoredPath(resId: Int): Any? = null
             override fun releaseAsset(resId: Int) {}
             override fun clear() {}
             override fun isReady(resId: Int): Boolean = false

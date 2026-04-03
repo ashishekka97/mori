@@ -1,9 +1,11 @@
 package me.ashishekka.mori.bridge.sync
 
 import android.graphics.BitmapFactory
+import android.graphics.Path
 import android.graphics.Rect
 import android.graphics.RuntimeShader
 import android.os.Build
+import androidx.core.graphics.PathParser
 import me.ashishekka.mori.engine.core.interfaces.AssetRegistry
 import me.ashishekka.mori.engine.core.models.AssetType
 import me.ashishekka.mori.engine.core.models.AtlasRegion
@@ -20,6 +22,7 @@ class AssetRegistryImpl : AssetRegistry {
     private val atlas by lazy { BitmapTextureAtlas() }
     private val assetBounds = mutableMapOf<Int, AtlasRegion>()
     private val shaders = mutableMapOf<Int, Any>()
+    private val paths = mutableMapOf<Int, Path>()
 
     override fun registerAsset(resId: Int, type: AssetType, stream: InputStream) {
         if (loadedAssets.contains(resId)) {
@@ -56,6 +59,16 @@ class AssetRegistryImpl : AssetRegistry {
                     loadedAssets.add(resId)
                 }
             }
+            AssetType.PATH -> {
+                val pathString = stream.readBytes().toString(Charset.defaultCharset())
+                try {
+                    val path = PathParser.createPathFromPathData(pathString)
+                    paths[resId] = path
+                    loadedAssets.add(resId)
+                } catch (e: Exception) {
+                    // Malformed path data, do not mark as loaded
+                }
+            }
             else -> {
                 loadedAssets.add(resId)
             }
@@ -73,10 +86,13 @@ class AssetRegistryImpl : AssetRegistry {
     
     override fun getShader(resId: Int): Any? = shaders[resId]
 
+    override fun getStoredPath(resId: Int): Any? = paths[resId]
+
     override fun releaseAsset(resId: Int) {
         loadedAssets.remove(resId)
         assetBounds.remove(resId)
         shaders.remove(resId)
+        paths.remove(resId)
         // Note: Removing from the atlas is not supported in this simple packer.
         // We assume assets are loaded once per biome session.
     }
@@ -85,6 +101,7 @@ class AssetRegistryImpl : AssetRegistry {
         loadedAssets.clear()
         assetBounds.clear()
         shaders.clear()
+        paths.clear()
         atlas.clear()
     }
 

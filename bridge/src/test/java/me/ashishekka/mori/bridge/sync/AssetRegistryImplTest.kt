@@ -127,4 +127,46 @@ class AssetRegistryImplTest {
         assertEquals(AtlasRegion.EMPTY, registry.getAtlasRegion(resId))
         verify { anyConstructed<BitmapTextureAtlas>().clear() }
     }
+
+    @Test
+    fun `registerAsset should parse and store valid SVG path data`() {
+        // Given
+        val resId = 10
+        val pathData = "M 0 0 L 10 10 Z"
+        val mockStream = java.io.ByteArrayInputStream(pathData.toByteArray())
+        val mockPath = mockk<android.graphics.Path>()
+
+        mockkStatic(androidx.core.graphics.PathParser::class)
+        every { androidx.core.graphics.PathParser.createPathFromPathData(pathData) } returns mockPath
+
+        // When
+        registry.registerAsset(resId, AssetType.PATH, mockStream)
+
+        // Then
+        assertTrue(registry.isReady(resId))
+        assertEquals(mockPath, registry.getStoredPath(resId))
+    }
+
+    @Test
+    fun `registerAsset should handle malformed SVG path data gracefully without crashing`() {
+        // Given
+        val resId = 11
+        val malformedPathData = "invalid path"
+        val mockStream = java.io.ByteArrayInputStream(malformedPathData.toByteArray())
+
+        mockkStatic(androidx.core.graphics.PathParser::class)
+        every { androidx.core.graphics.PathParser.createPathFromPathData(malformedPathData) } throws RuntimeException("Parse error")
+
+        // When
+        registry.registerAsset(resId, AssetType.PATH, mockStream)
+
+        // Then
+        assert(!registry.isReady(resId))
+        assertNull(registry.getStoredPath(resId))
+    }
+
+    @Test
+    fun `getStoredPath should return null for unregistered path IDs`() {
+        assertNull(registry.getStoredPath(999))
+    }
 }

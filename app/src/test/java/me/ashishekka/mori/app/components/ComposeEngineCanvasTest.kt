@@ -34,6 +34,7 @@ class ComposeEngineCanvasTest {
         every { anyConstructed<android.graphics.Path>().moveTo(any(), any()) } returns Unit
         every { anyConstructed<android.graphics.Path>().lineTo(any(), any()) } returns Unit
         every { anyConstructed<android.graphics.Path>().close() } returns Unit
+
         canvas = ComposeEngineCanvas(mockAssetRegistry)
     }
 
@@ -140,6 +141,71 @@ class ComposeEngineCanvasTest {
         
         verify(exactly = 0) { mockDrawScope.drawRect(brush = any(), topLeft = any(), size = any(), alpha = any(), style = any(), colorFilter = any(), blendMode = any()) }
     }
+@Test
+fun `drawPath should cache and draw parsed compose Path with Fill style`() {
+    canvas.drawScope = mockDrawScope
+    val resId = 20
+    val colorInt = 0xFFFF00FF.toInt()
+    val mockNativePath = mockk<android.graphics.Path>(relaxed = true)
+
+    every { mockAssetRegistry.getStoredPath(resId) } returns mockNativePath
+
+    canvas.drawPath(resId, colorInt, true)
+    verify {
+        mockDrawScope.drawPath(
+            path = any(),
+            color = Color(colorInt),
+            style = Fill
+        )
+    }
+
+    // Call again to test cache
+    canvas.drawPath(resId, colorInt, true)
+
+    verify(exactly = 2) {
+        mockDrawScope.drawPath(
+            path = any(),
+            color = Color(colorInt),
+            style = Fill
+        )
+    }
+}
+
+@Test
+fun `drawPath should draw parsed compose Path with Stroke style`() {
+    canvas.drawScope = mockDrawScope
+    val resId = 21
+    val colorInt = 0xFF00FFFF.toInt()
+    val mockNativePath = mockk<android.graphics.Path>(relaxed = true)
+
+    every { mockAssetRegistry.getStoredPath(resId) } returns mockNativePath
+
+    canvas.drawPath(resId, colorInt, false, 3f)
+
+    verify {
+        mockDrawScope.drawPath(
+            path = any(),
+            color = Color(colorInt),
+            style = Stroke(width = 3f)
+        )
+    }
+    }
+
+    @Test
+    fun `drawPath should do nothing for unregistered or invalid path IDs`() {
+    canvas.drawScope = mockDrawScope
+    val resId = 999
+    every { mockAssetRegistry.getStoredPath(resId) } returns null
+
+    canvas.drawPath(resId, 0, true)
+    verify(exactly = 0) {
+        mockDrawScope.drawPath(
+            path = any(),
+            color = any(),
+            style = any()
+        )
+    }
+}
 
     @Test
     fun `transforms should update state variables and restore should reset them`() {

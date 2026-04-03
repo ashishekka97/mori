@@ -110,6 +110,16 @@ class AndroidEngineCanvas(
         paint.shader = null
     }
 
+    override fun drawPath(resId: Int, color: Int, isFilled: Boolean, thickness: Float) {
+        val nativePath = assetRegistry.getStoredPath(resId) as? Path ?: return
+
+        paint.color = color
+        paint.style = if (isFilled) Paint.Style.FILL else Paint.Style.STROKE
+        paint.strokeWidth = if (isFilled) 0f else thickness
+
+        nativeCanvas.drawPath(nativePath, paint)
+    }
+
     override fun save() {
         nativeCanvas.save()
     }

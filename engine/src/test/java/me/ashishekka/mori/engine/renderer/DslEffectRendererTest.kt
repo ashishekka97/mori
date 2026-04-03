@@ -147,18 +147,19 @@ class DslEffectRendererTest {
     }
 
     @Test
-    fun `render should skip drawing for PATH type`() {
-        val layer = MoriLayer(id = 1, type = LayerType.PATH)
+    fun `render should call drawPath on canvas when layer type is PATH and resId is provided`() {
+        val layer = MoriLayer(
+            id = 1,
+            type = LayerType.PATH,
+            resId = 303
+        )
         val renderer = DslEffectRenderer(layer, evaluator)
 
         renderer.update(state)
         renderer.render(mockCanvas)
 
-        // Verify no draw calls were made for basic shapes
-        verify(exactly = 0) {
-            mockCanvas.drawRect(any(), any(), any(), any(), any(), any(), any())
-            mockCanvas.drawCircle(any(), any(), any(), any(), any(), any())
-            mockCanvas.drawPolygon(any(), any(), any(), any(), any())
+        verify {
+            mockCanvas.drawPath(eq(303), any(), eq(true), any())
         }
     }
 }

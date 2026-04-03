@@ -23,8 +23,15 @@ interface EngineCanvas {
      * @param resId The registered ID of the shader asset.
      * @param uniforms The 16-slot PropertyBuffer from the Rule Engine.
      */
-    fun drawShader(resId: Int, left: Float, top: Float, right: Float, bottom: Float, uniforms: FloatArray, complexity: Float = 1.0f)
-    
+     fun drawShader(resId: Int, left: Float, top: Float, right: Float, bottom: Float, uniforms: FloatArray, complexity: Float = 1.0f)
+
+     /**
+     * Draws a platform-specific path geometry.
+     * The implementation in the platform layer (e.g., Android) will look up
+     * the actual Path using the [AssetRegistry].
+     */
+     fun drawPath(resId: Int, color: Int, isFilled: Boolean = true, thickness: Float = 4f)
+
     fun save()
     fun restore()
     fun rotate(degrees: Float, pivotX: Float = 0f, pivotY: Float = 0f)

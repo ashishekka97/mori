@@ -118,6 +118,9 @@ class DslEffectRenderer(
                             continue
                         }
                     }
+                    AssetType.PATH -> {
+                        // PATH assets are drawn via LayerType.PATH block below
+                    }
                     AssetType.UNKNOWN -> { /* Fallback to base geometry */ }
                 }
             }
@@ -146,7 +149,9 @@ class DslEffectRenderer(
                     }
                 }
                 LayerType.PATH -> {
-                    // Placeholder for Phase 7 SVG support
+                    if (layer.resId != null) {
+                        canvas.drawPath(layer.resId, colorToUse, !isStroke, finalStrokeWidth)
+                    }
                 }
                 LayerType.UNKNOWN -> {
                     // Do nothing

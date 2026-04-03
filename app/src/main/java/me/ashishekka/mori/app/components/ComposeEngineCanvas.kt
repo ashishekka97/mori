@@ -6,6 +6,7 @@ import android.os.Build
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.ShaderBrush
+import androidx.compose.ui.graphics.asComposePath
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Fill
@@ -41,7 +42,9 @@ class ComposeEngineCanvas(
     private var scaleY: Float = 1f
     private var scalePivotX: Float = 0f
     private var scalePivotY: Float = 0f
-    
+
+    private val cachedComposePaths = mutableMapOf<Int, Path>()
+
     private var cachedAtlas: Bitmap? = null
     private var cachedImageBitmap: ImageBitmap? = null
     
@@ -161,6 +164,21 @@ class ComposeEngineCanvas(
                 topLeft = Offset(left, top),
                 size = Size(right - left, bottom - top)
             )
+        }
+    }
+
+    override fun drawPath(resId: Int, color: Int, isFilled: Boolean, thickness: Float) {
+        val nativePath = assetRegistry.getStoredPath(resId) as? android.graphics.Path ?: return
+
+        var composePath = cachedComposePaths.get(resId)
+        if (composePath == null) {
+            composePath = nativePath.asComposePath()
+            cachedComposePaths.put(resId, composePath)
+        }
+
+        val style = if (isFilled) Fill else Stroke(width = thickness)
+        drawScope?.applyTransformAndDraw {
+            drawPath(composePath, Color(color), style = style)
         }
     }
 

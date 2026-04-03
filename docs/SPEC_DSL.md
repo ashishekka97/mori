@@ -48,12 +48,13 @@ Different layer types interpret the `width` and `height` properties differently:
 | **`RECT`** | Standard rectangle. Uses both `width` and `height`. |
 | **`CIRCLE`** | Uses `width` as the diameter. `height` is ignored to ensure perfect circularity. |
 | **`TRIANGLE`** | Renders an equilateral triangle fitting within the `width` and `height` bounding box. |
-| **`PATH`** | (Phase 7) Reserved for complex SVG-like paths. |
+| **`PATH`** | (Phase 7) Renders a complex vector path. **Constraint:** Must provide only the raw SVG path data string (e.g., `"M10,10 L50,50 Z"`) via the resource registry. Full XML SVGs with intrinsic colors are not supported to maintain the "Dumb Muscle" performance and DSL coloring mandate. |
 
 ### 1.6 Resource Registry (Phase 7)
 Mori is designed to be asset-rich. While currently restricted to geometric primitives, the Biome schema includes a reserved `resources` block for external assets.
 
 *   **Bitmaps:** High-fidelity hand-painted textures.
+*   **Paths:** High-performance vector geometry defined by a raw SVG path string (e.g., `M10,10 L50,50 Z`). Must not contain XML nodes or intrinsic styling.
 *   **Shaders (AGSL):** Custom GPU logic for materials (Glass, Water, Light). 
     *   *Note:* Shaders are **Logic Resources**. They are defined once and can be applied to any Layer type (e.g., a `RECT` layer with a `glass_material` shader).
 *   **Referencing:** Layers link to these resources using a `res_id`, allowing a single asset to be reused across multiple layers with different DSL-driven effects.
