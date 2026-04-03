@@ -28,33 +28,37 @@ class AssetRegistryImpl : AssetRegistry {
             return
         }
 
-        if (type == AssetType.BITMAP) {
-            val bitmap = BitmapFactory.decodeStream(stream)
-            if (bitmap != null) {
-                val region = atlas.pack(bitmap)
-                if (region != null) {
-                    assetBounds[resId] = region
-                    loadedAssets.add(resId)
+        when (type) {
+            AssetType.BITMAP -> {
+                val bitmap = BitmapFactory.decodeStream(stream)
+                if (bitmap != null) {
+                    val region = atlas.pack(bitmap)
+                    if (region != null) {
+                        assetBounds[resId] = region
+                        loadedAssets.add(resId)
+                    }
+                    bitmap.recycle()
                 }
-                bitmap.recycle()
             }
-        } else if (type == AssetType.SHADER) {
-            val shaderString = stream.readBytes().toString(Charset.defaultCharset())
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                try {
-                    val shader = RuntimeShader(shaderString)
-                    shaders[resId] = shader
+            AssetType.SHADER -> {
+                val shaderString = stream.readBytes().toString(Charset.defaultCharset())
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    try {
+                        val shader = RuntimeShader(shaderString)
+                        shaders[resId] = shader
+                        loadedAssets.add(resId)
+                    } catch (e: IllegalArgumentException) {
+                        // Malformed shader string, do not mark as loaded
+                    }
+                } else {
+                    // For older SDKs, we might not support AGSL, but we still track it as "loaded" 
+                    // so we don't keep trying to load it. The canvas will just ignore it.
                     loadedAssets.add(resId)
-                } catch (e: IllegalArgumentException) {
-                    // Malformed shader string, do not mark as loaded
                 }
-            } else {
-                // For older SDKs, we might not support AGSL, but we still track it as "loaded" 
-                // so we don't keep trying to load it. The canvas will just ignore it.
+            }
+            else -> {
                 loadedAssets.add(resId)
             }
-        } else {
-            loadedAssets.add(resId)
         }
         
         // CRITICAL: Close the stream after use.

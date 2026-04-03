@@ -12,6 +12,8 @@ import android.service.wallpaper.WallpaperService
 import me.ashishekka.mori.engine.core.interfaces.AssetRegistry
 import me.ashishekka.mori.engine.core.interfaces.EngineCanvas
 import me.ashishekka.mori.engine.core.interfaces.RenderSurface
+import me.ashishekka.mori.engine.core.models.RenderProperty
+import me.ashishekka.mori.engine.core.models.ShaderUniforms
 
 /**
  * Android implementation of [EngineCanvas] wrapping a native [Canvas].
@@ -87,13 +89,13 @@ class AndroidEngineCanvas(
         // Basic uniform mapping
         // Task 7.2.2 will expand this, but for now we map the core properties
         // based on the PropertyBuffer indices defined in the Rule Engine.
-        shader.setFloatUniform("u_alpha", uniforms[4]) // INDEX_ALPHA
+        shader.setFloatUniform(ShaderUniforms.ALPHA, uniforms[RenderProperty.INDEX_ALPHA])
         // Custom expansion slots
-        shader.setFloatUniform("u_custom_a", uniforms[11]) // INDEX_CUSTOM_A
-        shader.setFloatUniform("u_custom_b", uniforms[12]) // INDEX_CUSTOM_B
-        shader.setFloatUniform("u_custom_c", uniforms[13]) // INDEX_CUSTOM_C
-        shader.setFloatUniform("u_custom_d", uniforms[14]) // INDEX_CUSTOM_D
-        shader.setFloatUniform("u_custom_e", uniforms[15]) // INDEX_CUSTOM_E
+        shader.setFloatUniform(ShaderUniforms.CUSTOM_A, uniforms[RenderProperty.INDEX_CUSTOM_A])
+        shader.setFloatUniform(ShaderUniforms.CUSTOM_B, uniforms[RenderProperty.INDEX_CUSTOM_B])
+        shader.setFloatUniform(ShaderUniforms.CUSTOM_C, uniforms[RenderProperty.INDEX_CUSTOM_C])
+        shader.setFloatUniform(ShaderUniforms.CUSTOM_D, uniforms[RenderProperty.INDEX_CUSTOM_D])
+        shader.setFloatUniform(ShaderUniforms.CUSTOM_E, uniforms[RenderProperty.INDEX_CUSTOM_E])
 
         paint.shader = shader
         nativeCanvas.drawRect(left, top, right, bottom, paint)
