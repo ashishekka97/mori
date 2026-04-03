@@ -1,5 +1,6 @@
 package me.ashishekka.mori.biome.decoder
 
+import me.ashishekka.mori.engine.core.models.AssetType
 import me.ashishekka.mori.engine.core.models.RenderProperty
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -82,6 +83,58 @@ class BiomeDecoderTest {
         val engineLayers = BiomeDecoder.compileToLayers(model)
         assertEquals(1, engineLayers.size)
         assertEquals(101, engineLayers[0].resId)
+        assertEquals(AssetType.BITMAP, engineLayers[0].assetType)
+    }
+
+    @Test
+    fun `compileToLayers should resolve SHADER asset type`() {
+        val shaderJson = """
+            {
+                "id": "shader_biome",
+                "name": "Shader Biome",
+                "resources": [
+                    { "id": 202, "path": "shaders/noise.agsl", "type": "SHADER" }
+                ],
+                "layers": [
+                    {
+                        "id": 1,
+                        "type": "SHADER",
+                        "resId": 202
+                    }
+                ]
+            }
+        """.trimIndent()
+        
+        val model = BiomeDecoder.decode(shaderJson)
+        val engineLayers = BiomeDecoder.compileToLayers(model)
+        
+        assertEquals(1, engineLayers.size)
+        assertEquals(202, engineLayers[0].resId)
+        assertEquals(AssetType.SHADER, engineLayers[0].assetType)
+    }
+
+    @Test
+    fun `compileToLayers should default to UNKNOWN for missing resource`() {
+        val missingResJson = """
+            {
+                "id": "missing_res_biome",
+                "name": "Missing Res",
+                "layers": [
+                    {
+                        "id": 1,
+                        "type": "RECT",
+                        "resId": 999
+                    }
+                ]
+            }
+        """.trimIndent()
+        
+        val model = BiomeDecoder.decode(missingResJson)
+        val engineLayers = BiomeDecoder.compileToLayers(model)
+        
+        assertEquals(1, engineLayers.size)
+        assertEquals(999, engineLayers[0].resId)
+        assertEquals(AssetType.UNKNOWN, engineLayers[0].assetType)
     }
 
     // --- ROBUSTNESS TESTS ---

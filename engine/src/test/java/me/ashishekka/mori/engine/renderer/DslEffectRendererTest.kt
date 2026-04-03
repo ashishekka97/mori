@@ -5,6 +5,8 @@ import io.mockk.verify
 import me.ashishekka.mori.engine.core.MoriEngineState
 import me.ashishekka.mori.engine.core.RuleEvaluator
 import me.ashishekka.mori.engine.core.interfaces.EngineCanvas
+import me.ashishekka.mori.engine.core.models.AssetType
+import me.ashishekka.mori.engine.core.models.LayerType
 import me.ashishekka.mori.engine.core.models.MoriLayer
 import me.ashishekka.mori.engine.core.models.RenderProperty
 import me.ashishekka.mori.engine.core.util.OpCode
@@ -101,6 +103,62 @@ class DslEffectRendererTest {
                 eq(true),
                 eq(0f)
             )
+        }
+    }
+
+    @Test
+    fun `render should draw bitmap when assetType is BITMAP`() {
+        val layer = MoriLayer(
+            id = 1,
+            type = LayerType.RECT,
+            resId = 101,
+            assetType = AssetType.BITMAP
+        )
+        val renderer = DslEffectRenderer(layer, evaluator)
+
+        renderer.update(state)
+        renderer.render(mockCanvas)
+
+        verify {
+            mockCanvas.drawBitmap(eq(101), eq(-50f), eq(-50f), eq(50f), eq(50f), eq(1f))
+        }
+        // Should NOT draw base rect fill
+        verify(exactly = 0) {
+            mockCanvas.drawRect(any(), any(), any(), any(), any(), eq(true), any())
+        }
+    }
+
+    @Test
+    fun `render should draw shader when assetType is SHADER`() {
+        val layer = MoriLayer(
+            id = 1,
+            type = LayerType.SHADER,
+            resId = 202,
+            assetType = AssetType.SHADER
+        )
+        val renderer = DslEffectRenderer(layer, evaluator)
+
+        renderer.update(state)
+        renderer.render(mockCanvas)
+
+        verify {
+            mockCanvas.drawShader(eq(202), eq(-50f), eq(-50f), eq(50f), eq(50f), any(), any())
+        }
+    }
+
+    @Test
+    fun `render should skip drawing for PATH type`() {
+        val layer = MoriLayer(id = 1, type = LayerType.PATH)
+        val renderer = DslEffectRenderer(layer, evaluator)
+
+        renderer.update(state)
+        renderer.render(mockCanvas)
+
+        // Verify no draw calls were made for basic shapes
+        verify(exactly = 0) {
+            mockCanvas.drawRect(any(), any(), any(), any(), any(), any(), any())
+            mockCanvas.drawCircle(any(), any(), any(), any(), any(), any())
+            mockCanvas.drawPolygon(any(), any(), any(), any(), any())
         }
     }
 }

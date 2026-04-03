@@ -3,6 +3,7 @@ package me.ashishekka.mori.engine.renderer
 import me.ashishekka.mori.engine.core.MoriEngineState
 import me.ashishekka.mori.engine.core.RuleEvaluator
 import me.ashishekka.mori.engine.core.interfaces.EngineCanvas
+import me.ashishekka.mori.engine.core.models.AssetType
 import me.ashishekka.mori.engine.core.models.LayerType
 import me.ashishekka.mori.engine.core.models.MoriLayer
 import me.ashishekka.mori.engine.core.models.RenderProperty
@@ -99,7 +100,29 @@ class DslEffectRenderer(
             val isStroke = pass == 1
             val colorToUse = if (isStroke) finalStrokeColor else finalColor
 
-            // ZERO-ALLOCATION: Fast enum ordinal comparison.
+            // 1. If we have an Asset (Bitmap/Shader) and it's the Fill pass, draw the asset.
+            if (!isStroke && layer.resId != null) {
+                when (layer.assetType) {
+                    AssetType.BITMAP -> {
+                        canvas.drawBitmap(layer.resId, -halfW, -halfH, halfW, halfH, alpha)
+                        // If it's a dedicated SHADER or PATH type, we don't draw base geometry.
+                        // For RECT/CIRCLE/TRIANGLE, we draw the asset and then optionally the stroke.
+                        if (layer.type == LayerType.RECT || layer.type == LayerType.CIRCLE || layer.type == LayerType.TRIANGLE) {
+                            // Proceed to stroke pass if needed, but skip base fill.
+                            continue 
+                        }
+                    }
+                    AssetType.SHADER -> {
+                        canvas.drawShader(layer.resId, -halfW, -halfH, halfW, halfH, buffer, engineState.shaderComplexity)
+                        if (layer.type == LayerType.RECT || layer.type == LayerType.CIRCLE || layer.type == LayerType.TRIANGLE || layer.type == LayerType.SHADER) {
+                            continue
+                        }
+                    }
+                    AssetType.UNKNOWN -> { /* Fallback to base geometry */ }
+                }
+            }
+
+            // 2. Draw Base Geometry
             when (layer.type) {
                 LayerType.RECT -> {
                     canvas.drawRect(-halfW, -halfH, halfW, halfH, colorToUse, !isStroke, finalStrokeWidth)
@@ -115,6 +138,15 @@ class DslEffectRenderer(
                     trianglePoints[4] = halfW
                     trianglePoints[5] = halfH
                     canvas.drawPolygon(trianglePoints, 6, colorToUse, !isStroke, finalStrokeWidth)
+                }
+                LayerType.SHADER -> {
+                    // Handled above in asset block, if no asset found, draw nothing or fallback RECT
+                    if (layer.assetType == AssetType.UNKNOWN) {
+                         canvas.drawRect(-halfW, -halfH, halfW, halfH, colorToUse, !isStroke, finalStrokeWidth)
+                    }
+                }
+                LayerType.PATH -> {
+                    // Placeholder for Phase 7 SVG support
                 }
                 LayerType.UNKNOWN -> {
                     // Do nothing

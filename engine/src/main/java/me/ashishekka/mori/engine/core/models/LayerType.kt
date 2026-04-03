@@ -8,6 +8,8 @@ enum class LayerType(val type: String) {
     RECT("RECT"),
     CIRCLE("CIRCLE"),
     TRIANGLE("TRIANGLE"),
+    SHADER("SHADER"),
+    PATH("PATH"),
     UNKNOWN("UNKNOWN");
 
     companion object {
