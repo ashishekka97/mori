@@ -30,7 +30,7 @@
         "width": "1000",
         "height": "4000",
         "color_primary": "mix_oklab(#1A1A2E, #A8DADC, (fact[1] + 1) / 2)",
-        "signal[0]": "1.0 - fact[8]"
+        "signal[0]": "1.0"
       }
     },
     {
@@ -144,14 +144,14 @@
     {
       "id": 25,
       "type": "TRIANGLE",
-      "zOrder": -75,
+      "zOrder": 100,
       "expressions": {
-        "x": "300",
-        "y": "420",
-        "width": "120",
-        "height": "80",
+        "x": "500",
+        "y": "500",
+        "width": "200",
+        "height": "200",
         "color_primary": "#F1FAEE",
-        "alpha": "signal[0]"
+        "alpha": "1.0"
       }
     },
     {
