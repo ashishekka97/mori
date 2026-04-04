@@ -198,7 +198,7 @@
         "y": "600",
         "width": "lerp(150, 350, fact[9])",
         "height": "lerp(100, 200, fact[9])",
-        "color_primary": "#2A9D8F"
+        "color_primary": "#4F772D"
       }
     },
     {
@@ -210,7 +210,7 @@
         "y": "540",
         "width": "lerp(120, 280, fact[9])",
         "height": "lerp(80, 160, fact[9])",
-        "color_primary": "#264653"
+        "color_primary": "#386641"
       }
     },
     {
@@ -222,7 +222,7 @@
         "y": "490",
         "width": "lerp(80, 200, fact[9])",
         "height": "lerp(60, 120, fact[9])",
-        "color_primary": "#2A9D8F"
+        "color_primary": "#6A994E"
       }
     },
     {
