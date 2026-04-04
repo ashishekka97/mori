@@ -24,7 +24,7 @@ Learn how to place elements in the 1000x1000 **Virtual Artboard** and connect th
     "y": "500 - sin((fact[2] * 6.28318) - 2.35619) * 450",
     "width": "160",
     "color_primary": "#F4A261",
-    "alpha": "if_gt(fact[1], -0.1, remap(fact[1], -0.1, 0.1, 0.0, 1.0), 0.0)"
+    "alpha": "if_gt(fact[1], 0.0, 1.0, clamp(remap(fact[1], -0.1, 0.0, 0.0, 1.0), 0.0, 1.0))"
   }
 }
 ```
