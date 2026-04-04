@@ -61,7 +61,8 @@ object BiomeDecoder {
                     type = LayerType.fromString(layerModel.type),
                     zOrder = layerModel.zOrder,
                     resId = layerModel.resId,
-                    assetType = layerModel.resId?.let { resourceTypes[it] } ?: AssetType.UNKNOWN
+                    assetType = layerModel.resId?.let { resourceTypes[it] } ?: AssetType.UNKNOWN,
+                    maskResId = layerModel.maskId
                 )
                 
                 layerModel.expressions.forEach { (propertyName, expression) ->

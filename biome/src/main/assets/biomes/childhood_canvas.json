@@ -549,6 +549,7 @@
       "id": 64,
       "type": "SHADER",
       "resId": 3,
+      "maskId": 1,
       "zOrder": -39,
       "expressions": {
         "x": "605 + oscillate(0, 8, 0.3, 0)",
@@ -557,7 +558,7 @@
         "height": "800",
         "color_primary": "#457B9D",
         "alpha": "0.7",
-        "custom_a": "time",
+        "custom_a": "time * 4",
         "custom_b": "fact[1]"
       }
     }

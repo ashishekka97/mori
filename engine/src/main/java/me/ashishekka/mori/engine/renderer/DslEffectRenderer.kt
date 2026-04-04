@@ -88,6 +88,11 @@ class DslEffectRenderer(
         canvas.translate(x, y)
         canvas.rotate(rotation)
 
+        // Apply Masking before scaling
+        if (layer.maskResId != null) {
+            canvas.clipPath(layer.maskResId)
+        }
+
         // Apply local scale (combining DSL scale and device scale)
         canvas.scale(scaleX * scale, scaleY * scale)
 
