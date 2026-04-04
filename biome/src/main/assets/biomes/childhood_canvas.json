@@ -32,6 +32,34 @@
       }
     },
     {
+      "id": 30,
+      "type": "RECT",
+      "zOrder": -96,
+      "expressions": {
+        "x": "500 + cos((fact[2] * 6.28318) - 2.35619) * 450",
+        "y": "500 - sin((fact[2] * 6.28318) - 2.35619) * 450",
+        "width": "220",
+        "height": "20",
+        "rotation": "time * 45",
+        "color_primary": "#F4A261",
+        "alpha": "if_gt(fact[2], 0.25, if_gt(fact[2], 0.75, 0.0, 0.4), 0.0)"
+      }
+    },
+    {
+      "id": 31,
+      "type": "RECT",
+      "zOrder": -96,
+      "expressions": {
+        "x": "500 + cos((fact[2] * 6.28318) - 2.35619) * 450",
+        "y": "500 - sin((fact[2] * 6.28318) - 2.35619) * 450",
+        "width": "220",
+        "height": "20",
+        "rotation": "time * 45 + 90",
+        "color_primary": "#F4A261",
+        "alpha": "if_gt(fact[2], 0.25, if_gt(fact[2], 0.75, 0.0, 0.4), 0.0)"
+      }
+    },
+    {
       "id": 29,
       "type": "CIRCLE",
       "zOrder": -95,
@@ -41,6 +69,30 @@
         "width": "120",
         "color_primary": "#F4F6F0",
         "alpha": "if_gt(fact[2], 0.25, if_gt(fact[2], 0.75, 1.0, 0.0), 1.0)"
+      }
+    },
+    {
+      "id": 34,
+      "type": "CIRCLE",
+      "zOrder": -94,
+      "expressions": {
+        "x": "500 + cos((fact[2] * 6.28318) + 0.78539) * 450 + 20",
+        "y": "500 - sin((fact[2] * 6.28318) + 0.78539) * 450 - 15",
+        "width": "25",
+        "color_primary": "#E0E0E0",
+        "alpha": "if_gt(fact[2], 0.25, if_gt(fact[2], 0.75, 0.6, 0.0), 0.6)"
+      }
+    },
+    {
+      "id": 35,
+      "type": "CIRCLE",
+      "zOrder": -94,
+      "expressions": {
+        "x": "500 + cos((fact[2] * 6.28318) + 0.78539) * 450 - 25",
+        "y": "500 - sin((fact[2] * 6.28318) + 0.78539) * 450 + 10",
+        "width": "35",
+        "color_primary": "#D3D3D3",
+        "alpha": "if_gt(fact[2], 0.25, if_gt(fact[2], 0.75, 0.6, 0.0), 0.6)"
       }
     },
     {
