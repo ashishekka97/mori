@@ -9,19 +9,22 @@ Mori is a zero-allocation engine designed for 60fps and minimal battery drain.
 *   **The Rule of 32:** You have a strict limit of 32 layers per biome.
 *   **The Solution:** Build complex scenes using basic overlapping primitives (`RECT`, `CIRCLE`, `TRIANGLE`) and high-performance `PATH` resources.
 
-## Chapter 1: The Sky & Sun (Coordinate Space & Facts)
+## Chapter 1: The Sky & Celestial Orbit (Coordinate Space & Facts)
 Learn how to place elements in the 1000x1000 **Virtual Artboard** and connect them to real-world sensors.
-*   **Concepts:** `x`, `y`, `fact[1]` (Sun Altitude), `mix_oklab`.
-*   **Goal:** A sky background that transitions from `#1A1A2E` (Night) to `#A8DADC` (Day). We use `height: 4000` to ensure the sky covers the screen during vertical parallax. The **Sun** (`CIRCLE`) moves from bottom-left to top-right using `fact[1]`.
+*   **Concepts:** `x`, `y`, `fact[2]` (Day Progress), `sin`, `cos`, `mix_oklab`.
+*   **Goal:** A sky background that transitions from `#1A1A2E` (Night) to `#A8DADC` (Day). We place the **Sun** and **Moon** on a shared circular orbit using `zOrder: -95` so they pass behind the mountains but in front of the sky.
 
 ```json
 {
-  "id": 1,
-  "type": "RECT",
-  "zOrder": -100,
+  "id": 2,
+  "type": "CIRCLE",
+  "zOrder": -95,
   "expressions": {
-    "x": "500", "y": "500", "width": "1000", "height": "4000",
-    "color_primary": "mix_oklab(#1A1A2E, #A8DADC, (fact[1] + 1) / 2)"
+    "x": "500 + cos((fact[2] * 6.28318) - 2.35619) * 450",
+    "y": "500 - sin((fact[2] * 6.28318) - 2.35619) * 450",
+    "width": "160",
+    "color_primary": "#F4A261",
+    "alpha": "if_gt(fact[1], -0.1, remap(fact[1], -0.1, 0.1, 0.0, 1.0), 0.0)"
   }
 }
 ```

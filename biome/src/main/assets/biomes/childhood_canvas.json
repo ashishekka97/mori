@@ -22,13 +22,25 @@
     {
       "id": 2,
       "type": "CIRCLE",
-      "zOrder": -90,
+      "zOrder": -95,
       "expressions": {
-        "x": "remap(fact[1], -1.0, 1.0, 150, 850)",
-        "y": "remap(fact[1], -1.0, 1.0, 800, 150)",
+        "x": "500 + cos((fact[2] * 6.28318) - 2.35619) * 450",
+        "y": "500 - sin((fact[2] * 6.28318) - 2.35619) * 450",
         "width": "160",
-        "color_primary": "if_gt(fact[1], 0.0, #F4A261, #E9C46A)",
-        "alpha": "remap(abs(fact[1]), 0.0, 0.2, 0.2, 1.0)"
+        "color_primary": "#F4A261",
+        "alpha": "if_gt(fact[1], -0.1, remap(fact[1], -0.1, 0.1, 0.0, 1.0), 0.0)"
+      }
+    },
+    {
+      "id": 29,
+      "type": "CIRCLE",
+      "zOrder": -95,
+      "expressions": {
+        "x": "500 + cos((fact[2] * 6.28318) + 0.78539) * 450",
+        "y": "500 - sin((fact[2] * 6.28318) + 0.78539) * 450",
+        "width": "120",
+        "color_primary": "#F4F6F0",
+        "alpha": "if_gt(fact[1], 0.1, 0.0, remap(fact[1], -0.1, 0.1, 1.0, 0.0))"
       }
     },
     {
