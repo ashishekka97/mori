@@ -40,7 +40,7 @@ Understand depth, geometric shapes, and responsive anchoring.
     "x": "500",
     "y": "fact[24] * 500 + 550",
     "width": "1000", "height": "2000",
-    "color_primary": "#E76F51"
+    "color_primary": "#8AB17D"
   }
 }
 ```
