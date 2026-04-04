@@ -146,10 +146,10 @@
       "type": "TRIANGLE",
       "zOrder": 100,
       "expressions": {
-        "x": "500",
-        "y": "500",
-        "width": "200",
-        "height": "200",
+        "x": "300",
+        "y": "420",
+        "width": "120",
+        "height": "80",
         "color_primary": "#F1FAEE",
         "alpha": "1.0"
       }
