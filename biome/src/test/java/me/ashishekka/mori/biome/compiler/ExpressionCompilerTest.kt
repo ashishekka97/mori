@@ -80,6 +80,25 @@ class ExpressionCompilerTest {
     }
 
     @Test
+    fun `compile should handle signal indexing`() {
+        val result1 = ExpressionCompiler.compile("signal[0] + 10")
+        val expected1 = intArrayOf(
+            OpCode.GET_SIGNAL, 0,
+            OpCode.PUSH_CONST, 10f.toBits(),
+            OpCode.ADD
+        )
+        assertArrayEquals(expected1, result1)
+
+        val result2 = ExpressionCompiler.compile("10 + signal[0]")
+        val expected2 = intArrayOf(
+            OpCode.PUSH_CONST, 10f.toBits(),
+            OpCode.GET_SIGNAL, 0,
+            OpCode.ADD
+        )
+        assertArrayEquals(expected2, result2)
+    }
+
+    @Test
     fun `compile should push zero for unknown variables`() {
         val result = ExpressionCompiler.compile("unknown_var + 10")
         val expected = intArrayOf(

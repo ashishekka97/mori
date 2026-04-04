@@ -159,8 +159,8 @@ object ExpressionCompiler {
         while (i < tokens.size) {
             val token = tokens[i]
             when {
-                // Number, Hex Color, or fact[n]
-                token.startsWith("fact[") || token.first().isDigit() || token.startsWith("#") || (token.length > 1 && token.first() == '.' && token[1].isDigit()) -> output.add(token)
+                // Number, Hex Color, fact[n], or signal[n]
+                token.startsWith("fact[") || token.startsWith("signal[") || token.first().isDigit() || token.startsWith("#") || (token.length > 1 && token.first() == '.' && token[1].isDigit()) -> output.add(token)
                 
                 // Function or Fact
                 token.all { it.isLetter() || it == '_' } -> {
