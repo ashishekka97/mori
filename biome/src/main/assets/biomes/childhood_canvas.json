@@ -28,7 +28,7 @@
         "y": "500 - sin((fact[2] * 6.28318) - 2.35619) * 450",
         "width": "160",
         "color_primary": "#F4A261",
-        "alpha": "if_gt(fact[1], 0.0, 1.0, clamp(remap(fact[1], -0.1, 0.0, 0.0, 1.0), 0.0, 1.0))"
+        "alpha": "if_gt(fact[2], 0.25, if_gt(fact[2], 0.75, 0.0, 1.0), 0.0)"
       }
     },
     {
@@ -40,7 +40,7 @@
         "y": "500 - sin((fact[2] * 6.28318) + 0.78539) * 450",
         "width": "120",
         "color_primary": "#F4F6F0",
-        "alpha": "if_gt(fact[1], 0.0, 0.0, clamp(remap(fact[1], -0.1, 0.0, 1.0, 0.0), 0.0, 1.0))"
+        "alpha": "if_gt(fact[2], 0.25, if_gt(fact[2], 0.75, 1.0, 0.0), 1.0)"
       }
     },
     {
