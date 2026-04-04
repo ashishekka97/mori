@@ -86,10 +86,10 @@ Bringing life to static objects with health data and motion logic.
 }
 ```
 
-## Chapter 5: The River & Smoke (High-Performance Paths)
-Harnessing the power of the GPU for complex vector geometry.
-*   **Concepts:** `PATH` layer type, `resId`, `time`.
-*   **Goal:** The river and chimney smoke use `PATH` resources. The smoke's vertical position and transparency are driven by `time` to create a looping animation.
+## Chapter 5: The River, Smoke, & Shaders
+Harnessing the power of the GPU for complex vector geometry and custom materials.
+*   **Concepts:** `PATH` and `SHADER` layer types, `resId`, `time`.
+*   **Goal:** The river and chimney smoke use `PATH` resources. The smoke's vertical position and transparency are driven by `time`. Finally, we apply a custom `SHADER` material over the river to create procedural water reflections using AGSL.
 
 ```json
 {
@@ -105,13 +105,34 @@ Harnessing the power of the GPU for complex vector geometry.
     "color_primary": "#00000000",
     "alpha": "(1.0 - (time % 4) / 4.0) * if_gt(fact[7], 0.5, 1.0, 0.0)"
   }
+},
+{
+  "id": 64,
+  "type": "SHADER",
+  "resId": 3,
+  "zOrder": -39,
+  "expressions": {
+    "x": "605 + oscillate(0, 8, 0.3, 0)",
+    "y": "(fact[24] * 500) + 200",
+    "width": "200", "height": "300",
+    "color_primary": "#457B9D",
+    "alpha": "0.5"
+  }
 }
 ```
 
 ---
 
+
+## Chapter 6: High-Fidelity Techniques
+Pushing the visual boundaries using math instead of memory.
+*   **Procedural Bloom:** Stack semi-transparent `CIRCLE`s behind light sources (like the Sun) with increasing widths and decreasing alphas.
+*   **Parallax Depth:** Use `mix_oklab` to blend background `color_primary` with the sky color based on depth to create atmospheric fog.
+*   **Wind Simulation:** Use `oscillate()` on the `rotation` property of foliage layers to breathe life into the scene.
+
+
 ## Summary of the Artist's Workflow
 1.  **Define Resources:** Add your raw SVG path strings to the `resources` block.
-2.  **Layer the Scene:** Arrange your 32 layers from back to front using `zOrder`.
+2.  **Layer the Scene:** Arrange your 64 layers from back to front using `zOrder`.
 3.  **Bind the Senses:** Use `fact[n]` to make properties (color, scale, position) react to the world.
 4.  **Verify:** Ensure all math is zero-allocation and stays within the 1000x1000 artboard (or uses Over-scan for backgrounds).

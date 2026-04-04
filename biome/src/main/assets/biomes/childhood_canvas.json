@@ -3,8 +3,21 @@
   "name": "The Childhood Canvas",
   "description": "A dynamic papercraft landscape reacting to time, battery, and vitality.",
   "resources": [
-    { "id": 1, "path": "river_curve.path", "type": "PATH" },
-    { "id": 2, "path": "smoke_wisp.path", "type": "PATH" }
+    {
+      "id": 1,
+      "path": "river_curve.path",
+      "type": "PATH"
+    },
+    {
+      "id": 2,
+      "path": "smoke_wisp.path",
+      "type": "PATH"
+    },
+    {
+      "id": 3,
+      "path": "water_shimmer.agsl",
+      "type": "SHADER"
+    }
   ],
   "layers": [
     {
@@ -29,62 +42,6 @@
         "width": "160",
         "color_primary": "#F4A261",
         "alpha": "if_gt(fact[2], 0.25, if_gt(fact[2], 0.75, 0.0, 1.0), 0.0)"
-      }
-    },
-    {
-      "id": 30,
-      "type": "RECT",
-      "zOrder": -96,
-      "expressions": {
-        "x": "500 + cos((fact[2] * 6.28318) - 2.35619) * 450",
-        "y": "500 - sin((fact[2] * 6.28318) - 2.35619) * 450",
-        "width": "220",
-        "height": "20",
-        "rotation": "time * 45",
-        "color_primary": "#F4A261",
-        "alpha": "if_gt(fact[2], 0.25, if_gt(fact[2], 0.75, 0.0, 0.4), 0.0)"
-      }
-    },
-    {
-      "id": 31,
-      "type": "RECT",
-      "zOrder": -96,
-      "expressions": {
-        "x": "500 + cos((fact[2] * 6.28318) - 2.35619) * 450",
-        "y": "500 - sin((fact[2] * 6.28318) - 2.35619) * 450",
-        "width": "220",
-        "height": "20",
-        "rotation": "time * 45 + 90",
-        "color_primary": "#F4A261",
-        "alpha": "if_gt(fact[2], 0.25, if_gt(fact[2], 0.75, 0.0, 0.4), 0.0)"
-      }
-    },
-    {
-      "id": 32,
-      "type": "RECT",
-      "zOrder": -96,
-      "expressions": {
-        "x": "500 + cos((fact[2] * 6.28318) - 2.35619) * 450",
-        "y": "500 - sin((fact[2] * 6.28318) - 2.35619) * 450",
-        "width": "220",
-        "height": "20",
-        "rotation": "time * 45 + 45",
-        "color_primary": "#F4A261",
-        "alpha": "if_gt(fact[2], 0.25, if_gt(fact[2], 0.75, 0.0, 0.4), 0.0)"
-      }
-    },
-    {
-      "id": 33,
-      "type": "RECT",
-      "zOrder": -96,
-      "expressions": {
-        "x": "500 + cos((fact[2] * 6.28318) - 2.35619) * 450",
-        "y": "500 - sin((fact[2] * 6.28318) - 2.35619) * 450",
-        "width": "220",
-        "height": "20",
-        "rotation": "time * 45 + 135",
-        "color_primary": "#F4A261",
-        "alpha": "if_gt(fact[2], 0.25, if_gt(fact[2], 0.75, 0.0, 0.4), 0.0)"
       }
     },
     {
@@ -144,7 +101,7 @@
         "y": "580",
         "width": "600",
         "height": "400",
-        "color_primary": "#264653"
+        "color_primary": "mix_oklab(#264653, mix_oklab(#1A1A2E, #A8DADC, (fact[1] + 1) / 2), 0.3)"
       }
     },
     {
@@ -156,7 +113,7 @@
         "y": "550",
         "width": "700",
         "height": "500",
-        "color_primary": "#264653"
+        "color_primary": "mix_oklab(#264653, mix_oklab(#1A1A2E, #A8DADC, (fact[1] + 1) / 2), 0.3)"
       }
     },
     {
@@ -168,7 +125,7 @@
         "y": "620",
         "width": "450",
         "height": "300",
-        "color_primary": "#2A9D8F"
+        "color_primary": "mix_oklab(#2A9D8F, mix_oklab(#1A1A2E, #A8DADC, (fact[1] + 1) / 2), 0.15)"
       }
     },
     {
@@ -180,7 +137,7 @@
         "y": "650",
         "width": "400",
         "height": "250",
-        "color_primary": "#2A9D8F"
+        "color_primary": "mix_oklab(#2A9D8F, mix_oklab(#1A1A2E, #A8DADC, (fact[1] + 1) / 2), 0.15)"
       }
     },
     {
@@ -354,7 +311,8 @@
         "y": "600",
         "width": "lerp(150, 350, fact[9])",
         "height": "lerp(100, 200, fact[9])",
-        "color_primary": "#4F772D"
+        "color_primary": "#4F772D",
+        "rotation": "oscillate((0 - 3), 3, 0.5, 0)"
       }
     },
     {
@@ -366,7 +324,8 @@
         "y": "540",
         "width": "lerp(120, 280, fact[9])",
         "height": "lerp(80, 160, fact[9])",
-        "color_primary": "#386641"
+        "color_primary": "#386641",
+        "rotation": "oscillate((0 - 5), 5, 0.5, 0.2)"
       }
     },
     {
@@ -378,7 +337,8 @@
         "y": "490",
         "width": "lerp(80, 200, fact[9])",
         "height": "lerp(60, 120, fact[9])",
-        "color_primary": "#6A994E"
+        "color_primary": "#6A994E",
+        "rotation": "oscillate((0 - 7), 7, 0.5, 0.4)"
       }
     },
     {
@@ -403,6 +363,202 @@
         "width": "10",
         "color_primary": "#E9C46A",
         "alpha": "if_gt(fact[1], 0.0, 0.0, oscillate(0.6, 0.4, 0.8, 3.14))"
+      }
+    },
+    {
+      "id": 37,
+      "type": "CIRCLE",
+      "zOrder": -97,
+      "expressions": {
+        "x": "500 + cos((fact[2] * 6.28318) - 2.35619) * 450",
+        "y": "500 - sin((fact[2] * 6.28318) - 2.35619) * 450",
+        "width": "220",
+        "color_primary": "#F4A261",
+        "alpha": "if_gt(fact[2], 0.25, if_gt(fact[2], 0.75, 0.0, 0.4), 0.0)"
+      }
+    },
+    {
+      "id": 38,
+      "type": "CIRCLE",
+      "zOrder": -98,
+      "expressions": {
+        "x": "500 + cos((fact[2] * 6.28318) - 2.35619) * 450",
+        "y": "500 - sin((fact[2] * 6.28318) - 2.35619) * 450",
+        "width": "300",
+        "color_primary": "#F4A261",
+        "alpha": "if_gt(fact[2], 0.25, if_gt(fact[2], 0.75, 0.0, 0.15), 0.0)"
+      }
+    },
+    {
+      "id": 42,
+      "type": "CIRCLE",
+      "zOrder": -99,
+      "expressions": {
+        "x": "200",
+        "y": "150",
+        "width": "6",
+        "color_primary": "#FFFFFF",
+        "alpha": "if_gt(fact[1], 0.0, 0.0, oscillate(0.2, 0.8, 1.5, 0))"
+      }
+    },
+    {
+      "id": 43,
+      "type": "CIRCLE",
+      "zOrder": -99,
+      "expressions": {
+        "x": "800",
+        "y": "250",
+        "width": "4",
+        "color_primary": "#FFFFFF",
+        "alpha": "if_gt(fact[1], 0.0, 0.0, oscillate(0.1, 0.9, 0.8, 2.0))"
+      }
+    },
+    {
+      "id": 44,
+      "type": "CIRCLE",
+      "zOrder": -99,
+      "expressions": {
+        "x": "450",
+        "y": "100",
+        "width": "8",
+        "color_primary": "#FFFFFF",
+        "alpha": "if_gt(fact[1], 0.0, 0.0, oscillate(0.3, 1.0, 2.1, 1.0))"
+      }
+    },
+    {
+      "id": 45,
+      "type": "CIRCLE",
+      "zOrder": -99,
+      "expressions": {
+        "x": "100",
+        "y": "300",
+        "width": "5",
+        "color_primary": "#FFFFFF",
+        "alpha": "if_gt(fact[1], 0.0, 0.0, oscillate(0.1, 1.0, 1.1, 3.14))"
+      }
+    },
+    {
+      "id": 55,
+      "type": "RECT",
+      "zOrder": 2,
+      "expressions": {
+        "x": "250",
+        "y": "715",
+        "width": "25",
+        "height": "50",
+        "color_primary": "#3E2723"
+      }
+    },
+    {
+      "id": 50,
+      "type": "CIRCLE",
+      "zOrder": -85,
+      "expressions": {
+        "x": "(((time * 8) % 1500) - 250) - 30",
+        "y": "300 + oscillate((0 - 5), 5, 0.2, 0)",
+        "width": "40",
+        "color_primary": "#FFFFFF",
+        "alpha": "if_gt(fact[1], 0.0, 1.0, 0.0)"
+      }
+    },
+    {
+      "id": 51,
+      "type": "CIRCLE",
+      "zOrder": -85,
+      "expressions": {
+        "x": "(((time * 8) % 1500) - 250) - 10",
+        "y": "(300 + oscillate((0 - 5), 5, 0.2, 0)) - 8",
+        "width": "55",
+        "color_primary": "#FFFFFF",
+        "alpha": "if_gt(fact[1], 0.0, 1.0, 0.0)"
+      }
+    },
+    {
+      "id": 52,
+      "type": "CIRCLE",
+      "zOrder": -85,
+      "expressions": {
+        "x": "(((time * 8) % 1500) - 250) + 15",
+        "y": "(300 + oscillate((0 - 5), 5, 0.2, 0)) - 12",
+        "width": "65",
+        "color_primary": "#FFFFFF",
+        "alpha": "if_gt(fact[1], 0.0, 1.0, 0.0)"
+      }
+    },
+    {
+      "id": 59,
+      "type": "CIRCLE",
+      "zOrder": -85,
+      "expressions": {
+        "x": "(((time * 8) % 1500) - 250) + 40",
+        "y": "(300 + oscillate((0 - 5), 5, 0.2, 0))",
+        "width": "45",
+        "color_primary": "#FFFFFF",
+        "alpha": "if_gt(fact[1], 0.0, 1.0, 0.0)"
+      }
+    },
+    {
+      "id": 56,
+      "type": "CIRCLE",
+      "zOrder": -86,
+      "expressions": {
+        "x": "(((time * 12) % 1500) - 150) - 35",
+        "y": "(180 + oscillate((0 - 8), 8, 0.15, 1))",
+        "width": "35",
+        "color_primary": "#FFFFFF",
+        "alpha": "if_gt(fact[1], 0.0, 1.0, 0.0)"
+      }
+    },
+    {
+      "id": 57,
+      "type": "CIRCLE",
+      "zOrder": -86,
+      "expressions": {
+        "x": "(((time * 12) % 1500) - 150) - 10",
+        "y": "(180 + oscillate((0 - 8), 8, 0.15, 1)) - 5",
+        "width": "45",
+        "color_primary": "#FFFFFF",
+        "alpha": "if_gt(fact[1], 0.0, 1.0, 0.0)"
+      }
+    },
+    {
+      "id": 58,
+      "type": "CIRCLE",
+      "zOrder": -86,
+      "expressions": {
+        "x": "(((time * 12) % 1500) - 150) + 15",
+        "y": "(180 + oscillate((0 - 8), 8, 0.15, 1)) - 10",
+        "width": "55",
+        "color_primary": "#FFFFFF",
+        "alpha": "if_gt(fact[1], 0.0, 1.0, 0.0)"
+      }
+    },
+    {
+      "id": 60,
+      "type": "CIRCLE",
+      "zOrder": -86,
+      "expressions": {
+        "x": "(((time * 12) % 1500) - 150) + 40",
+        "y": "(180 + oscillate((0 - 8), 8, 0.15, 1)) - 2",
+        "width": "40",
+        "color_primary": "#FFFFFF",
+        "alpha": "if_gt(fact[1], 0.0, 1.0, 0.0)"
+      }
+    },
+    {
+      "id": 64,
+      "type": "SHADER",
+      "resId": 3,
+      "zOrder": -39,
+      "expressions": {
+        "x": "605 + oscillate(0, 8, 0.3, 0)",
+        "y": "(fact[24] * 500) + 400",
+        "width": "400",
+        "height": "800",
+        "color_primary": "#457B9D",
+        "alpha": "0.7",
+        "custom_a": "time",
+        "custom_b": "fact[1]"
       }
     }
   ]

@@ -21,3 +21,9 @@ This document tracks the evolution of the Mori platform, capturing key decisions
 *   **Architectural Shifts**: Shifted from hardcoded Kotlin logic to a declarative JSON-driven system. Introduced the "VRAM Model" for property handovers.
 *   **Performance**: Achieved 100% zero-allocation status for the evaluation loop. All per-frame object creation has been eliminated.
 *   **State of the Machine**: Mori is now a fully data-driven platform. The engine is "dumb," and all visual behavior is defined via external DSLs, making it extremely portable and efficient.
+
+
+## Phase 7: The Visual Pipeline
+*   **Decisions**: Implemented the `AssetRegistry` and a Bitmap Texture Atlas to enable zero-allocation asset rendering and unified GPU pipelines.
+*   **Architectural Shifts**: Integrated AGSL shaders mapped directly from Property Buffers to GPU Uniforms. Shifted towards high-performance, platform-agnostic GPU drawing paths for `PATH` layers to bypass Android XML overhead. Expanded the maximum layer limit to 64 to support procedural bloom, parallax depth, and procedural shadows entirely driven by the DSL.
+*   **State of the Machine**: The visual pipeline is now fully connected from rule evaluation to GPU rendering via `DslEffectRenderer`. Validated by the successful rendering of the high-fidelity "The Childhood Canvas" scene without breaking the zero-allocation mandate.
