@@ -98,9 +98,9 @@
       "zOrder": -79,
       "expressions": {
         "x": "750",
-        "y": "330",
-        "width": "84",
-        "height": "60",
+        "y": "362.5",
+        "width": "175",
+        "height": "125",
         "color_primary": "#F1FAEE",
         "alpha": "1.0 - fact[8]"
       }
@@ -111,9 +111,9 @@
       "zOrder": -69,
       "expressions": {
         "x": "450",
-        "y": "485",
-        "width": "45",
-        "height": "30",
+        "y": "492.5",
+        "width": "68",
+        "height": "45",
         "color_primary": "#F1FAEE",
         "alpha": "1.0 - fact[8]"
       }
@@ -124,9 +124,9 @@
       "zOrder": -69,
       "expressions": {
         "x": "150",
-        "y": "545",
-        "width": "64",
-        "height": "40",
+        "y": "537.5",
+        "width": "40",
+        "height": "25",
         "color_primary": "#F1FAEE",
         "alpha": "1.0 - fact[8]"
       }
