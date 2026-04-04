@@ -112,7 +112,7 @@
         "y": "680",
         "width": "140",
         "height": "120",
-        "color_primary": "#F4A261"
+        "color_primary": "#B08968"
       }
     },
     {
@@ -147,7 +147,7 @@
         "x": "220",
         "y": "670",
         "width": "30",
-        "color_primary": "if_gt(fact[16], 0.5, #1A1A2E, #E9C46A)",
+        "color_primary": "if_gt(fact[16], 0.5, #1A1A2E, #FFFF88)",
         "alpha": "if_gt(fact[1], 0.1, 0.3, 1.0)"
       }
     },
@@ -159,7 +159,7 @@
         "x": "280",
         "y": "670",
         "width": "30",
-        "color_primary": "if_gt(fact[16], 0.5, #1A1A2E, #E9C46A)",
+        "color_primary": "if_gt(fact[16], 0.5, #1A1A2E, #FFFF88)",
         "alpha": "if_gt(fact[1], 0.1, 0.3, 1.0)"
       }
     },
