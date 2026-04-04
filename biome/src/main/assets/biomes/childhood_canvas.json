@@ -211,8 +211,8 @@
       "resId": 1,
       "zOrder": -40,
       "expressions": {
-        "x": "605 + oscillate(0, 8, 0.3, 0)",
-        "y": "720",
+        "x": "660",
+        "y": "1240",
         "color_primary": "#457B9D",
         "alpha": "0.8"
       }
@@ -553,8 +553,8 @@
       "maskId": 1,
       "zOrder": -39,
       "expressions": {
-        "x": "605 + oscillate(0, 8, 0.3, 0)",
-        "y": "720",
+        "x": "660",
+        "y": "1240",
         "width": "1000",
         "height": "1500",
         "color_primary": "#457B9D",
