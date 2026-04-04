@@ -24,8 +24,9 @@ Each entry in the `layers` array defines a single visual element or logic proces
 | Key | Type | Description |
 | :--- | :--- | :--- |
 | `id` | Int | A unique ID for this specific layer. |
-| `type` | String | The geometric primitive: `RECT`, `CIRCLE`, or `TRIANGLE`. |
+| `type` | String | The geometric primitive: `RECT`, `CIRCLE`, `TRIANGLE`, or `PATH`. |
 | `zOrder` | Int | Determines depth. Higher values are drawn in front. |
+| `resId` | Int | (Optional) Reference to a resource in the [Resource Registry](#16-resource-registry-phase-7). |
 | `expressions`| Map | A collection of [DSL Expressions](#2-language-foundations). |
 
 ### 1.3 Performance Budget: The Golden Rule
@@ -57,7 +58,7 @@ Mori is designed to be asset-rich. While currently restricted to geometric primi
 *   **Paths:** High-performance vector geometry defined by a raw SVG path string (e.g., `M10,10 L50,50 Z`). Must not contain XML nodes or intrinsic styling.
 *   **Shaders (AGSL):** Custom GPU logic for materials (Glass, Water, Light). 
     *   *Note:* Shaders are **Logic Resources**. They are defined once and can be applied to any Layer type (e.g., a `RECT` layer with a `glass_material` shader).
-*   **Referencing:** Layers link to these resources using a `res_id`, allowing a single asset to be reused across multiple layers with different DSL-driven effects.
+*   **Referencing:** Layers link to these resources using a `resId`, allowing a single asset to be reused across multiple layers with different DSL-driven effects.
 
 ### 1.7 Special Layer Types
 *   **`SHADER`**: A full-screen atmospheric pass that uses an AGSL resource but does not require geometric bounds (e.g., Color Grading, Vignette, Fog).

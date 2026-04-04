@@ -1,7 +1,7 @@
 {
   "id": "childhood_canvas",
-  "name": "Hello World: Papercraft Scenery",
-  "description": "A dynamic papercraft landscape built with basic primitives, reacting to time and device state.",
+  "name": "The Childhood Canvas",
+  "description": "A dynamic papercraft landscape reacting to time, battery, and vitality.",
   "resources": [
     { "id": 1, "path": "river_curve.path", "type": "PATH" },
     { "id": 2, "path": "smoke_wisp.path", "type": "PATH" }
@@ -10,95 +10,97 @@
     {
       "id": 1,
       "type": "RECT",
-      "zOrder": -20,
+      "zOrder": -100,
       "expressions": {
         "x": "500",
         "y": "500",
         "width": "1000",
         "height": "4000",
-        "color_primary": "mix_oklab(#0D0221, #87CEEB, (fact[1] + 1) / 2)"
+        "color_primary": "mix_oklab(#1A1A2E, #A8DADC, (fact[1] + 1) / 2)"
       }
     },
     {
       "id": 2,
       "type": "CIRCLE",
-      "zOrder": -18,
+      "zOrder": -90,
       "expressions": {
         "x": "850",
         "y": "remap(abs(fact[1]), 0.0, 1.0, 650, 200)",
-        "width": "150",
-        "color_primary": "if_gt(fact[1], 0.0, #FFD700, #F4F6F0)"
+        "width": "160",
+        "color_primary": "if_gt(fact[1], 0.0, #F4A261, #E9C46A)",
+        "alpha": "remap(abs(fact[1]), 0.0, 0.2, 0.2, 1.0)"
       }
     },
     {
       "id": 3,
       "type": "TRIANGLE",
-      "zOrder": -15,
+      "zOrder": -80,
       "expressions": {
         "x": "300",
-        "y": "550",
-        "width": "500",
-        "height": "380",
-        "color_primary": "#2F4F2F"
+        "y": "580",
+        "width": "600",
+        "height": "400",
+        "color_primary": "#264653"
       }
     },
     {
       "id": 4,
       "type": "TRIANGLE",
-      "zOrder": -15,
+      "zOrder": -80,
       "expressions": {
-        "x": "700",
-        "y": "500",
-        "width": "650",
-        "height": "520",
-        "color_primary": "#2F4F2F"
+        "x": "750",
+        "y": "550",
+        "width": "700",
+        "height": "500",
+        "color_primary": "#264653"
       }
     },
     {
       "id": 5,
       "type": "TRIANGLE",
-      "zOrder": -10,
+      "zOrder": -70,
       "expressions": {
-        "x": "400",
+        "x": "450",
         "y": "620",
-        "width": "380",
-        "height": "260",
-        "color_primary": "#4F7942"
+        "width": "450",
+        "height": "300",
+        "color_primary": "#2A9D8F"
       }
     },
     {
       "id": 6,
       "type": "TRIANGLE",
-      "zOrder": -10,
+      "zOrder": -70,
       "expressions": {
-        "x": "650",
-        "y": "570",
-        "width": "500",
-        "height": "380",
-        "color_primary": "#4F7942"
+        "x": "150",
+        "y": "650",
+        "width": "400",
+        "height": "250",
+        "color_primary": "#2A9D8F"
       }
     },
     {
       "id": 7,
       "type": "RECT",
-      "zOrder": -5,
+      "zOrder": -50,
       "expressions": {
         "x": "500",
-        "y": "fact[24] * 500 + 500",
+        "y": "fact[24] * 500 + 550",
         "width": "1000",
         "height": "2000",
-        "color_primary": "#3CB371"
+        "color_primary": "#E76F51"
       }
     },
     {
       "id": 8,
       "type": "PATH",
       "resId": 1,
-      "zOrder": -4,
+      "zOrder": -40,
       "expressions": {
-        "x": "500 + oscillate(0, 5, 0.4, 0)",
-        "y": "fact[24] * 500",
-        "color_primary": "#4682B4"
+        "x": "500 + oscillate(0, 8, 0.3, 0)",
+        "y": "fact[24] * 500 + 50",
+        "color_primary": "#457B9D",
+        "alpha": "0.8"
       }
     },
     {
@@ -107,75 +109,72 @@
       "zOrder": 0,
       "expressions": {
         "x": "250",
-        "y": "650",
-        "width": "150",
-        "height": "100",
-        "color_primary": "#8B4513"
+        "y": "680",
+        "width": "140",
+        "height": "120",
+        "color_primary": "#F4A261"
       }
     },
     {
       "id": 10,
       "type": "TRIANGLE",
-      "zOrder": 1,
+      "zOrder": 5,
       "expressions": {
         "x": "250",
-        "y": "550",
+        "y": "580",
         "width": "180",
-        "height": "100",
-        "color_primary": "#A9A9A9"
+        "height": "120",
+        "color_primary": "#E76F51"
       }
     },
     {
       "id": 11,
-      "type": "CIRCLE",
-      "zOrder": 2,
+      "type": "RECT",
+      "zOrder": 10,
       "expressions": {
         "x": "250",
-        "y": "650",
+        "y": "710",
         "width": "40",
-        "color_primary": "if_gt(fact[16], 0.5, #222222, #FFD700)"
+        "height": "60",
+        "color_primary": "#264653"
+      }
+    },
+    {
+      "id": 21,
+      "type": "CIRCLE",
+      "zOrder": 11,
+      "expressions": {
+        "x": "220",
+        "y": "670",
+        "width": "30",
+        "color_primary": "if_gt(fact[16], 0.5, #1A1A2E, #E9C46A)",
+        "alpha": "if_gt(fact[1], 0.1, 0.3, 1.0)"
+      }
+    },
+    {
+      "id": 22,
+      "type": "CIRCLE",
+      "zOrder": 11,
+      "expressions": {
+        "x": "280",
+        "y": "670",
+        "width": "30",
+        "color_primary": "if_gt(fact[16], 0.5, #1A1A2E, #E9C46A)",
+        "alpha": "if_gt(fact[1], 0.1, 0.3, 1.0)"
       }
     },
     {
       "id": 12,
       "type": "PATH",
       "resId": 2,
-      "zOrder": 3,
+      "zOrder": 20,
       "expressions": {
-        "x": "250 + oscillate(0, 10, 0.4, 0)",
-        "y": "485 - (time % 3) * 30",
+        "x": "250 + oscillate(0, 15, 0.4, 0)",
+        "y": "500 - (time % 4) * 40",
         "stroke_width": "8",
-        "color_secondary": "#F0F8FF",
+        "color_secondary": "#F1FAEE",
         "color_primary": "#00000000",
-        "alpha": "(1.0 - (time % 3) / 3.0) * if_gt(fact[7], 0.5, 1.0, 0.0)"
-      }
-    },
-    {
-      "id": 19,
-      "type": "PATH",
-      "resId": 2,
-      "zOrder": 3,
-      "expressions": {
-        "x": "255 + oscillate(0, 8, 0.6, 2.1)",
-        "y": "485 - ((time + 1) % 3) * 30",
-        "stroke_width": "6",
-        "color_secondary": "#F0F8FF",
-        "color_primary": "#00000000",
-        "alpha": "(1.0 - ((time + 1) % 3) / 3.0) * if_gt(fact[7], 0.5, 1.0, 0.0)"
-      }
-    },
-    {
-      "id": 20,
-      "type": "PATH",
-      "resId": 2,
-      "zOrder": 3,
-      "expressions": {
-        "x": "245 + oscillate(0, 12, 0.3, 4.2)",
-        "y": "485 - ((time + 2) % 3) * 30",
-        "stroke_width": "10",
-        "color_secondary": "#F0F8FF",
-        "color_primary": "#00000000",
-        "alpha": "(1.0 - ((time + 2) % 3) / 3.0) * if_gt(fact[7], 0.5, 1.0, 0.0)"
+        "alpha": "(1.0 - (time % 4) / 4.0) * if_gt(fact[7], 0.5, 1.0, 0.0)"
       }
     },
     {
@@ -184,69 +183,81 @@
       "zOrder": 0,
       "expressions": {
         "x": "750",
-        "y": "650",
-        "width": "30",
-        "height": "100",
-        "color_primary": "#654321"
+        "y": "680",
+        "width": "40",
+        "height": "140",
+        "color_primary": "#264653"
       }
     },
     {
       "id": 14,
       "type": "CIRCLE",
-      "zOrder": 1,
+      "zOrder": 30,
       "expressions": {
-        "x": "750",
-        "y": "570",
-        "width": "lerp(100, 250, fact[9])",
-        "color_primary": "#32CD32"
+        "x": "750 + oscillate(0, 10, 0.5, 0)",
+        "y": "580",
+        "width": "lerp(120, 300, fact[9])",
+        "color_primary": "#2A9D8F"
+      }
+    },
+    {
+      "id": 23,
+      "type": "CIRCLE",
+      "zOrder": 31,
+      "expressions": {
+        "x": "720 + oscillate(0, 8, 0.6, 1.0)",
+        "y": "600",
+        "width": "lerp(60, 150, fact[9])",
+        "color_primary": "#264653",
+        "alpha": "0.4"
       }
     },
     {
       "id": 15,
       "type": "CIRCLE",
-      "zOrder": 10,
+      "zOrder": 50,
       "expressions": {
-        "x": "400 + oscillate(0, 20, 0.8, 0)",
-        "y": "720 + oscillate(0, 10, 1.2, 1.5)",
-        "width": "10",
-        "color_primary": "#FFFF00",
-        "alpha": "if_gt(fact[1], 0.0, 0.0, oscillate(0.5, 0.5, 1.0, 0))"
+        "x": "400 + oscillate(0, 30, 0.8, 0)",
+        "y": "720 + oscillate(0, 15, 1.2, 1.5)",
+        "width": "12",
+        "color_primary": "#E9C46A",
+        "alpha": "if_gt(fact[1], 0.0, 0.0, oscillate(0.6, 0.4, 1.0, 0))"
       }
     },
     {
       "id": 16,
       "type": "CIRCLE",
-      "zOrder": 10,
+      "zOrder": 50,
       "expressions": {
-        "x": "600 + oscillate(0, 15, 0.6, 2.1)",
-        "y": "750 + oscillate(0, 20, 0.9, 0.5)",
+        "x": "600 + oscillate(0, 20, 0.6, 2.1)",
+        "y": "750 + oscillate(0, 25, 0.9, 0.5)",
         "width": "10",
-        "color_primary": "#FFFF00",
-        "alpha": "if_gt(fact[1], 0.0, 0.0, oscillate(0.5, 0.5, 0.8, 3.14))"
+        "color_primary": "#E9C46A",
+        "alpha": "if_gt(fact[1], 0.0, 0.0, oscillate(0.6, 0.4, 0.8, 3.14))"
       }
     },
     {
       "id": 17,
       "type": "CIRCLE",
-      "zOrder": 10,
+      "zOrder": 50,
       "expressions": {
-        "x": "200 + oscillate(0, 30, 0.4, 1.0)",
-        "y": "800 + oscillate(0, 15, 0.7, 2.5)",
+        "x": "200 + oscillate(0, 40, 0.4, 1.0)",
+        "y": "800 + oscillate(0, 20, 0.7, 2.5)",
         "width": "8",
-        "color_primary": "#FFFF00",
-        "alpha": "if_gt(fact[1], 0.0, 0.0, oscillate(0.5, 0.5, 1.5, 1.2))"
+        "color_primary": "#E9C46A",
+        "alpha": "if_gt(fact[1], 0.0, 0.0, oscillate(0.6, 0.4, 1.5, 1.2))"
       }
     },
     {
       "id": 18,
       "type": "CIRCLE",
-      "zOrder": 10,
+      "zOrder": 50,
       "expressions": {
-        "x": "800 + oscillate(0, 25, 1.1, 0.2)",
-        "y": "680 + oscillate(0, 30, 0.5, 3.8)",
-        "width": "12",
-        "color_primary": "#FFFF00",
-        "alpha": "if_gt(fact[1], 0.0, 0.0, oscillate(0.5, 0.5, 0.9, 2.2))"
+        "x": "800 + oscillate(0, 35, 1.1, 0.2)",
+        "y": "680 + oscillate(0, 40, 0.5, 3.8)",
+        "width": "14",
+        "color_primary": "#E9C46A",
+        "alpha": "if_gt(fact[1], 0.0, 0.0, oscillate(0.6, 0.4, 0.9, 2.2))"
       }
     }
   ]
