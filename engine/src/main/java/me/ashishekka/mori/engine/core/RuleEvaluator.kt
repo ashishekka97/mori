@@ -223,7 +223,17 @@ class RuleEvaluator(private val maxStackSize: Int = 32) {
             val bytecode = rules[i]
             // If there's a rule, update the buffer. If not, the previous value persists.
             if (bytecode != null) {
-                buffer[i] = evaluate(bytecode, state, signals)
+                val result = evaluate(bytecode, state, signals)
+                buffer[i] = result
+
+                // Inter-layer Signal Handover: If this property is a signal slot, 
+                // propagate it to the shared signals buffer for subsequent layers.
+                if (i >= RenderProperty.INDEX_SIGNAL_0 && i <= RenderProperty.INDEX_SIGNAL_7) {
+                    val signalIndex = i - RenderProperty.INDEX_SIGNAL_0
+                    if (signalIndex >= 0 && signalIndex < signals.size) {
+                        signals[signalIndex] = result
+                    }
+                }
             }
         }
     }

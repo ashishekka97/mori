@@ -12,6 +12,7 @@ class DebugPulseRendererTest {
 
     private val renderer = DebugPulseRenderer()
     private val state = MoriEngineState()
+    private val signals = FloatArray(8)
     private val mockCanvas = mockk<EngineCanvas>(relaxed = true)
 
     @Before
@@ -31,7 +32,7 @@ class DebugPulseRendererTest {
         // Given
         state.currentTimeNanos = 1_000_000_000L
         state.setFieldValue(MoriEngineStateIndices.FACT_BATTERY_LEVEL, 0.5f)
-        renderer.update(state)
+        renderer.update(state, signals)
 
         // When
         renderer.render(mockCanvas)
@@ -47,7 +48,7 @@ class DebugPulseRendererTest {
     fun `update should react to thermal stress with jitter`() {
         // Given high thermal stress
         state.setFieldValue(MoriEngineStateIndices.FACT_THERMAL_STRESS, 1.0f)
-        renderer.update(state)
+        renderer.update(state, signals)
 
         // When
         renderer.render(mockCanvas)
@@ -72,7 +73,7 @@ class DebugPulseRendererTest {
     fun `render should draw stardust based on vitality progress`() {
         // Given some steps progress
         state.setFieldValue(MoriEngineStateIndices.FACT_STEPS_PROGRESS, 0.5f)
-        renderer.update(state)
+        renderer.update(state, signals)
 
         // When
         renderer.render(mockCanvas)

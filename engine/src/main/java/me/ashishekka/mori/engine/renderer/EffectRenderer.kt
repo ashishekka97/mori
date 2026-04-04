@@ -45,8 +45,9 @@ interface EffectRenderer {
 
     /**
      * Updates the internal simulation state based on the provided [state].
+     * @param signals A buffer for inter-layer communication results.
      */
-    fun update(state: MoriEngineState)
+    fun update(state: MoriEngineState, signals: FloatArray)
 
     /**
      * Draws the effect onto the provided platform-agnostic [canvas].
@@ -56,8 +57,8 @@ interface EffectRenderer {
     /**
      * Composite method for easy execution.
      */
-    fun updateAndDraw(state: MoriEngineState, canvas: EngineCanvas) {
-        update(state)
+    fun updateAndDraw(state: MoriEngineState, signals: FloatArray, canvas: EngineCanvas) {
+        update(state, signals)
         render(canvas)
     }
 }

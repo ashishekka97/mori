@@ -17,6 +17,7 @@ class DslEffectRendererTest {
     private val evaluator = RuleEvaluator()
     private val mockCanvas = mockk<EngineCanvas>(relaxed = true)
     private val state = MoriEngineState()
+    private val signals = FloatArray(8)
 
     @Test
     fun `render should draw rectangle at calculated position`() {
@@ -28,7 +29,7 @@ class DslEffectRendererTest {
         val renderer = DslEffectRenderer(layer, evaluator)
 
         // When
-        renderer.update(state)
+        renderer.update(state, signals)
         renderer.render(mockCanvas)
 
         // Then
@@ -57,7 +58,7 @@ class DslEffectRendererTest {
         val renderer = DslEffectRenderer(layer, evaluator)
 
         // When
-        renderer.update(state)
+        renderer.update(state, signals)
         renderer.render(mockCanvas)
 
         // Then
@@ -85,7 +86,7 @@ class DslEffectRendererTest {
         val renderer = DslEffectRenderer(layer, evaluator)
 
         // When
-        renderer.update(state)
+        renderer.update(state, signals)
         renderer.render(mockCanvas)
 
         // Then
@@ -116,7 +117,7 @@ class DslEffectRendererTest {
         )
         val renderer = DslEffectRenderer(layer, evaluator)
 
-        renderer.update(state)
+        renderer.update(state, signals)
         renderer.render(mockCanvas)
 
         verify {
@@ -138,7 +139,7 @@ class DslEffectRendererTest {
         )
         val renderer = DslEffectRenderer(layer, evaluator)
 
-        renderer.update(state)
+        renderer.update(state, signals)
         renderer.render(mockCanvas)
 
         verify {
@@ -155,7 +156,7 @@ class DslEffectRendererTest {
         )
         val renderer = DslEffectRenderer(layer, evaluator)
 
-        renderer.update(state)
+        renderer.update(state, signals)
         renderer.render(mockCanvas)
 
         verify {

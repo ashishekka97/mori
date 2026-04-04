@@ -3,6 +3,7 @@ package me.ashishekka.mori
 import android.service.wallpaper.WallpaperService
 import android.view.SurfaceHolder
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import me.ashishekka.mori.app.WallpaperFactory
 import me.ashishekka.mori.bridge.metrics.MetricCalculator
@@ -43,6 +44,7 @@ class MoriWallpaperService : WallpaperService() {
         private val stateSynchronizer: StateSynchronizer by inject { parametersOf(engineScope, moriEngine) }
 
         private var isLifecycleStarted = false
+        private var loadJob: Job? = null
 
         override fun onVisibilityChanged(visible: Boolean) {
             super.onVisibilityChanged(visible)
@@ -53,15 +55,23 @@ class MoriWallpaperService : WallpaperService() {
                     isLifecycleStarted = true
                 }
                 
+                loadJob?.cancel()
                 // UNIFIED: Use the formal Wallpaper Spec
-                engineScope.launch {
+                loadJob = engineScope.launch {
                     val wallpaper = wallpaperFactory.loadWallpaper("childhood_canvas")
-                    moriEngine.setWallpaper(wallpaper)
+                    // CRITICAL: setWallpaper MUST be on the Main thread to avoid race conditions with onDrawFrame
+                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                        moriEngine.setWallpaper(wallpaper)
+                        
+                        // Start engine only AFTER wallpaper is set
+                        moriEngine.start()
+                        stateSynchronizer.start()
+                    }
                 }
-                
-                moriEngine.start()
-                stateSynchronizer.start()
             } else {
+                loadJob?.cancel()
+                loadJob = null
+                
                 if (isLifecycleStarted) {
                     lifecycleManager.onStop()
                     isLifecycleStarted = false
@@ -79,17 +89,27 @@ class MoriWallpaperService : WallpaperService() {
             super.onSurfaceChanged(holder, format, width, height)
             val density = resources.displayMetrics.density
             
-            moriEngine.targetScaleMode = ScaleMode.FIT
-            moriEngine.state.referenceWidth = 1000f
-            moriEngine.state.referenceHeight = 1000f
+            // Standardize viewport metrics to match Compose PulseBackdrop (1000x1100)
+            val refW = 1000f
+            val refH = 1100f
+            val scaleMode = ScaleMode.FIT
+
+            moriEngine.targetScaleMode = scaleMode
+            moriEngine.state.referenceWidth = refW
+            moriEngine.state.referenceHeight = refH
             
             moriEngine.onSurfaceChanged(width, height, density)
             metricCalculator.updateMetrics(width, height, density)
+            stateSynchronizer.updateViewport(refW, refH, scaleMode)
+            
             moriEngine.onDrawFrame()
         }
 
         override fun onSurfaceDestroyed(holder: SurfaceHolder) {
             super.onSurfaceDestroyed(holder)
+            
+            loadJob?.cancel()
+            loadJob = null
             
             if (isLifecycleStarted) {
                 lifecycleManager.onStop()

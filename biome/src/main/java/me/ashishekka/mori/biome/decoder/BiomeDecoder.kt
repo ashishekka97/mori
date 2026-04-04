@@ -99,6 +99,14 @@ object BiomeDecoder {
             "custom_c" -> RenderProperty.INDEX_CUSTOM_C
             "custom_d" -> RenderProperty.INDEX_CUSTOM_D
             "custom_e" -> RenderProperty.INDEX_CUSTOM_E
+            "signal[0]" -> RenderProperty.INDEX_SIGNAL_0
+            "signal[1]" -> RenderProperty.INDEX_SIGNAL_1
+            "signal[2]" -> RenderProperty.INDEX_SIGNAL_2
+            "signal[3]" -> RenderProperty.INDEX_SIGNAL_3
+            "signal[4]" -> RenderProperty.INDEX_SIGNAL_4
+            "signal[5]" -> RenderProperty.INDEX_SIGNAL_5
+            "signal[6]" -> RenderProperty.INDEX_SIGNAL_6
+            "signal[7]" -> RenderProperty.INDEX_SIGNAL_7
             else -> -1
         }
     }

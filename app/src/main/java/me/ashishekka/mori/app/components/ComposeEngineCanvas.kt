@@ -157,7 +157,8 @@ class ComposeEngineCanvas(
             // Ignore
         }
 
-        for (i in 0 until RenderProperty.BUFFER_SIZE) {
+        val uniformCount = ShaderUniforms.UNIFORM_NAMES.size
+        for (i in 0 until uniformCount) {
             try {
                 if (i == RenderProperty.INDEX_COLOR_PRIMARY || i == RenderProperty.INDEX_COLOR_SECONDARY) {
                     val colorInt = java.lang.Float.floatToRawIntBits(uniforms[i])

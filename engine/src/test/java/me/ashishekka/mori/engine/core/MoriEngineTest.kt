@@ -67,7 +67,7 @@ class MoriEngineTest {
         engine.onDrawFrame()
 
         // Then
-        verify(exactly = 1) { layerManager.update(any()) }
+        verify(exactly = 1) { layerManager.update(any(), any()) }
         verify(exactly = 1) { layerManager.draw(mockCanvas) }
         verify(exactly = 1) { renderSurface.unlockCanvasAndPost(mockCanvas) }
     }
@@ -83,7 +83,7 @@ class MoriEngineTest {
         engine.onDrawFrame()
 
         // Then
-        verify { fallbackRenderer.update(any()) }
+        verify { fallbackRenderer.update(any(), any()) }
         verify { fallbackRenderer.render(mockCanvas) }
         verify { renderSurface.unlockCanvasAndPost(mockCanvas) }
     }
@@ -100,15 +100,15 @@ class MoriEngineTest {
 
         // First tick (always draws)
         tickCallback(100_000_000L)
-        verify(exactly = 1) { layerManager.update(any()) }
+        verify(exactly = 1) { layerManager.update(any(), any()) }
 
         // Second tick too soon (10ms later)
         tickCallback(110_000_000L)
-        verify(exactly = 1) { layerManager.update(any()) } // Still 1
+        verify(exactly = 1) { layerManager.update(any(), any()) } // Still 1
 
         // Third tick far enough (40ms later)
         tickCallback(150_000_000L)
-        verify(exactly = 2) { layerManager.update(any()) }
+        verify(exactly = 2) { layerManager.update(any(), any()) }
     }
 
     @Test

@@ -138,8 +138,8 @@ object ExpressionCompiler {
 
     private fun tokenize(expression: String): List<String> {
         val tokens = mutableListOf<String>()
-        // Improved regex to capture floats, identifiers, operators, #HEX colors, and fact[n]
-        val regex = Regex("""(fact\[[0-9]+\])|([0-9]*\.?[0-9]+)|([a-zA-Z_][a-zA-Z0-9_]*)|(\#[a-fA-F0-9]{6,8})|(\[)|(\])|(\()|(\))|(\+|-|\*|/|%)|(,)""")
+        // Improved regex to capture floats, identifiers, operators, #HEX colors, fact[n], and signal[n]
+        val regex = Regex("""(fact\[[0-9]+\])|(signal\[[0-9]+\])|([0-9]*\.?[0-9]+)|([a-zA-Z_][a-zA-Z0-9_]*)|(\#[a-fA-F0-9]{6,8})|(\[)|(\])|(\()|(\))|(\+|-|\*|/|%)|(,)""")
         regex.findAll(expression).forEach { match ->
             tokens.add(match.value)
         }
@@ -263,6 +263,14 @@ object ExpressionCompiler {
                             throw IllegalArgumentException("Fact index out of bounds: $index")
                         }
                         bytecode.add(OpCode.GET_STATE)
+                        bytecode.add(index)
+                    } else if (token.startsWith("signal[")) {
+                        val indexStr = token.substring(7, token.length - 1)
+                        val index = indexStr.toIntOrNull() ?: 0
+                        if (index < 0 || index >= 8) { // Assuming 8 signals
+                            throw IllegalArgumentException("Signal index out of bounds: $index")
+                        }
+                        bytecode.add(OpCode.GET_SIGNAL)
                         bytecode.add(index)
                     } else if (token.startsWith("#")) {
                         // Parse Hex Color directly to Int bits to prevent Float precision loss

@@ -22,7 +22,7 @@ class StaticFallbackRenderer : EffectRenderer {
 
     override fun onSurfaceChanged(width: Int, height: Int, density: Float) {}
 
-    override fun update(state: MoriEngineState) {
+    override fun update(state: MoriEngineState, signals: FloatArray) {
         val sun = state.getFieldValue(MoriEngineStateIndices.FACT_SUN_ALTITUDE)
         
         // Stash old values to check for changes

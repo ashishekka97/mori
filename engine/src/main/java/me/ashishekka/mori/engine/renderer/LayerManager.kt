@@ -56,10 +56,10 @@ class LayerManager(
     /**
      * Updates all active layers with the current engine state.
      */
-    fun update(state: MoriEngineState) {
+    fun update(state: MoriEngineState, signals: FloatArray) {
         var i = 0
         while (i < activeLayerCount) {
-            layers[i]?.update(state)
+            layers[i]?.update(state, signals)
             i++
         }
     }

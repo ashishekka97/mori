@@ -36,7 +36,7 @@ class DebugPulseRenderer : EffectRenderer {
         }
     }
 
-    override fun update(state: MoriEngineState) {
+    override fun update(state: MoriEngineState, signals: FloatArray) {
         this.state = state
 
         val timeSeconds = state.currentTimeNanos / 1_000_000_000.0

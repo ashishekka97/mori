@@ -31,6 +31,17 @@ object RenderProperty {
     const val INDEX_CUSTOM_C = 13
     const val INDEX_CUSTOM_D = 14
     const val INDEX_CUSTOM_E = 15
+
+    // --- Shared Signals (16-23) ---
+    /** Pre-allocated slots for inter-layer communication (signal[0-7]). */
+    const val INDEX_SIGNAL_0 = 16
+    const val INDEX_SIGNAL_1 = 17
+    const val INDEX_SIGNAL_2 = 18
+    const val INDEX_SIGNAL_3 = 19
+    const val INDEX_SIGNAL_4 = 20
+    const val INDEX_SIGNAL_5 = 21
+    const val INDEX_SIGNAL_6 = 22
+    const val INDEX_SIGNAL_7 = 23
     
-    const val BUFFER_SIZE = 16
+    const val BUFFER_SIZE = 24
 }
