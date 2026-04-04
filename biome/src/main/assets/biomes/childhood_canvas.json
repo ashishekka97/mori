@@ -97,7 +97,7 @@
       "resId": 1,
       "zOrder": -40,
       "expressions": {
-        "x": "635 + oscillate(0, 8, 0.3, 0)",
+        "x": "605 + oscillate(0, 8, 0.3, 0)",
         "y": "fact[24] * 500 + 50",
         "color_primary": "#457B9D",
         "alpha": "0.8"
