@@ -90,7 +90,7 @@ class DslEffectRenderer(
 
         // Apply Masking before scaling
         if (layer.maskResId != null) {
-            canvas.clipPath(layer.maskResId)
+            canvas.clipPath(layer.maskResId, 0f, 0f)
         }
 
         // Apply local scale (combining DSL scale and device scale)

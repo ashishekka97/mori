@@ -120,9 +120,12 @@ class AndroidEngineCanvas(
         nativeCanvas.drawPath(nativePath, paint)
     }
 
-    override fun clipPath(resId: Int) {
+    override fun clipPath(resId: Int, x: Float, y: Float) {
         val nativePath = assetRegistry.getStoredPath(resId) as? Path ?: return
+        nativeCanvas.save()
+        nativeCanvas.translate(x, y)
         nativeCanvas.clipPath(nativePath)
+        nativeCanvas.restore()
     }
 
     override fun save() {

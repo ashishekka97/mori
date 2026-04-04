@@ -35,7 +35,7 @@ interface EngineCanvas {
      /**
       * Clips the drawing area to the specified path.
       */
-     fun clipPath(resId: Int)
+     fun clipPath(resId: Int, x: Float, y: Float)
 
      fun save()
      fun restore()

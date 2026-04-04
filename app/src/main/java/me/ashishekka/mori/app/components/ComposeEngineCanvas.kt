@@ -43,12 +43,14 @@ class ComposeEngineCanvas(
     private var scalePivotX: Float = 0f
     private var scalePivotY: Float = 0f
     private var clipPathId: Int? = null
+    private var clipOffsetX: Float = 0f
+    private var clipOffsetY: Float = 0f
 
     private val cachedComposePaths = mutableMapOf<Int, Path>()
 
     private var cachedAtlas: Bitmap? = null
     private var cachedImageBitmap: ImageBitmap? = null
-    
+
     private val hasTransform: Boolean
         get() = rotationDegrees != 0f || translateX != 0f || translateY != 0f || scaleX != 1f || scaleY != 1f || clipPathId != null
 
@@ -58,10 +60,14 @@ class ComposeEngineCanvas(
                 if (translateX != 0f || translateY != 0f) translate(translateX, translateY)
                 if (rotationDegrees != 0f) rotate(rotationDegrees, Offset(rotationPivotX, rotationPivotY))
                 if (scaleX != 1f || scaleY != 1f) scale(scaleX, scaleY, Offset(scalePivotX, scalePivotY))
-                
+
                 clipPathId?.let { resId ->
                     val nativePath = assetRegistry.getStoredPath(resId) as? android.graphics.Path
-                    nativePath?.asComposePath()?.let { clipPath(it) }
+                    nativePath?.asComposePath()?.let { 
+                        translate(clipOffsetX, clipOffsetY)
+                        clipPath(it) 
+                        translate(-clipOffsetX, -clipOffsetY)
+                    }
                 }
             }) {
                 drawBlock()
@@ -188,8 +194,10 @@ class ComposeEngineCanvas(
         }
     }
 
-    override fun clipPath(resId: Int) {
+    override fun clipPath(resId: Int, x: Float, y: Float) {
         clipPathId = resId
+        clipOffsetX = x
+        clipOffsetY = y
     }
 
     override fun save() {
@@ -207,6 +215,8 @@ class ComposeEngineCanvas(
         scalePivotX = 0f
         scalePivotY = 0f
         clipPathId = null
+        clipOffsetX = 0f
+        clipOffsetY = 0f
     }
 
     override fun rotate(degrees: Float, pivotX: Float, pivotY: Float) {
