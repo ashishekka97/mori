@@ -1,8 +1,6 @@
 package me.ashishekka.mori.engine.renderer
 
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verifyOrder
+import io.mockk.*
 import me.ashishekka.mori.engine.core.MoriEngineState
 import me.ashishekka.mori.engine.core.interfaces.EngineCanvas
 import org.junit.Assert.assertFalse
@@ -20,6 +18,7 @@ class LayerManagerTest {
         val foreground = mockk<EffectRenderer>(relaxed = true) { every { zOrder } returns 20 }
 
         val state = MoriEngineState()
+        val signals = FloatArray(8)
         val canvas = mockk<EngineCanvas>()
 
         // When (Add in mixed order)
@@ -28,14 +27,14 @@ class LayerManagerTest {
         layerManager.addEffect(background)
 
         // *** FIX: Calling update and draw separately ***
-        layerManager.update(state)
+        layerManager.update(state, signals)
         layerManager.draw(canvas)
 
         // Then (Verify draw order: background -> midground -> foreground)
         verifyOrder {
-            background.update(state)
-            midground.update(state)
-            foreground.update(state)
+            background.update(state, any())
+            midground.update(state, any())
+            foreground.update(state, any())
 
             background.render(canvas)
             midground.render(canvas)

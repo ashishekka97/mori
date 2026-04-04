@@ -1,8 +1,6 @@
 package me.ashishekka.mori.engine.renderer
 
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
+import io.mockk.*
 import me.ashishekka.mori.engine.core.MoriEngineState
 import me.ashishekka.mori.engine.core.interfaces.EngineCanvas
 import org.junit.Test
@@ -14,16 +12,17 @@ class EffectRendererTest {
         // Given
         val mockRenderer = mockk<EffectRenderer>(relaxed = true)
         val state = MoriEngineState()
+        val signals = FloatArray(8)
         val canvas = mockk<EngineCanvas>()
 
         // Ensure the default implementation is called
-        every { mockRenderer.updateAndDraw(any(), any()) } answers { callOriginal() }
+        every { mockRenderer.updateAndDraw(any(), any(), any()) } answers { callOriginal() }
 
         // When
-        mockRenderer.updateAndDraw(state, canvas)
+        mockRenderer.updateAndDraw(state, signals, canvas)
 
         // Then
-        verify { mockRenderer.update(state) }
+        verify { mockRenderer.update(state, any()) }
         verify { mockRenderer.render(canvas) }
     }
 }

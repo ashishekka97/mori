@@ -1,104 +1,220 @@
 {
   "id": "childhood_canvas",
-  "name": "Hello World: Papercraft Scenery",
-  "description": "A dynamic papercraft landscape built with basic primitives, reacting to time and device state.",
+  "name": "The Childhood Canvas",
+  "description": "A dynamic papercraft landscape reacting to time, battery, and vitality.",
   "resources": [
-    { "id": 1, "path": "river_curve.path", "type": "PATH" },
-    { "id": 2, "path": "smoke_wisp.path", "type": "PATH" }
+    {
+      "id": 1,
+      "path": "river_curve.path",
+      "type": "PATH"
+    },
+    {
+      "id": 2,
+      "path": "smoke_wisp.path",
+      "type": "PATH"
+    },
+    {
+      "id": 3,
+      "path": "water_shimmer.agsl",
+      "type": "SHADER"
+    }
   ],
   "layers": [
     {
       "id": 1,
       "type": "RECT",
-      "zOrder": -20,
+      "zOrder": -100,
       "expressions": {
         "x": "500",
         "y": "500",
-        "width": "1000",
+        "width": "4000",
         "height": "4000",
-        "color_primary": "mix_oklab(#0D0221, #87CEEB, (fact[1] + 1) / 2)"
+        "color_primary": "mix_oklab(#1A1A2E, #A8DADC, (fact[1] + 1) / 2)",
+        "signal[0]": "1.0 - fact[8]"
       }
     },
     {
       "id": 2,
       "type": "CIRCLE",
-      "zOrder": -18,
+      "zOrder": -95,
       "expressions": {
-        "x": "850",
-        "y": "remap(abs(fact[1]), 0.0, 1.0, 650, 200)",
-        "width": "150",
-        "color_primary": "if_gt(fact[1], 0.0, #FFD700, #F4F6F0)"
+        "x": "500 + cos((fact[2] * 6.28318) - 2.35619) * 450",
+        "y": "500 - sin((fact[2] * 6.28318) - 2.35619) * 450",
+        "width": "160",
+        "color_primary": "#FFD166",
+        "alpha": "if_gt(fact[1], 0.0, 1.0, clamp(remap(fact[1], -0.1, 0.0, 0.0, 1.0), 0.0, 1.0))"
+      }
+    },
+    {
+      "id": 29,
+      "type": "CIRCLE",
+      "zOrder": -95,
+      "expressions": {
+        "x": "500 + cos((fact[2] * 6.28318) + 0.78539) * 450",
+        "y": "500 - sin((fact[2] * 6.28318) + 0.78539) * 450",
+        "width": "120",
+        "color_primary": "#F4F6F0",
+        "alpha": "if_gt(fact[1], 0.0, clamp(remap(fact[1], 0.0, 0.1, 1.0, 0.0), 0.0, 1.0), 1.0)"
+      }
+    },
+    {
+      "id": 34,
+      "type": "CIRCLE",
+      "zOrder": -94,
+      "expressions": {
+        "x": "500 + cos((fact[2] * 6.28318) + 0.78539) * 450 + 20",
+        "y": "500 - sin((fact[2] * 6.28318) + 0.78539) * 450 - 15",
+        "width": "25",
+        "color_primary": "#E0E0E0",
+        "alpha": "if_gt(fact[2], 0.25, if_gt(fact[2], 0.75, 0.6, 0.0), 0.6)"
+      }
+    },
+    {
+      "id": 35,
+      "type": "CIRCLE",
+      "zOrder": -94,
+      "expressions": {
+        "x": "500 + cos((fact[2] * 6.28318) + 0.78539) * 450 - 25",
+        "y": "500 - sin((fact[2] * 6.28318) + 0.78539) * 450 + 10",
+        "width": "35",
+        "color_primary": "#D3D3D3",
+        "alpha": "if_gt(fact[2], 0.25, if_gt(fact[2], 0.75, 0.6, 0.0), 0.6)"
+      }
+    },
+    {
+      "id": 36,
+      "type": "CIRCLE",
+      "zOrder": -94,
+      "expressions": {
+        "x": "500 + cos((fact[2] * 6.28318) + 0.78539) * 450 + 5",
+        "y": "500 - sin((fact[2] * 6.28318) + 0.78539) * 450 + 25",
+        "width": "15",
+        "color_primary": "#BDBDBD",
+        "alpha": "if_gt(fact[2], 0.25, if_gt(fact[2], 0.75, 0.6, 0.0), 0.6)"
       }
     },
     {
       "id": 3,
       "type": "TRIANGLE",
-      "zOrder": -15,
+      "zOrder": -80,
       "expressions": {
         "x": "300",
-        "y": "550",
-        "width": "500",
-        "height": "380",
-        "color_primary": "#2F4F2F"
+        "y": "580",
+        "width": "600",
+        "height": "400",
+        "color_primary": "mix_oklab(#264653, mix_oklab(#1A1A2E, #A8DADC, (fact[1] + 1) / 2), 0.3)"
       }
     },
     {
       "id": 4,
       "type": "TRIANGLE",
-      "zOrder": -15,
+      "zOrder": -80,
       "expressions": {
-        "x": "700",
-        "y": "500",
-        "width": "650",
-        "height": "520",
-        "color_primary": "#2F4F2F"
+        "x": "750",
+        "y": "550",
+        "width": "700",
+        "height": "500",
+        "color_primary": "mix_oklab(#264653, mix_oklab(#1A1A2E, #A8DADC, (fact[1] + 1) / 2), 0.3)"
       }
     },
     {
       "id": 5,
       "type": "TRIANGLE",
-      "zOrder": -10,
+      "zOrder": -70,
       "expressions": {
-        "x": "400",
+        "x": "450",
         "y": "620",
-        "width": "380",
-        "height": "260",
-        "color_primary": "#4F7942"
+        "width": "450",
+        "height": "300",
+        "color_primary": "mix_oklab(#2A9D8F, mix_oklab(#1A1A2E, #A8DADC, (fact[1] + 1) / 2), 0.15)"
       }
     },
     {
       "id": 6,
       "type": "TRIANGLE",
-      "zOrder": -10,
+      "zOrder": -70,
       "expressions": {
-        "x": "650",
-        "y": "570",
-        "width": "500",
-        "height": "380",
-        "color_primary": "#4F7942"
+        "x": "150",
+        "y": "650",
+        "width": "400",
+        "height": "250",
+        "color_primary": "mix_oklab(#2A9D8F, mix_oklab(#1A1A2E, #A8DADC, (fact[1] + 1) / 2), 0.15)"
+      }
+    },
+    {
+      "id": 25,
+      "type": "TRIANGLE",
+      "zOrder": -75,
+      "expressions": {
+        "x": "300",
+        "y": "420",
+        "width": "120",
+        "height": "80",
+        "color_primary": "#F1FAEE",
+        "alpha": "signal[0]"
+      }
+    },
+    {
+      "id": 26,
+      "type": "TRIANGLE",
+      "zOrder": -75,
+      "expressions": {
+        "x": "750",
+        "y": "362.5",
+        "width": "175",
+        "height": "125",
+        "color_primary": "#F1FAEE",
+        "alpha": "signal[0]"
+      }
+    },
+    {
+      "id": 27,
+      "type": "TRIANGLE",
+      "zOrder": -65,
+      "expressions": {
+        "x": "450",
+        "y": "492.5",
+        "width": "68",
+        "height": "45",
+        "color_primary": "#F1FAEE",
+        "alpha": "signal[0]"
+      }
+    },
+    {
+      "id": 28,
+      "type": "TRIANGLE",
+      "zOrder": -65,
+      "expressions": {
+        "x": "150",
+        "y": "537.5",
+        "width": "40",
+        "height": "25",
+        "color_primary": "#F1FAEE",
+        "alpha": "signal[0]"
       }
     },
     {
       "id": 7,
       "type": "RECT",
-      "zOrder": -5,
+      "zOrder": -50,
       "expressions": {
         "x": "500",
-        "y": "fact[24] * 500 + 500",
-        "width": "1000",
+        "y": "1740",
+        "width": "4000",
         "height": "2000",
-        "color_primary": "#3CB371"
+        "color_primary": "#8AB17D"
       }
     },
     {
       "id": 8,
       "type": "PATH",
       "resId": 1,
-      "zOrder": -4,
+      "zOrder": -40,
       "expressions": {
-        "x": "500 + oscillate(0, 5, 0.4, 0)",
-        "y": "fact[24] * 500",
-        "color_primary": "#4682B4"
+        "x": "660",
+        "y": "1240",
+        "color_primary": "#457B9D",
+        "alpha": "0.8"
       }
     },
     {
@@ -107,75 +223,72 @@
       "zOrder": 0,
       "expressions": {
         "x": "250",
-        "y": "650",
-        "width": "150",
-        "height": "100",
-        "color_primary": "#8B4513"
+        "y": "680",
+        "width": "140",
+        "height": "120",
+        "color_primary": "#B08968"
       }
     },
     {
       "id": 10,
       "type": "TRIANGLE",
-      "zOrder": 1,
+      "zOrder": 5,
       "expressions": {
         "x": "250",
-        "y": "550",
+        "y": "580",
         "width": "180",
-        "height": "100",
-        "color_primary": "#A9A9A9"
+        "height": "120",
+        "color_primary": "#E76F51"
       }
     },
     {
       "id": 11,
-      "type": "CIRCLE",
-      "zOrder": 2,
+      "type": "RECT",
+      "zOrder": 10,
       "expressions": {
         "x": "250",
-        "y": "650",
+        "y": "710",
         "width": "40",
-        "color_primary": "if_gt(fact[16], 0.5, #222222, #FFD700)"
+        "height": "60",
+        "color_primary": "#264653"
+      }
+    },
+    {
+      "id": 21,
+      "type": "CIRCLE",
+      "zOrder": 11,
+      "expressions": {
+        "x": "220",
+        "y": "670",
+        "width": "30",
+        "color_primary": "if_gt(fact[16], 0.5, #1A1A2E, #FFFF88)",
+        "alpha": "if_gt(fact[1], 0.1, 0.3, 1.0)"
+      }
+    },
+    {
+      "id": 22,
+      "type": "CIRCLE",
+      "zOrder": 11,
+      "expressions": {
+        "x": "280",
+        "y": "670",
+        "width": "30",
+        "color_primary": "if_gt(fact[16], 0.5, #1A1A2E, #FFFF88)",
+        "alpha": "if_gt(fact[1], 0.1, 0.3, 1.0)"
       }
     },
     {
       "id": 12,
       "type": "PATH",
       "resId": 2,
-      "zOrder": 3,
+      "zOrder": 20,
       "expressions": {
-        "x": "250 + oscillate(0, 10, 0.4, 0)",
-        "y": "485 - (time % 3) * 30",
+        "x": "250 + oscillate(0, 15, 0.4, 0)",
+        "y": "500 - (time % 4) * 40",
         "stroke_width": "8",
-        "color_secondary": "#F0F8FF",
+        "color_secondary": "#F1FAEE",
         "color_primary": "#00000000",
-        "alpha": "(1.0 - (time % 3) / 3.0) * if_gt(fact[7], 0.5, 1.0, 0.0)"
-      }
-    },
-    {
-      "id": 19,
-      "type": "PATH",
-      "resId": 2,
-      "zOrder": 3,
-      "expressions": {
-        "x": "255 + oscillate(0, 8, 0.6, 2.1)",
-        "y": "485 - ((time + 1) % 3) * 30",
-        "stroke_width": "6",
-        "color_secondary": "#F0F8FF",
-        "color_primary": "#00000000",
-        "alpha": "(1.0 - ((time + 1) % 3) / 3.0) * if_gt(fact[7], 0.5, 1.0, 0.0)"
-      }
-    },
-    {
-      "id": 20,
-      "type": "PATH",
-      "resId": 2,
-      "zOrder": 3,
-      "expressions": {
-        "x": "245 + oscillate(0, 12, 0.3, 4.2)",
-        "y": "485 - ((time + 2) % 3) * 30",
-        "stroke_width": "10",
-        "color_secondary": "#F0F8FF",
-        "color_primary": "#00000000",
-        "alpha": "(1.0 - ((time + 2) % 3) / 3.0) * if_gt(fact[7], 0.5, 1.0, 0.0)"
+        "alpha": "(1.0 - (time % 4) / 4.0) * if_gt(fact[7], 0.5, 1.0, 0.0)"
       }
     },
     {
@@ -184,69 +297,270 @@
       "zOrder": 0,
       "expressions": {
         "x": "750",
-        "y": "650",
-        "width": "30",
-        "height": "100",
-        "color_primary": "#654321"
+        "y": "680",
+        "width": "40",
+        "height": "140",
+        "color_primary": "#5D4037"
       }
     },
     {
       "id": 14,
-      "type": "CIRCLE",
-      "zOrder": 1,
+      "type": "TRIANGLE",
+      "zOrder": 30,
       "expressions": {
-        "x": "750",
-        "y": "570",
-        "width": "lerp(100, 250, fact[9])",
-        "color_primary": "#32CD32"
+        "x": "750 + oscillate(0, 10, 0.5, 0)",
+        "y": "600",
+        "width": "lerp(150, 350, fact[9])",
+        "height": "lerp(100, 200, fact[9])",
+        "color_primary": "#4F772D",
+        "rotation": "oscillate((0 - 3), 3, 0.5, 0)"
+      }
+    },
+    {
+      "id": 23,
+      "type": "TRIANGLE",
+      "zOrder": 31,
+      "expressions": {
+        "x": "750 + oscillate(0, 12, 0.5, 0.2)",
+        "y": "540",
+        "width": "lerp(120, 280, fact[9])",
+        "height": "lerp(80, 160, fact[9])",
+        "color_primary": "#386641",
+        "rotation": "oscillate((0 - 5), 5, 0.5, 0.2)"
+      }
+    },
+    {
+      "id": 24,
+      "type": "TRIANGLE",
+      "zOrder": 32,
+      "expressions": {
+        "x": "750 + oscillate(0, 14, 0.5, 0.4)",
+        "y": "490",
+        "width": "lerp(80, 200, fact[9])",
+        "height": "lerp(60, 120, fact[9])",
+        "color_primary": "#6A994E",
+        "rotation": "oscillate((0 - 7), 7, 0.5, 0.4)"
       }
     },
     {
       "id": 15,
       "type": "CIRCLE",
-      "zOrder": 10,
+      "zOrder": 50,
       "expressions": {
-        "x": "400 + oscillate(0, 20, 0.8, 0)",
-        "y": "720 + oscillate(0, 10, 1.2, 1.5)",
-        "width": "10",
-        "color_primary": "#FFFF00",
-        "alpha": "if_gt(fact[1], 0.0, 0.0, oscillate(0.5, 0.5, 1.0, 0))"
+        "x": "400 + oscillate(0, 30, 0.8, 0)",
+        "y": "720 + oscillate(0, 15, 1.2, 1.5)",
+        "width": "12",
+        "color_primary": "#E9C46A",
+        "alpha": "if_gt(fact[1], 0.0, 0.0, oscillate(0.6, 0.4, 1.0, 0))"
       }
     },
     {
       "id": 16,
       "type": "CIRCLE",
-      "zOrder": 10,
+      "zOrder": 50,
       "expressions": {
-        "x": "600 + oscillate(0, 15, 0.6, 2.1)",
-        "y": "750 + oscillate(0, 20, 0.9, 0.5)",
+        "x": "600 + oscillate(0, 20, 0.6, 2.1)",
+        "y": "750 + oscillate(0, 25, 0.9, 0.5)",
         "width": "10",
-        "color_primary": "#FFFF00",
-        "alpha": "if_gt(fact[1], 0.0, 0.0, oscillate(0.5, 0.5, 0.8, 3.14))"
+        "color_primary": "#E9C46A",
+        "alpha": "if_gt(fact[1], 0.0, 0.0, oscillate(0.6, 0.4, 0.8, 3.14))"
       }
     },
     {
-      "id": 17,
+      "id": 37,
       "type": "CIRCLE",
-      "zOrder": 10,
+      "zOrder": -97,
       "expressions": {
-        "x": "200 + oscillate(0, 30, 0.4, 1.0)",
-        "y": "800 + oscillate(0, 15, 0.7, 2.5)",
+        "x": "500 + cos((fact[2] * 6.28318) - 2.35619) * 450",
+        "y": "500 - sin((fact[2] * 6.28318) - 2.35619) * 450",
+        "width": "220",
+        "color_primary": "#FFD166",
+        "alpha": "if_gt(fact[2], 0.25, if_gt(fact[2], 0.75, 0.0, 0.5), 0.0)"
+      }
+    },
+    {
+      "id": 38,
+      "type": "CIRCLE",
+      "zOrder": -98,
+      "expressions": {
+        "x": "500 + cos((fact[2] * 6.28318) - 2.35619) * 450",
+        "y": "500 - sin((fact[2] * 6.28318) - 2.35619) * 450",
+        "width": "300",
+        "color_primary": "#FFD166",
+        "alpha": "if_gt(fact[2], 0.25, if_gt(fact[2], 0.75, 0.0, 0.25), 0.0)"
+      }
+    },
+    {
+      "id": 42,
+      "type": "CIRCLE",
+      "zOrder": -99,
+      "expressions": {
+        "x": "200",
+        "y": "150",
+        "width": "6",
+        "color_primary": "#FFFFFF",
+        "alpha": "if_gt(fact[1], 0.0, 0.0, oscillate(0.2, 0.8, 1.5, 0))"
+      }
+    },
+    {
+      "id": 43,
+      "type": "CIRCLE",
+      "zOrder": -99,
+      "expressions": {
+        "x": "800",
+        "y": "250",
+        "width": "4",
+        "color_primary": "#FFFFFF",
+        "alpha": "if_gt(fact[1], 0.0, 0.0, oscillate(0.1, 0.9, 0.8, 2.0))"
+      }
+    },
+    {
+      "id": 44,
+      "type": "CIRCLE",
+      "zOrder": -99,
+      "expressions": {
+        "x": "450",
+        "y": "100",
         "width": "8",
-        "color_primary": "#FFFF00",
-        "alpha": "if_gt(fact[1], 0.0, 0.0, oscillate(0.5, 0.5, 1.5, 1.2))"
+        "color_primary": "#FFFFFF",
+        "alpha": "if_gt(fact[1], 0.0, 0.0, oscillate(0.3, 1.0, 2.1, 1.0))"
       }
     },
     {
-      "id": 18,
+      "id": 45,
       "type": "CIRCLE",
-      "zOrder": 10,
+      "zOrder": -99,
       "expressions": {
-        "x": "800 + oscillate(0, 25, 1.1, 0.2)",
-        "y": "680 + oscillate(0, 30, 0.5, 3.8)",
-        "width": "12",
-        "color_primary": "#FFFF00",
-        "alpha": "if_gt(fact[1], 0.0, 0.0, oscillate(0.5, 0.5, 0.9, 2.2))"
+        "x": "100",
+        "y": "300",
+        "width": "5",
+        "color_primary": "#FFFFFF",
+        "alpha": "if_gt(fact[1], 0.0, 0.0, oscillate(0.1, 1.0, 1.1, 3.14))"
+      }
+    },
+    {
+      "id": 55,
+      "type": "RECT",
+      "zOrder": 2,
+      "expressions": {
+        "x": "250",
+        "y": "715",
+        "width": "25",
+        "height": "50",
+        "color_primary": "#3E2723"
+      }
+    },
+    {
+      "id": 50,
+      "type": "CIRCLE",
+      "zOrder": -85,
+      "expressions": {
+        "x": "(((time * 8) % 1500) - 250) - 30",
+        "y": "300 + oscillate((0 - 5), 5, 0.2, 0)",
+        "width": "40",
+        "color_primary": "#FFFFFF",
+        "alpha": "if_gt(fact[1], 0.0, 1.0, 0.0)"
+      }
+    },
+    {
+      "id": 51,
+      "type": "CIRCLE",
+      "zOrder": -85,
+      "expressions": {
+        "x": "(((time * 8) % 1500) - 250) - 10",
+        "y": "(300 + oscillate((0 - 5), 5, 0.2, 0)) - 8",
+        "width": "55",
+        "color_primary": "#FFFFFF",
+        "alpha": "if_gt(fact[1], 0.0, 1.0, 0.0)"
+      }
+    },
+    {
+      "id": 52,
+      "type": "CIRCLE",
+      "zOrder": -85,
+      "expressions": {
+        "x": "(((time * 8) % 1500) - 250) + 15",
+        "y": "(300 + oscillate((0 - 5), 5, 0.2, 0)) - 12",
+        "width": "65",
+        "color_primary": "#FFFFFF",
+        "alpha": "if_gt(fact[1], 0.0, 1.0, 0.0)"
+      }
+    },
+    {
+      "id": 59,
+      "type": "CIRCLE",
+      "zOrder": -85,
+      "expressions": {
+        "x": "(((time * 8) % 1500) - 250) + 40",
+        "y": "(300 + oscillate((0 - 5), 5, 0.2, 0))",
+        "width": "45",
+        "color_primary": "#FFFFFF",
+        "alpha": "if_gt(fact[1], 0.0, 1.0, 0.0)"
+      }
+    },
+    {
+      "id": 56,
+      "type": "CIRCLE",
+      "zOrder": -86,
+      "expressions": {
+        "x": "(((time * 12) % 1500) - 150) - 35",
+        "y": "(180 + oscillate((0 - 8), 8, 0.15, 1))",
+        "width": "35",
+        "color_primary": "#FFFFFF",
+        "alpha": "if_gt(fact[1], 0.0, 1.0, 0.0)"
+      }
+    },
+    {
+      "id": 57,
+      "type": "CIRCLE",
+      "zOrder": -86,
+      "expressions": {
+        "x": "(((time * 12) % 1500) - 150) - 10",
+        "y": "(180 + oscillate((0 - 8), 8, 0.15, 1)) - 5",
+        "width": "45",
+        "color_primary": "#FFFFFF",
+        "alpha": "if_gt(fact[1], 0.0, 1.0, 0.0)"
+      }
+    },
+    {
+      "id": 58,
+      "type": "CIRCLE",
+      "zOrder": -86,
+      "expressions": {
+        "x": "(((time * 12) % 1500) - 150) + 15",
+        "y": "(180 + oscillate((0 - 8), 8, 0.15, 1)) - 10",
+        "width": "55",
+        "color_primary": "#FFFFFF",
+        "alpha": "if_gt(fact[1], 0.0, 1.0, 0.0)"
+      }
+    },
+    {
+      "id": 60,
+      "type": "CIRCLE",
+      "zOrder": -86,
+      "expressions": {
+        "x": "(((time * 12) % 1500) - 150) + 40",
+        "y": "(180 + oscillate((0 - 8), 8, 0.15, 1)) - 2",
+        "width": "40",
+        "color_primary": "#FFFFFF",
+        "alpha": "if_gt(fact[1], 0.0, 1.0, 0.0)"
+      }
+    },
+    {
+      "id": 64,
+      "type": "SHADER",
+      "resId": 3,
+      "maskId": 1,
+      "zOrder": -39,
+      "expressions": {
+        "x": "660",
+        "y": "1240",
+        "width": "1000",
+        "height": "1500",
+        "color_primary": "#457B9D",
+        "alpha": "0.7",
+        "custom_a": "time * 2",
+        "custom_b": "fact[1]"
       }
     }
   ]

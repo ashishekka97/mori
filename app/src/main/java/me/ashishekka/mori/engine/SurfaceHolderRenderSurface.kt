@@ -62,9 +62,7 @@ class AndroidEngineCanvas(
             i += 2
         }
         
-        if (isFilled) {
-            path.close()
-        }
+        path.close()
         
         nativeCanvas.drawPath(path, paint)
     }
@@ -92,7 +90,8 @@ class AndroidEngineCanvas(
             // Ignore
         }
 
-        for (i in 0 until RenderProperty.BUFFER_SIZE) {
+        val uniformCount = ShaderUniforms.UNIFORM_NAMES.size
+        for (i in 0 until uniformCount) {
             try {
                 if (i == RenderProperty.INDEX_COLOR_PRIMARY || i == RenderProperty.INDEX_COLOR_SECONDARY) {
                     val colorInt = java.lang.Float.floatToRawIntBits(uniforms[i])
@@ -118,6 +117,13 @@ class AndroidEngineCanvas(
         paint.strokeWidth = if (isFilled) 0f else thickness
 
         nativeCanvas.drawPath(nativePath, paint)
+    }
+
+    override fun clipPath(resId: Int, x: Float, y: Float) {
+        val nativePath = assetRegistry.getStoredPath(resId) as? Path ?: return
+        nativeCanvas.translate(x, y)
+        nativeCanvas.clipPath(nativePath)
+        nativeCanvas.translate(-x, -y)
     }
 
     override fun save() {
@@ -151,7 +157,11 @@ class SurfaceHolderRenderSurface(
 
     override fun lockCanvas(): EngineCanvas? {
         val nativeCanvas = try {
-            serviceEngine.surfaceHolder.lockCanvas()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                serviceEngine.surfaceHolder.lockHardwareCanvas()
+            } else {
+                serviceEngine.surfaceHolder.lockCanvas()
+            }
         } catch (e: Exception) {
             null
         }

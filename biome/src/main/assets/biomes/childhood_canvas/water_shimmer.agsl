@@ -1,0 +1,72 @@
+uniform float u_x;
+uniform float u_y;
+uniform float u_scale_x;
+uniform float u_scale_y;
+uniform float u_rotation;
+uniform float u_width;
+uniform float u_height;
+uniform float u_stroke_width;
+uniform float u_alpha;
+uniform half4 u_color_primary;
+uniform half4 u_color_secondary;
+uniform float u_custom_a;
+uniform float u_custom_b;
+uniform float u_custom_c;
+uniform float u_custom_d;
+uniform float u_custom_e;
+uniform float u_complexity;
+
+// Pseudo-random noise function
+float random(float2 st) {
+    return fract(sin(dot(st.xy, float2(12.9898, 78.233))) * 43758.5453123);
+}
+
+half4 main(in float2 fragCoord) {
+    // In Android's RuntimeShader, fragCoord is absolute screen space (pixels).
+    // u_x and u_y define the center of the shape in virtual space, but they are transformed 
+    // before drawing. To make the UV relative to the bounding box, we need to normalize.
+    
+    // Instead of using u_width directly for fragCoord normalization, we can use a fixed scale
+    // to map the pixel coordinates to a nice wave grid, preventing scaling artifacts.
+    float2 uv = fragCoord.xy * 0.02; 
+    
+    float time = u_custom_a;
+    float sunAltitude = u_custom_b; 
+    
+    // Scale UV to create "cells" for the sparkles
+    float2 scaledUv = uv * float2(5.0, 15.0);
+    float2 cellUv = floor(scaledUv);
+    
+    // Random twinkle speed and offset
+    float cellRandom = random(cellUv);
+    
+    // Sparkle density
+    float spawnChance = step(0.92, cellRandom);
+    
+    // Twinkle animation
+    float twinkle = sin(time * (0.2 + cellRandom * 0.8) + cellRandom * 10.0) * 0.5 + 0.5;
+    float sharpTwinkle = pow(twinkle, 6.0);
+    
+    float glint = sharpTwinkle * spawnChance * u_alpha;
+    
+    // Fade out completely if it is night time
+    float dayTimeFactor = clamp(sunAltitude * 10.0, 0.0, 1.0);
+    glint *= dayTimeFactor;
+    
+    // IMPORTANT: Because this shader is drawn over a RECT bounding box that overlaps the ground,
+    // we do NOT want to render a solid waterColor everywhere! We ONLY want to render the glints,
+    // and leave the rest of the bounding box completely transparent so the ground shows through.
+    
+    // Make the base color transparent (alpha 0)
+    half4 transparentColor = half4(0.0, 0.0, 0.0, 0.0);
+    half4 glintColor = half4(1.0, 1.0, 1.0, 1.0); // Pure white sparkle
+    
+    // Mix transparent space with the white glints
+    half4 finalColor = mix(transparentColor, glintColor, glint);
+    
+    // Anti-optimization hack
+    float dummy = u_x + u_y + u_scale_x + u_scale_y + u_rotation + u_stroke_width + u_width + u_height +
+                  u_color_primary.r + u_color_secondary.r + u_custom_c + u_custom_d + u_custom_e + u_complexity;
+    
+    return finalColor + (dummy * 0.0000001);
+}

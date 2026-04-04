@@ -13,13 +13,14 @@ class StaticFallbackRendererTest {
 
     private val renderer = StaticFallbackRenderer()
     private val state = MoriEngineState()
+    private val signals = FloatArray(8)
     private val mockCanvas = mockk<EngineCanvas>(relaxed = true)
 
     @Test
     fun `render should draw foundation color on canvas`() {
         // Given
         state.setFieldValue(MoriEngineStateIndices.FACT_SUN_ALTITUDE, -1.0f) // Midnight
-        renderer.update(state)
+        renderer.update(state, signals)
 
         // When
         renderer.render(mockCanvas)
@@ -32,14 +33,14 @@ class StaticFallbackRendererTest {
     fun `update should shift colors based on sun altitude`() {
         // Midnight
         state.setFieldValue(MoriEngineStateIndices.FACT_SUN_ALTITUDE, -1.0f)
-        renderer.update(state)
+        renderer.update(state, signals)
         val midnightPalette = renderer.getPaletteContribution()
         assertNotNull(midnightPalette)
         assertEquals(0xFF0D0221.toInt(), midnightPalette?.foundation)
 
         // Noon
         state.setFieldValue(MoriEngineStateIndices.FACT_SUN_ALTITUDE, 1.0f)
-        renderer.update(state)
+        renderer.update(state, signals)
         val noonPalette = renderer.getPaletteContribution()
         assertNotNull(noonPalette)
         assertEquals(0xFF40C4FF.toInt(), noonPalette?.foundation)
@@ -48,10 +49,10 @@ class StaticFallbackRendererTest {
     @Test
     fun `palette should be cached when values do not change`() {
         state.setFieldValue(MoriEngineStateIndices.FACT_SUN_ALTITUDE, 0.5f)
-        renderer.update(state)
+        renderer.update(state, signals)
         val palette1 = renderer.getPaletteContribution()
 
-        renderer.update(state)
+        renderer.update(state, signals)
         val palette2 = renderer.getPaletteContribution()
 
         assert(palette1 === palette2) // Reference equality
@@ -60,11 +61,11 @@ class StaticFallbackRendererTest {
     @Test
     fun `palette should be invalidated when values change`() {
         state.setFieldValue(MoriEngineStateIndices.FACT_SUN_ALTITUDE, 0.5f)
-        renderer.update(state)
+        renderer.update(state, signals)
         val palette1 = renderer.getPaletteContribution()
 
         state.setFieldValue(MoriEngineStateIndices.FACT_SUN_ALTITUDE, -0.5f)
-        renderer.update(state)
+        renderer.update(state, signals)
         val palette2 = renderer.getPaletteContribution()
 
         assert(palette1 !== palette2) // New object created

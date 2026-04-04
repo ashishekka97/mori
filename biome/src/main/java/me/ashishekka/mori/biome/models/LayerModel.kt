@@ -13,6 +13,8 @@ data class LayerModel(
     val zOrder: Int = 0,
     /** Optional reference to a resource (Bitmap or Shader) in [BiomeModel.resources]. */
     val resId: Int? = null,
+    /** Optional reference to a resource (Path) to use as a mask. */
+    val maskId: Int? = null,
     /** Map of property names to their DSL expressions. */
     val expressions: Map<String, String> = emptyMap()
 )

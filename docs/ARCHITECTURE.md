@@ -1,5 +1,9 @@
 # Architecture: The Agnostic Platform
 
+---
+**Documentation Suite:** **[Architecture](ARCHITECTURE.md)** | [Biome DSL](SPEC_DSL.md) | [Instruction Set (ISA)](SPEC_ISA.md) | [Tutorial](TUTORIAL_CANVAS.md)
+---
+
 Mori is built on a strict unidirectional data flow, enforced by Gradle modules. This architecture protects the rendering thread from Android framework overhead and ensures zero-allocation performance at 60 FPS.
 
 ## 1. The "Mori Machine" (Visual Flow)

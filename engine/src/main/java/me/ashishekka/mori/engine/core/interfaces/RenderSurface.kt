@@ -32,9 +32,14 @@ interface EngineCanvas {
      */
      fun drawPath(resId: Int, color: Int, isFilled: Boolean = true, thickness: Float = 4f)
 
-    fun save()
-    fun restore()
-    fun rotate(degrees: Float, pivotX: Float = 0f, pivotY: Float = 0f)
+     /**
+      * Clips the drawing area to the specified path.
+      */
+     fun clipPath(resId: Int, x: Float, y: Float)
+
+     fun save()
+     fun restore()
+     fun rotate(degrees: Float, pivotX: Float = 0f, pivotY: Float = 0f)
     fun translate(dx: Float, dy: Float)
     fun scale(sx: Float, sy: Float, pivotX: Float = 0f, pivotY: Float = 0f)
 }

@@ -8,7 +8,7 @@ import me.ashishekka.mori.engine.core.interfaces.EngineCanvas
  * ZERO-ALLOCATION: Uses manual indexing for all iterations in the hot path.
  */
 class LayerManager(
-    private val maxLayers: Int = 32
+    private val maxLayers: Int = 64
 ) {
     private val layers = arrayOfNulls<EffectRenderer>(maxLayers)
     private var activeLayerCount = 0
@@ -56,10 +56,10 @@ class LayerManager(
     /**
      * Updates all active layers with the current engine state.
      */
-    fun update(state: MoriEngineState) {
+    fun update(state: MoriEngineState, signals: FloatArray) {
         var i = 0
         while (i < activeLayerCount) {
-            layers[i]?.update(state)
+            layers[i]?.update(state, signals)
             i++
         }
     }

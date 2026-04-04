@@ -24,14 +24,13 @@ class DslEffectRenderer(
     override val zOrder: Int = layer.zOrder
 
     private var state: MoriEngineState? = null
-    private val signals = FloatArray(8) // Inter-layer communication buffer
     private val trianglePoints = FloatArray(6) // Pre-allocated for zero-allocation drawing
 
     override fun onSurfaceChanged(width: Int, height: Int, density: Float) {
         // Geometric setup handled by EngineState
     }
 
-    override fun update(state: MoriEngineState) {
+    override fun update(state: MoriEngineState, signals: FloatArray) {
         this.state = state
         // 1. Execute all rules for this layer (Zero-Allocation)
         evaluator.evaluateLayer(layer, state, signals)
@@ -90,6 +89,11 @@ class DslEffectRenderer(
 
         // Apply local scale (combining DSL scale and device scale)
         canvas.scale(scaleX * scale, scaleY * scale)
+
+        // Apply Masking after scaling
+        if (layer.maskResId != null) {
+            canvas.clipPath(layer.maskResId, 0f, 0f)
+        }
 
         // Now draw everything relative to 0,0
         val halfW = width / 2f

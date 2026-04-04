@@ -138,8 +138,8 @@ object ExpressionCompiler {
 
     private fun tokenize(expression: String): List<String> {
         val tokens = mutableListOf<String>()
-        // Improved regex to capture floats, identifiers, operators, #HEX colors, and fact[n]
-        val regex = Regex("""(fact\[[0-9]+\])|([0-9]*\.?[0-9]+)|([a-zA-Z_][a-zA-Z0-9_]*)|(\#[a-fA-F0-9]{6,8})|(\[)|(\])|(\()|(\))|(\+|-|\*|/|%)|(,)""")
+        // Improved regex to capture floats, identifiers, operators, #HEX colors, fact[n], and signal[n]
+        val regex = Regex("""(fact\[[0-9]+\])|(signal\[[0-9]+\])|([0-9]*\.?[0-9]+)|([a-zA-Z_][a-zA-Z0-9_]*)|(\#[a-fA-F0-9]{6,8})|(\[)|(\])|(\()|(\))|(\+|-|\*|/|%)|(,)""")
         regex.findAll(expression).forEach { match ->
             tokens.add(match.value)
         }
@@ -159,8 +159,8 @@ object ExpressionCompiler {
         while (i < tokens.size) {
             val token = tokens[i]
             when {
-                // Number, Hex Color, or fact[n]
-                token.startsWith("fact[") || token.first().isDigit() || token.startsWith("#") || (token.length > 1 && token.first() == '.' && token[1].isDigit()) -> output.add(token)
+                // Number, Hex Color, fact[n], or signal[n]
+                token.startsWith("fact[") || token.startsWith("signal[") || token.first().isDigit() || token.startsWith("#") || (token.length > 1 && token.first() == '.' && token[1].isDigit()) -> output.add(token)
                 
                 // Function or Fact
                 token.all { it.isLetter() || it == '_' } -> {
@@ -169,8 +169,14 @@ object ExpressionCompiler {
                     } else if (token == "time") {
                         output.add("time")
                     } else {
-                        // Unknown variable, push 0
-                        output.add("0")
+                        // Check if it's a known identifier like fact or signal
+                        if (token == "fact" || token == "signal") {
+                            // These are handled by the bracket logic
+                            operators.push(token)
+                        } else {
+                            // Unknown variable, push 0
+                            output.add("0")
+                        }
                     }
                 }
 
@@ -195,9 +201,16 @@ object ExpressionCompiler {
                     if (operators.isEmpty()) throw IllegalArgumentException("Mismatched parentheses")
                     operators.pop() // Pop the opening bracket
                     
-                    // If it was a function call, pop the function name
+                    // If it was a function call, or a special token (fact/signal), handle it
                     if (operators.isNotEmpty() && operators.peek().all { it.isLetter() || it == '_' }) {
-                        output.add(operators.pop())
+                        val name = operators.pop()
+                        if (name == "fact" || name == "signal") {
+                            // Convert the previous number into fact[n] or signal[n]
+                            val index = output.removeAt(output.size - 1)
+                            output.add("$name[$index]")
+                        } else {
+                            output.add(name)
+                        }
                     }
                 }
                 
@@ -263,6 +276,14 @@ object ExpressionCompiler {
                             throw IllegalArgumentException("Fact index out of bounds: $index")
                         }
                         bytecode.add(OpCode.GET_STATE)
+                        bytecode.add(index)
+                    } else if (token.startsWith("signal[")) {
+                        val indexStr = token.substring(7, token.length - 1)
+                        val index = indexStr.toIntOrNull() ?: 0
+                        if (index < 0 || index >= 8) { // Assuming 8 signals
+                            throw IllegalArgumentException("Signal index out of bounds: $index")
+                        }
+                        bytecode.add(OpCode.GET_SIGNAL)
                         bytecode.add(index)
                     } else if (token.startsWith("#")) {
                         // Parse Hex Color directly to Int bits to prevent Float precision loss

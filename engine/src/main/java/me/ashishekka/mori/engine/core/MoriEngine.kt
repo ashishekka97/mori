@@ -41,6 +41,7 @@ class MoriEngine(
 
     private var frameIntervalNanos: Long = 1_000_000_000L / 60
     private var lastFrameTimeNanos: Long = 0L
+    private val sharedSignals = FloatArray(8) // Inter-layer communication buffer
 
     init {
         ticker.setOnTickCallback { frameTimeNanos ->
@@ -115,8 +116,15 @@ class MoriEngine(
         }
         state.shaderComplexity = complexity
 
+        // 0. RESET: Clear signals for the new frame.
+        var i = 0
+        while (i < 8) {
+            sharedSignals[i] = 0f
+            i++
+        }
+
         // 1. UPDATE: Propagate the latest state to all layers first.
-        layerManager.update(state)
+        layerManager.update(state, sharedSignals)
         
         // 2. SYNTHESIZE: Let the wallpaper derive its theme from the now-updated layers.
         currentWallpaper?.synthesizePalette(state)
@@ -128,7 +136,7 @@ class MoriEngine(
                 // 3. DRAW: Render all layers onto the canvas.
                 layerManager.draw(it)
             } catch (e: Throwable) {
-                fallbackRenderer.update(state)
+                fallbackRenderer.update(state, sharedSignals)
                 fallbackRenderer.render(it)
             } finally {
                 renderSurface.unlockCanvasAndPost(it)
@@ -154,7 +162,15 @@ class MoriEngine(
         state.viewportSafeX = (width - state.viewportSafeWidth) / 2f
         state.viewportSafeY = (height - state.viewportSafeHeight) / 2f
 
+        // Reset signals for the one-off draw
+        var i = 0
+        while (i < 8) {
+            sharedSignals[i] = 0f
+            i++
+        }
+
         layerManager.onSurfaceChanged(width, height, density)
+        fallbackRenderer.update(state, sharedSignals)
         fallbackRenderer.onSurfaceChanged(width, height, density)
     }
 
