@@ -14,7 +14,7 @@ description: Specialist in the Mori Biome Layer, Rule Engine (VM), JSON DSL, and
 ## Biome DSL
 - JSON-based declarative configurations for visual behavior.
 - Maps raw "Facts" (Sensor data) from Persona to visual "Properties" in the Engine.
-- **Power Budget**: Maximum 16 layers per biome.
+- **Power Budget**: Maximum 64 layers per biome.
 - **Coordinate Space**: 1000x1000 Virtual Reference Space.
 
 ## Key Functions (Macro-OpCodes)

@@ -29,7 +29,8 @@
         "y": "500",
         "width": "1000",
         "height": "4000",
-        "color_primary": "mix_oklab(#1A1A2E, #A8DADC, (fact[1] + 1) / 2)"
+        "color_primary": "mix_oklab(#1A1A2E, #A8DADC, (fact[1] + 1) / 2)",
+        "signal[0]": "1.0 - fact[8]"
       }
     },
     {
@@ -41,7 +42,7 @@
         "y": "500 - sin((fact[2] * 6.28318) - 2.35619) * 450",
         "width": "160",
         "color_primary": "#F4A261",
-        "alpha": "if_gt(fact[2], 0.25, if_gt(fact[2], 0.75, 0.0, 1.0), 0.0)"
+        "alpha": "if_gt(fact[1], 0.0, 1.0, clamp(remap(fact[1], -0.1, 0.0, 0.0, 1.0), 0.0, 1.0))"
       }
     },
     {
@@ -53,7 +54,7 @@
         "y": "500 - sin((fact[2] * 6.28318) + 0.78539) * 450",
         "width": "120",
         "color_primary": "#F4F6F0",
-        "alpha": "if_gt(fact[2], 0.25, if_gt(fact[2], 0.75, 1.0, 0.0), 1.0)"
+        "alpha": "if_gt(fact[1], 0.0, clamp(remap(fact[1], 0.0, 0.1, 1.0, 0.0), 0.0, 1.0), 1.0)"
       }
     },
     {
@@ -150,7 +151,7 @@
         "width": "120",
         "height": "80",
         "color_primary": "#F1FAEE",
-        "alpha": "1.0 - fact[8]"
+        "alpha": "signal[0]"
       }
     },
     {
@@ -163,7 +164,7 @@
         "width": "175",
         "height": "125",
         "color_primary": "#F1FAEE",
-        "alpha": "1.0 - fact[8]"
+        "alpha": "signal[0]"
       }
     },
     {
@@ -176,7 +177,7 @@
         "width": "68",
         "height": "45",
         "color_primary": "#F1FAEE",
-        "alpha": "1.0 - fact[8]"
+        "alpha": "signal[0]"
       }
     },
     {
@@ -189,7 +190,7 @@
         "width": "40",
         "height": "25",
         "color_primary": "#F1FAEE",
-        "alpha": "1.0 - fact[8]"
+        "alpha": "signal[0]"
       }
     },
     {

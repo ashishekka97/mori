@@ -12,7 +12,7 @@ echo "🔍 Auditing :engine module for Zero-Allocation violations..."
 # Note: We exclude tests and focus on src/main.
 
 # We use [^wd] to ensure we don't catch "drawRect" or "drawPath"
-VIOLATIONS=$(grep -rnE "\.copy\(|[^wd]Rect\(|[^wd]Paint\(|[^wd]Path\(" engine/src/main/java/)
+VIOLATIONS=$(grep -rnE "\.copy\(|[^wd]Rect\(|[^wd]Paint\(|[^a-zA-Z]Path\(" engine/src/main/java/ | grep -v "drawPath" | grep -v "clipPath")
 
 if [ -n "$VIOLATIONS" ]; then
     echo "❌ ERROR: Zero-Allocation Violations Found in :engine!"

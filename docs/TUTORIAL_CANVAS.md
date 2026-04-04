@@ -6,7 +6,7 @@ Welcome to the Mori Artist's Guide. In this tutorial, you will build a "Hello Wo
 
 ## The Power Budget & Primitives
 Mori is a zero-allocation engine designed for 60fps and minimal battery drain. 
-*   **The Rule of 32:** You have a strict limit of 32 layers per biome.
+The Rule of 64: You have a strict limit of 64 layers per biome.
 *   **The Solution:** Build complex scenes using basic overlapping primitives (`RECT`, `CIRCLE`, `TRIANGLE`) and high-performance `PATH` resources.
 
 ## Chapter 1: The Sky & Celestial Orbit (Coordinate Space & Facts)
@@ -60,7 +60,7 @@ Introduction to boolean logic and conditional rendering.
   "zOrder": 11,
   "expressions": {
     "x": "220", "y": "670", "width": "30",
-    "color_primary": "if_gt(fact[16], 0.5, #1A1A2E, #E9C46A)",
+    "color_primary": "if_gt(fact[16], 0.5, #1A1A2E, #FFFF88)",
     "alpha": "if_gt(fact[1], 0.1, 0.3, 1.0)"
   }
 }
@@ -81,7 +81,7 @@ Bringing life to static objects with health data and motion logic.
     "y": "600",
     "width": "lerp(150, 350, fact[9])",
     "height": "lerp(100, 200, fact[9])",
-    "color_primary": "#2A9D8F"
+    "color_primary": "#4F772D"
   }
 }
 ```
@@ -89,7 +89,7 @@ Bringing life to static objects with health data and motion logic.
 ## Chapter 5: The River, Smoke, & Shaders
 Harnessing the power of the GPU for complex vector geometry and custom materials.
 *   **Concepts:** `PATH` and `SHADER` layer types, `resId`, `time`.
-*   **Goal:** The river and chimney smoke use `PATH` resources. The smoke's vertical position and transparency are driven by `time`. Finally, we apply a custom `SHADER` material over the river to create procedural water reflections using AGSL.
+*   **Goal:** The river (`resId: 1`) and chimney smoke (`resId: 2`) use `PATH` resources. The smoke's vertical position and transparency are driven by `time`. Finally, we apply a custom `SHADER` material over the river to create procedural water reflections using AGSL.
 
 ```json
 {
@@ -113,22 +113,32 @@ Harnessing the power of the GPU for complex vector geometry and custom materials
   "zOrder": -39,
   "expressions": {
     "x": "605 + oscillate(0, 8, 0.3, 0)",
-    "y": "(fact[24] * 500) + 200",
-    "width": "200", "height": "300",
+    "y": "fact[24] * 500 + 50",
+    "width": "1000", "height": "1500",
     "color_primary": "#457B9D",
-    "alpha": "0.5"
+    "alpha": "0.7"
   }
 }
 ```
 
 ---
 
-
 ## Chapter 6: High-Fidelity Techniques
 Pushing the visual boundaries using math instead of memory.
 *   **Procedural Bloom:** Stack semi-transparent `CIRCLE`s behind light sources (like the Sun) with increasing widths and decreasing alphas.
 *   **Parallax Depth:** Use `mix_oklab` to blend background `color_primary` with the sky color based on depth to create atmospheric fog.
 *   **Wind Simulation:** Use `oscillate()` on the `rotation` property of foliage layers to breathe life into the scene.
+*   **Signal Optimization:** If multiple layers depend on the same complex math (e.g., Thermal Stress), calculate it once in a background layer and store it in a `signal[n]`.
+
+```json
+{
+  "id": 1,
+  "type": "RECT",
+  "expressions": {
+    "signal[0]": "1.0 - fact[8]"
+  }
+}
+```
 
 
 ## Summary of the Artist's Workflow
