@@ -66,17 +66,18 @@ Introduction to boolean logic and conditional rendering.
 ## Chapter 4: The Tree (Vitality & Animation)
 Bringing life to static objects with health data and motion logic.
 *   **Concepts:** `fact[9]` (Steps Progress), `oscillate`, `lerp`.
-*   **Goal:** The tree foliage grows as you walk (`lerp` with `fact[9]`) and sways gently in the wind.
+*   **Goal:** The tree foliage grows as you walk (`lerp` with `fact[9]`) and sways gently in the wind. We use a stacked `TRIANGLE` approach for a classic papercraft pine look.
 
 ```json
 {
   "id": 14,
-  "type": "CIRCLE",
+  "type": "TRIANGLE",
   "zOrder": 30,
   "expressions": {
     "x": "750 + oscillate(0, 10, 0.5, 0)",
-    "y": "580",
-    "width": "lerp(120, 300, fact[9])",
+    "y": "600",
+    "width": "lerp(150, 350, fact[9])",
+    "height": "lerp(100, 200, fact[9])",
     "color_primary": "#2A9D8F"
   }
 }
