@@ -63,9 +63,14 @@ class ComposeEngineCanvas(
 
                 clipPathId?.let { resId ->
                     val nativePath = assetRegistry.getStoredPath(resId) as? android.graphics.Path
-                    nativePath?.asComposePath()?.let { 
+                    if (nativePath != null) {
+                        var composePath = cachedComposePaths[resId]
+                        if (composePath == null) {
+                            composePath = nativePath.asComposePath()
+                            cachedComposePaths[resId] = composePath
+                        }
                         translate(clipOffsetX, clipOffsetY)
-                        clipPath(it) 
+                        clipPath(composePath)
                         translate(-clipOffsetX, -clipOffsetY)
                     }
                 }

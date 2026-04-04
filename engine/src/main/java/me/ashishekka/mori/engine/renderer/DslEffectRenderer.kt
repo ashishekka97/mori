@@ -87,13 +87,13 @@ class DslEffectRenderer(
         canvas.translate(x, y)
         canvas.rotate(rotation)
 
-        // Apply Masking before scaling
+        // Apply local scale (combining DSL scale and device scale)
+        canvas.scale(scaleX * scale, scaleY * scale)
+
+        // Apply Masking after scaling
         if (layer.maskResId != null) {
             canvas.clipPath(layer.maskResId, 0f, 0f)
         }
-
-        // Apply local scale (combining DSL scale and device scale)
-        canvas.scale(scaleX * scale, scaleY * scale)
 
         // Now draw everything relative to 0,0
         val halfW = width / 2f

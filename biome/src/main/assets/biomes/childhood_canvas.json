@@ -144,7 +144,7 @@
     {
       "id": 25,
       "type": "TRIANGLE",
-      "zOrder": -79,
+      "zOrder": -75,
       "expressions": {
         "x": "300",
         "y": "420",
@@ -157,7 +157,7 @@
     {
       "id": 26,
       "type": "TRIANGLE",
-      "zOrder": -79,
+      "zOrder": -75,
       "expressions": {
         "x": "750",
         "y": "362.5",
@@ -170,7 +170,7 @@
     {
       "id": 27,
       "type": "TRIANGLE",
-      "zOrder": -69,
+      "zOrder": -65,
       "expressions": {
         "x": "450",
         "y": "492.5",
@@ -183,7 +183,7 @@
     {
       "id": 28,
       "type": "TRIANGLE",
-      "zOrder": -69,
+      "zOrder": -65,
       "expressions": {
         "x": "150",
         "y": "537.5",
