@@ -80,6 +80,58 @@
       }
     },
     {
+      "id": 25,
+      "type": "TRIANGLE",
+      "zOrder": -79,
+      "expressions": {
+        "x": "300",
+        "y": "510",
+        "width": "200",
+        "height": "140",
+        "color_primary": "#F1FAEE",
+        "alpha": "1.0 - fact[8]"
+      }
+    },
+    {
+      "id": 26,
+      "type": "TRIANGLE",
+      "zOrder": -79,
+      "expressions": {
+        "x": "750",
+        "y": "460",
+        "width": "240",
+        "height": "180",
+        "color_primary": "#F1FAEE",
+        "alpha": "1.0 - fact[8]"
+      }
+    },
+    {
+      "id": 27,
+      "type": "TRIANGLE",
+      "zOrder": -69,
+      "expressions": {
+        "x": "450",
+        "y": "580",
+        "width": "150",
+        "height": "100",
+        "color_primary": "#F1FAEE",
+        "alpha": "1.0 - fact[8]"
+      }
+    },
+    {
+      "id": 28,
+      "type": "TRIANGLE",
+      "zOrder": -69,
+      "expressions": {
+        "x": "150",
+        "y": "610",
+        "width": "120",
+        "height": "80",
+        "color_primary": "#F1FAEE",
+        "alpha": "1.0 - fact[8]"
+      }
+    },
+    {
       "id": 7,
       "type": "RECT",
       "zOrder": -50,
