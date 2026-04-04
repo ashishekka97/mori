@@ -23,7 +23,7 @@
     {
       "id": 1,
       "type": "RECT",
-      "zOrder": -120,
+      "zOrder": -100,
       "expressions": {
         "x": "500",
         "y": "500",
@@ -196,10 +196,10 @@
     {
       "id": 7,
       "type": "RECT",
-      "zOrder": -110,
+      "zOrder": -50,
       "expressions": {
         "x": "500",
-        "y": "1300",
+        "y": "1740",
         "width": "4000",
         "height": "2000",
         "color_primary": "#8AB17D"
@@ -212,7 +212,7 @@
       "zOrder": -40,
       "expressions": {
         "x": "605 + oscillate(0, 8, 0.3, 0)",
-        "y": "950",
+        "y": "720",
         "color_primary": "#457B9D",
         "alpha": "0.8"
       }
@@ -554,7 +554,7 @@
       "zOrder": -39,
       "expressions": {
         "x": "605 + oscillate(0, 8, 0.3, 0)",
-        "y": "950",
+        "y": "720",
         "width": "1000",
         "height": "1500",
         "color_primary": "#457B9D",
