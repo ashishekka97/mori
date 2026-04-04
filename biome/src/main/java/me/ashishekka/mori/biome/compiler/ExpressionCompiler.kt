@@ -169,8 +169,14 @@ object ExpressionCompiler {
                     } else if (token == "time") {
                         output.add("time")
                     } else {
-                        // Unknown variable, push 0
-                        output.add("0")
+                        // Check if it's a known identifier like fact or signal
+                        if (token == "fact" || token == "signal") {
+                            // These are handled by the bracket logic
+                            operators.push(token)
+                        } else {
+                            // Unknown variable, push 0
+                            output.add("0")
+                        }
                     }
                 }
 
@@ -195,9 +201,16 @@ object ExpressionCompiler {
                     if (operators.isEmpty()) throw IllegalArgumentException("Mismatched parentheses")
                     operators.pop() // Pop the opening bracket
                     
-                    // If it was a function call, pop the function name
+                    // If it was a function call, or a special token (fact/signal), handle it
                     if (operators.isNotEmpty() && operators.peek().all { it.isLetter() || it == '_' }) {
-                        output.add(operators.pop())
+                        val name = operators.pop()
+                        if (name == "fact" || name == "signal") {
+                            // Convert the previous number into fact[n] or signal[n]
+                            val index = output.removeAt(output.size - 1)
+                            output.add("$name[$index]")
+                        } else {
+                            output.add(name)
+                        }
                     }
                 }
                 
