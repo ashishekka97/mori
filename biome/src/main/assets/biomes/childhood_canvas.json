@@ -25,7 +25,7 @@
       "zOrder": -90,
       "expressions": {
         "x": "remap(fact[1], -1.0, 1.0, 150, 850)",
-        "y": "500 - sqrt(1.0 - fact[1] * fact[1]) * 350",
+        "y": "remap(fact[1], -1.0, 1.0, 800, 150)",
         "width": "160",
         "color_primary": "if_gt(fact[1], 0.0, #F4A261, #E9C46A)",
         "alpha": "remap(abs(fact[1]), 0.0, 0.2, 0.2, 1.0)"

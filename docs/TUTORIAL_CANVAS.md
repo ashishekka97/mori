@@ -12,7 +12,7 @@ Mori is a zero-allocation engine designed for 60fps and minimal battery drain.
 ## Chapter 1: The Sky & Sun (Coordinate Space & Facts)
 Learn how to place elements in the 1000x1000 **Virtual Artboard** and connect them to real-world sensors.
 *   **Concepts:** `x`, `y`, `fact[1]` (Sun Altitude), `mix_oklab`.
-*   **Goal:** A sky background that transitions from `#1A1A2E` (Night) to `#A8DADC` (Day). We use `height: 4000` to ensure the sky covers the screen during vertical parallax.
+*   **Goal:** A sky background that transitions from `#1A1A2E` (Night) to `#A8DADC` (Day). We use `height: 4000` to ensure the sky covers the screen during vertical parallax. The **Sun** (`CIRCLE`) moves from bottom-left to top-right using `fact[1]`.
 
 ```json
 {
