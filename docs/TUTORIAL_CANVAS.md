@@ -1,5 +1,9 @@
 # Tutorial: "The Childhood Canvas" (Papercraft Scenery)
 
+---
+**Documentation Suite:** [Architecture](ARCHITECTURE.md) | [Biome DSL](SPEC_DSL.md) | [Instruction Set (ISA)](SPEC_ISA.md) | **[Tutorial](TUTORIAL_CANVAS.md)**
+---
+
 Welcome to the Mori Artist's Guide. In this tutorial, you will build a "Hello World" dynamic papercraft scenery. You will learn how to use the Mori Biome DSL, respect the strict power budget, and bind real-world sensor data to high-performance visual pipelines.
 
 ---
@@ -92,43 +96,74 @@ Harnessing the power of the GPU for complex vector geometry and custom materials
 *   **Goal:** The river (`resId: 1`) and chimney smoke (`resId: 2`) use `PATH` resources. The smoke's vertical position and transparency are driven by `time`. Finally, we apply a custom `SHADER` material over the river to create procedural water reflections using AGSL.
 
 ```json
-{
-  "id": 12,
-  "type": "PATH",
-  "resId": 2,
-  "zOrder": 20,
-  "expressions": {
-    "x": "250 + oscillate(0, 15, 0.4, 0)",
-    "y": "500 - (time % 4) * 40",
-    "stroke_width": "8",
-    "color_secondary": "#F1FAEE",
-    "color_primary": "#00000000",
-    "alpha": "(1.0 - (time % 4) / 4.0) * if_gt(fact[7], 0.5, 1.0, 0.0)"
+[
+  {
+    "id": 12,
+    "type": "PATH",
+    "resId": 2,
+    "zOrder": 20,
+    "expressions": {
+      "x": "250 + oscillate(0, 15, 0.4, 0)",
+      "y": "500 - (time % 4) * 40",
+      "stroke_width": "8",
+      "color_secondary": "#F1FAEE",
+      "color_primary": "#00000000",
+      "alpha": "(1.0 - (time % 4) / 4.0) * if_gt(fact[7], 0.5, 1.0, 0.0)"
+    }
+  },
+  {
+    "id": 64,
+    "type": "SHADER",
+    "resId": 3,
+    "maskId": 1,
+    "zOrder": -39,
+    "expressions": {
+      "x": "660",
+      "y": "1240",
+      "width": "1000",
+      "height": "1500",
+      "color_primary": "#457B9D",
+      "alpha": "0.7"
+    }
   }
-},
-{
-  "id": 64,
-  "type": "SHADER",
-  "resId": 3,
-  "zOrder": -39,
-  "expressions": {
-    "x": "605 + oscillate(0, 8, 0.3, 0)",
-    "y": "fact[24] * 500 + 50",
-    "width": "1000", "height": "1500",
-    "color_primary": "#457B9D",
-    "alpha": "0.7"
-  }
-}
+]
 ```
 
 ---
 
 ## Chapter 6: High-Fidelity Techniques
 Pushing the visual boundaries using math instead of memory.
+
+### 6.1 Looping Motion (The Clouds)
+To create elements that drift endlessly, use the modulo operator `%` on `time`.
+```json
+{
+  "id": 50,
+  "type": "CIRCLE",
+  "expressions": {
+    "x": "(((time * 8) % 1500) - 250)",
+    "y": "300 + oscillate(-5, 5, 0.2, 0)",
+    "width": "60",
+    "color_primary": "#FFFFFF"
+  }
+}
+```
+
+### 6.2 Signal Optimization (Thermal Snow)
+If multiple layers share complex logic, calculate it **once** in a background layer and read it via `signal[n]`. In our demo, we use `signal[0]` to make mountain snow melt as the device temperature (`fact[8]`) rises.
+```json
+// In Layer 1 (Sky):
+"signal[0]": "1.0 - fact[8]"
+
+// In Layer 25 (Snow Cap):
+"alpha": "signal[0]"
+```
+
+### 6.3 Clipping Masks (The River Shimmer)
+Use `maskId` to constrain an effect (like a `SHADER` or a gradient `RECT`) to a specific `PATH`. This ensures the water shimmer never bleeds onto the grass.
 *   **Procedural Bloom:** Stack semi-transparent `CIRCLE`s behind light sources (like the Sun) with increasing widths and decreasing alphas.
 *   **Parallax Depth:** Use `mix_oklab` to blend background `color_primary` with the sky color based on depth to create atmospheric fog.
 *   **Wind Simulation:** Use `oscillate()` on the `rotation` property of foliage layers to breathe life into the scene.
-*   **Signal Optimization:** If multiple layers depend on the same complex math (e.g., Thermal Stress), calculate it once in a background layer and store it in a `signal[n]`.
 
 ```json
 {

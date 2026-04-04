@@ -1,5 +1,9 @@
 # Mori: Biome DSL Specification (v1.0)
 
+---
+**Documentation Suite:** [Architecture](ARCHITECTURE.md) | **[Biome DSL](SPEC_DSL.md)** | [Instruction Set (ISA)](SPEC_ISA.md) | [Tutorial](TUTORIAL_CANVAS.md)
+---
+
 This document provides a comprehensive guide to defining Mori Biomes. It covers the file structure, logic system, data access, and rendering properties required to create high-performance, data-driven live wallpapers.
 
 ---
@@ -11,23 +15,24 @@ A Mori Biome is defined as a single JSON file. The structure is designed for cla
 ### 1.1 The Root Object
 The root of the JSON file contains the metadata and the list of rendering layers.
 
-| Key | Type | Description |
-| :--- | :--- | :--- |
-| `id` | String | A unique identifier for the biome (e.g., `zen_forest`). |
-| `name` | String | The human-readable name displayed in the UI. |
-| `description`| String | (Optional) A brief explanation of the biome's behavior. |
-| `layers` | Array | A collection of [Layer Objects](#12-the-layer-object). |
+| Key           | Type   | Description                                             |
+|:--------------|:-------|:--------------------------------------------------------|
+| `id`          | String | A unique identifier for the biome (e.g., `zen_forest`). |
+| `name`        | String | The human-readable name displayed in the UI.            |
+| `description` | String | (Optional) A brief explanation of the biome's behavior. |
+| `layers`      | Array  | A collection of [Layer Objects](#12-the-layer-object).  |
 
 ### 1.2 The Layer Object
 Each entry in the `layers` array defines a single visual element or logic processor.
 
-| Key | Type | Description |
-| :--- | :--- | :--- |
-| `id` | Int | A unique ID for this specific layer. |
-| `type` | String | The geometric primitive: `RECT`, `CIRCLE`, `TRIANGLE`, or `PATH`. |
-| `zOrder` | Int | Determines depth. Higher values are drawn in front. |
-| `resId` | Int | (Optional) Reference to a resource in the [Resource Registry](#16-resource-registry-phase-7). |
-| `expressions`| Map | A collection of [DSL Expressions](#2-language-foundations). |
+| Key           | Type   | Description                                                                                   |
+|:--------------|:-------|:----------------------------------------------------------------------------------------------|
+| `id`          | Int    | A unique ID for this specific layer.                                                          |
+| `type`        | String | The geometric primitive: `RECT`, `CIRCLE`, `TRIANGLE`, or `PATH`.                             |
+| `zOrder`      | Int    | Determines depth. Higher values are drawn in front.                                           |
+| `resId`       | Int    | (Optional) Reference to a resource in the [Resource Registry](#16-resource-registry-phase-7). |
+| `maskId`      | Int    | (Optional) Reference to a `PATH` resource to use as a clipping mask for this layer.           |
+| `expressions` | Map    | A collection of [DSL Expressions](#2-language-foundations).                                   |
 
 ### 1.3 Performance Budget: The Golden Rule
 To ensure maximum battery efficiency and maintain 60fps on all devices, the Mori Engine follows a strict **Power Budget**:
@@ -44,12 +49,13 @@ The `expressions` key is where the "Brain" of the layer lives. It maps **Visual 
 ### 1.5 Geometry Behaviors by Type
 Different layer types interpret the `width` and `height` properties differently:
 
-| Type | interpretation |
-| :--- | :--- |
-| **`RECT`** | Standard rectangle. Uses both `width` and `height`. |
-| **`CIRCLE`** | Uses `width` as the diameter. `height` is ignored to ensure perfect circularity. |
-| **`TRIANGLE`** | Renders an equilateral triangle fitting within the `width` and `height` bounding box. |
-| **`PATH`** | (Phase 7) Renders a complex vector path. **Constraint:** Must provide only the raw SVG path data string (e.g., `"M10,10 L50,50 Z"`) via the resource registry. Full XML SVGs with intrinsic colors are not supported to maintain the "Dumb Muscle" performance and DSL coloring mandate. |
+| Type           | interpretation                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+|:---------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`RECT`**     | Standard rectangle. Uses both `width` and `height`.                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| **`CIRCLE`**   | Uses `width` as the diameter. `height` is ignored to ensure perfect circularity.                                                                                                                                                                                                                                                                                                                                                                                                          |
+| **`TRIANGLE`** | Renders an equilateral triangle fitting within the `width` and `height` bounding box.                                                                                                                                                                                                                                                                                                                                                                                                     |
+| **`PATH`**     | (Phase 7) Renders a complex vector path. **Constraint:** Must provide only the raw SVG path data string (e.g., `"M10,10 L50,50 Z"`) via the resource registry. Full XML SVGs with intrinsic colors are not supported to maintain the "Dumb Muscle" performance and DSL coloring mandate. <br><br> *Artist Tip:* Path coordinates are relative to the Layer's `(x, y)` center. When exporting from Figma/Illustrator, ensure your path is centered at `(0,0)` to prevent unwanted offsets. |
+| **`SHADER`**   | A full-screen atmospheric pass that uses an AGSL resource but does not require geometric bounds (e.g., Color Grading, Vignette, Fog).                                                                                                                                                                                                                                                                                                                                                     |
 
 ### 1.6 Resource Registry (Phase 7)
 Mori is designed to be asset-rich. While currently restricted to geometric primitives, the Biome schema includes a reserved `resources` block for external assets.
@@ -59,11 +65,6 @@ Mori is designed to be asset-rich. While currently restricted to geometric primi
 *   **Shaders (AGSL):** Custom GPU logic for materials (Glass, Water, Light). 
     *   *Note:* Shaders are **Logic Resources**. They are defined once and can be applied to any Layer type (e.g., a `RECT` layer with a `glass_material` shader).
 *   **Referencing:** Layers link to these resources using a `resId`, allowing a single asset to be reused across multiple layers with different DSL-driven effects.
-
-### 1.7 Special Layer Types
-*   **`SHADER`**: A full-screen atmospheric pass that uses an AGSL resource but does not require geometric bounds (e.g., Color Grading, Vignette, Fog).
-
----
 
 ## 2. Language Foundations
 
@@ -85,6 +86,7 @@ In addition to math, the DSL supports logical comparisons:
 ### 2.4 Inter-Layer Signals (`signal[n]`)
 Signals allow layers to communicate. A "Logic Layer" can calculate a complex value and store it in a signal slot (0-7), which other layers can then read.
 *   **Keyword:** `signal[index]`
+*   **Range:** `0` to `7` (Total 8 slots).
 *   *Excellence Note:* This prevents redundant math. Calculate "Wind Speed" once in Layer 1, and read it in all Tree layers.
 
 ### 2.5 The Engine Lifecycle
@@ -124,7 +126,36 @@ Mori biomes can react to device rotation using the **Orientation Fact (`fact[25]
 *   **Exact Hex Colors:** To prevent the precision loss inherent in floating-point math, Mori uses a specialized **Hex Ingress**.
     *   **Format:** `#RRGGBB` or `#AARRGGBB`.
     *   **Example:** `"color_primary": "#FF5252"`
-    *   *Excellence Note:* Hex strings are parsed directly into 32-bit ARGB integers, ensuring your colors are mathematically exact.
+
+### 2.8 DSL Cheat Sheet: Anatomy of an Expression
+Expressions are strings that combine five elements using standard math (`+`, `-`, `*`, `/`, `%`).
+
+| Element       | Syntax       | Description                      | Example             |
+|:--------------|:-------------|:---------------------------------|:--------------------|
+| **Constants** | `1.5`, `-40` | Hardcoded numbers.               | `500`               |
+| **Colors**    | `#RRGGBB`    | Hex strings (converted to Int).  | `#FF0000`           |
+| **Keywords**  | `time`       | Continuous seconds since load.   | `sin(time)`         |
+| **Senses**    | `fact[n]`    | Real-world data (0.0 to 1.0).    | `fact[6]` (Battery) |
+| **Signals**   | `signal[n]`  | Custom values from other layers. | `signal[0]`         |
+| **Functions** | `fn(a, b)`   | Built-in logic macros.           | `lerp(0, 100, t)`   |
+
+#### 2.9 Decoding the Logic: From Art to Math
+To help bridge the gap between creative intent and DSL syntax, here is how we "read" common expressions:
+
+**1. The "Battery Gauge" (Progressive Value)**
+`"width": "remap(fact[6], 0, 1, 0, 1000)"`
+*   **English:** "Take the device **Battery Level** (0 to 1) and stretch it so 0% battery equals 0px width and 100% battery equals 1000px width."
+*   **Tokens:** `remap` (The Tool), `fact[6]` (The Sensor), `0, 1` (Input Range), `0, 1000` (Visual Output).
+
+**2. The "Heartbeat" (Cyclic Animation)**
+`"scale_x": "oscillate(1.0, 0.2, 0.5, 0)"`
+*   **English:** "Starting at **100% scale**, pulse the width by **20%** at a speed of **0.5Hz** (one full pulse every 2 seconds)."
+*   **Tokens:** `oscillate` (The Loop), `1.0` (Center), `0.2` (Swing), `0.5` (Speed).
+
+**3. The "Sun & Moon" (Conditional Swap)**
+`"color_primary": "if_gt(fact[1], 0.0, #FFD166, #F4F6F0)"`
+*   **English:** "Check if the **Sun Altitude** is greater than 0. If it is (Daytime), use **Yellow**; otherwise (Nighttime), use **Off-White**."
+*   **Tokens:** `if_gt` (The Logic), `fact[1]` (The Sensor), `0.0` (Threshold), `#FFD166` (Day Color), `#F4F6F0` (Night Color).
 
 ---
 
@@ -159,13 +190,18 @@ Mori provides a suite of high-value "Macro-OpCodes" for atmospheric animations. 
 ### 3.4 Easing Functions
 All easing functions take a factor `t` (0.0 to 1.0) and return a transformed factor.
 *   **`ease_in_out(t)`**: Standard smooth start and end.
-*   **`ease_back(t)`**: Over-shooting "back" easing.
-*   **`ease_elastic(t)`**: An oscillating "spring" easing.
+*   **`ease_back(t)`**: Over-shooting "back" easing for organic bounce.
+*   **`ease_elastic(t)`**: An oscillating "spring" easing for high-energy reactions.
 
 ### 3.5 Perceptual Atmosphere
 *   **`noise(v)`**: Returns a deterministic, pseudo-random hash between `0.0` and `1.0`.
 *   **`mix_oklab(colorA, colorB, t)`**: Interpolates colors in OKLab space.
     *   *Example:* `"color_primary": "mix_oklab(#0D0221, #87CEEB, (fact[1] + 1) / 2)"`
+
+### 3.6 Artist Note: The OKLab Advantage
+Mori uses the **OKLab color space** for all programmatic color blending (`mix_oklab`). 
+*   **Why?** Unlike standard RGB blending (which often results in "muddy" or greyish midpoints), OKLab is designed to match human perception. 
+*   **Result:** Gradients remain vibrant, and brightness is preserved consistently across the entire transition. This is critical for high-fidelity sky transitions and atmospheric lighting.
 
 ---
 
@@ -174,48 +210,48 @@ All easing functions take a factor `t` (0.0 to 1.0) and return a transformed fac
 The `fact[n]` array is the artist's window into the real world. All values are normalized between `0.0` and `1.0` unless otherwise noted.
 
 ### 4.1 Chronos (Time & Seasons)
-| Index | Name      | Range | Description                                   |
-|:-----:|:----------| :---: |:----------------------------------------------|
-| **0** | `time_s`  | `raw` | Raw continuous seconds.                       |
-| **1** | `sun_alt` | `-1..1` | Sun position (-1.0 = Midnight, 1.0 = Noon).   |
-| **2** | `time_p`  | `0..1` | Day progress (0.0 = Midnight, 1.0 = 23:59).   |
-| **3** | `moon_p`  | `0..1` | Moon phase (0.0 = New, 1.0 = Full).           |
-| **4** | `season`  | `0..1` | Season progress (0.0 = Spring, 1.0 = Winter). |
-| **5** | `is_weekend`| `0/1` | 1.0 if it is the weekend, else 0.0.           |
+| Index | Name         |  Range  | Description                                   |
+|:-----:|:-------------|:-------:|:----------------------------------------------|
+| **0** | `time_s`     |  `raw`  | Raw continuous seconds.                       |
+| **1** | `sun_alt`    | `-1..1` | Sun position (-1.0 = Midnight, 1.0 = Noon).   |
+| **2** | `time_p`     | `0..1`  | Day progress (0.0 = Midnight, 1.0 = 23:59).   |
+| **3** | `moon_p`     | `0..1`  | Moon phase (0.0 = New, 1.0 = Full).           |
+| **4** | `season`     | `0..1`  | Season progress (0.0 = Spring, 1.0 = Winter). |
+| **5** | `is_weekend` |  `0/1`  | 1.0 if it is the weekend, else 0.0.           |
 
 ### 4.2 Energy (Power & Thermals)
-| Index | Name | Range | Description |
-| :---: | :--- | :---: | :--- |
-| **6** | `battery` | `0..1` | Device charge percentage. |
-| **7** | `charging`| `0/1` | 1.0 if connected to power, else 0.0. |
-| **8** | `thermal` | `0..1` | 0.0 (Cool) to 1.0 (Emergency throttling). |
+| Index | Name       | Range  | Description                               |
+|:-----:|:-----------|:------:|:------------------------------------------|
+| **6** | `battery`  | `0..1` | Device charge percentage.                 |
+| **7** | `charging` | `0/1`  | 1.0 if connected to power, else 0.0.      |
+| **8** | `thermal`  | `0..1` | 0.0 (Cool) to 1.0 (Emergency throttling). |
 
 ### 4.3 Vitality & Zen
-| Index | Name | Range | Description |
-| :---: | :--- | :---: | :--- |
-| **9** | `steps_p` | `0..1` | Progress toward daily step goal. |
-| **10**| `activity`| `0..1` | Current physical activity level. |
-| **11**| `sleep`   | `0..1` | Quality of rest. |
-| **12**| `stand_p` | `0..1` | Progress toward daily stand goal. |
-| **13**| `congestion`| `0..1` | Device usage intensity. |
-| **14**| `social`  | `0..1` | Notification frequency summaries. |
-| **15**| `context` | `0..1` | App switching frequency. |
-| **16**| `dnd`     | `0/1` | 1.0 if Do Not Disturb is active. |
-| **17**| `idle_time`| `0..1` | Time since last device interaction. |
-| **18**| `light`   | `0..1` | Ambient light intensity. |
-| **19**| `pocket`  | `0/1` | 1.0 if proximity sensor is blocked. |
+| Index  | Name         | Range  | Description                         |
+|:------:|:-------------|:------:|:------------------------------------|
+| **9**  | `steps_p`    | `0..1` | Progress toward daily step goal.    |
+| **10** | `activity`   | `0..1` | Current physical activity level.    |
+| **11** | `sleep`      | `0..1` | Quality of rest.                    |
+| **12** | `stand_p`    | `0..1` | Progress toward daily stand goal.   |
+| **13** | `congestion` | `0..1` | Device usage intensity.             |
+| **14** | `social`     | `0..1` | Notification frequency summaries.   |
+| **15** | `context`    | `0..1` | App switching frequency.            |
+| **16** | `dnd`        | `0/1`  | 1.0 if Do Not Disturb is active.    |
+| **17** | `idle_time`  | `0..1` | Time since last device interaction. |
+| **18** | `light`      | `0..1` | Ambient light intensity.            |
+| **19** | `pocket`     | `0/1`  | 1.0 if proximity sensor is blocked. |
 
 ### 4.4 Platform Metadata
-| Index | Name | Description |
-| :---: | :--- | :--- |
-| **20** | `kp_index`| Geomagnetic activity index (Atmospheric effects). |
-| **21** | `media`   | Current media pulse (if audio is playing). |
-| **22** | `alarm`   | Time until the next alarm. |
-| **23** | `notifs`  | Unread notification count. |
-| **24** | `aspect`  | Physical aspect ratio (`height / width`). Used for [Edge-to-Edge math](#262-edge-to-edge-programming). |
-| **25** | `is_land` | 1.0 if the device is in Landscape mode, else 0.0. |
-| **26** | `f_ratio` | Field ratio (`width / height`). Useful for horizontal positioning in landscape. |
-| **27-31** | `custom`| Reserved for Biome-specific local signal injection. |
+|   Index   | Name       | Description                                                                                            |
+|:---------:|:-----------|:-------------------------------------------------------------------------------------------------------|
+|  **20**   | `kp_index` | Geomagnetic activity index (Atmospheric effects).                                                      |
+|  **21**   | `media`    | Current media pulse (if audio is playing).                                                             |
+|  **22**   | `alarm`    | Time until the next alarm.                                                                             |
+|  **23**   | `notifs`   | Unread notification count.                                                                             |
+|  **24**   | `aspect`   | Physical aspect ratio (`height / width`). Used for [Edge-to-Edge math](#262-edge-to-edge-programming). |
+|  **25**   | `is_land`  | 1.0 if the device is in Landscape mode, else 0.0.                                                      |
+|  **26**   | `f_ratio`  | Field ratio (`width / height`). Useful for horizontal positioning in landscape.                        |
+| **27-31** | `custom`   | Reserved for Biome-specific local signal injection.                                                    |
 
 ---
 
@@ -224,23 +260,25 @@ The `fact[n]` array is the artist's window into the real world. All values are n
 Visual properties define how a layer is transformed and colored. All properties are calculated in a **1000x1000 Virtual Space** and scaled uniformly based on the screen width.
 
 ### 5.1 Transform Properties
-| Property | Default | Description |
-| :--- | :---: | :--- |
-| **`x`** | `0.0` | Horizontal center position (0 to 1000). |
-| **`y`** | `0.0` | Vertical center position (0 to 1000). |
-| **`width`** | `100.0` | Base width in virtual units. |
-| **`height`** | `100.0` | Base height in virtual units. |
-| **`scale_x`** | `1.0` | Multiplier for the width. |
-| **`scale_y`** | `1.0` | Multiplier for the height. |
-| **`rotation`**| `0.0` | Degrees of clockwise rotation around the (x,y) center. |
+| Property       | Default | Description                                                |
+|:---------------|:-------:|:-----------------------------------------------------------|
+| **`x`**        |  `0.0`  | Horizontal center position (0 to 1000).                    |
+| **`y`**        |  `0.0`  | Vertical center position (0 to 1000).                      |
+| **`width`**    | `100.0` | Base width in virtual units.                               |
+| **`height`**   | `100.0` | Base height in virtual units.                              |
+| **`scale_x`**  |  `1.0`  | Multiplier for the width.                                  |
+| **`scale_y`**  |  `1.0`  | Multiplier for the height.                                 |
+| **`rotation`** |  `0.0`  | Clockwise rotation in **degrees** around the (x,y) center. |
 
 ### 5.2 Style Properties
-| Property | Default | Description |
-| :--- | :---: | :--- |
-| **`alpha`** | `1.0` | Global transparency (0.0 = Invisible, 1.0 = Opaque). |
-| **`stroke_width`**| `0.0` | Thickness of the outline. If `> 0`, Mori renders both Fill and Stroke. |
-| **`color_primary`**| `#FFFFFF`| The fill color (ARGB Hex format). |
-| **`color_secondary`**| `#FFFFFF`| The stroke color (ARGB Hex format). |
+| Property              |  Default  | Description                                                            |
+|:----------------------|:---------:|:-----------------------------------------------------------------------|
+| **`alpha`**           |   `1.0`   | Global transparency (0.0 = Invisible, 1.0 = Opaque).                   |
+| **`stroke_width`**    |   `0.0`   | Thickness of the outline. If `> 0`, Mori renders both Fill and Stroke. |
+| **`color_primary`**   | `#FFFFFF` | The fill color (ARGB Hex format).                                      |
+| **`color_secondary`** | `#FFFFFF` | The stroke color (ARGB Hex format).                                    |
+
+*Artist Tip:* To create an **outline-only** shape, set `color_primary` to `#00000000` (transparent) and provide a `stroke_width` and `color_secondary`.
 
 ### 5.3 Property Defaults & Behavior
 If a property is omitted from the `expressions` map, the Engine uses the default value listed above. 
