@@ -43,7 +43,7 @@ fun PulseBackdrop(
     assetRegistry: AssetRegistry,
     scaleMode: ScaleMode = ScaleMode.FIT,
     referenceWidth: Float = 1000f,
-    referenceHeight: Float = 1100f,
+    referenceHeight: Float = 1000f,
     content: @Composable () -> Unit = {}
 ) {
     val ticker = remember { ComposeEngineTicker() }

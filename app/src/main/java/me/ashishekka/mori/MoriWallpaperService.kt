@@ -31,8 +31,17 @@ class MoriWallpaperService : WallpaperService() {
     private val wallpaperFactory: WallpaperFactory by inject()
     private val engineScope: CoroutineScope by inject(named("EngineScope"))
 
+    private var activeEngine: MoriEngineImpl? = null
+
     override fun onCreateEngine(): Engine {
-        return MoriEngineImpl()
+        val engine = MoriEngineImpl()
+        activeEngine = engine
+        return engine
+    }
+
+    override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
+        super.onConfigurationChanged(newConfig)
+        activeEngine?.onConfigurationChanged(newConfig)
     }
 
     private inner class MoriEngineImpl : Engine() {
@@ -87,26 +96,50 @@ class MoriWallpaperService : WallpaperService() {
 
         override fun onSurfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
             super.onSurfaceChanged(holder, format, width, height)
+            updateEngineMetrics(width, height)
+            moriEngine.onDrawFrame()
+        }
+
+        private fun updateEngineMetrics(width: Int, height: Int) {
             val density = resources.displayMetrics.density
-            
-            // Standardize viewport metrics to match Compose PulseBackdrop (1000x1100)
+
+            // Standardize viewport metrics to match Mori DSL Spec (1000x1000)
             val refW = 1000f
-            val refH = 1100f
+            val refH = 1000f
             val scaleMode = ScaleMode.FIT
 
             moriEngine.targetScaleMode = scaleMode
             moriEngine.state.referenceWidth = refW
             moriEngine.state.referenceHeight = refH
-            
+
             moriEngine.onSurfaceChanged(width, height, density)
             metricCalculator.updateMetrics(width, height, density)
             stateSynchronizer.updateViewport(refW, refH, scaleMode)
             
-            moriEngine.onDrawFrame()
+            // Sync platform facts for orientation
+            val isLandscape = width > height
+            moriEngine.state.setFieldValue(me.ashishekka.mori.engine.core.MoriEngineStateIndices.FACT_IS_LANDSCAPE, if (isLandscape) 1f else 0f)
+            moriEngine.state.setFieldValue(me.ashishekka.mori.engine.core.MoriEngineStateIndices.FACT_ASPECT_RATIO, height.toFloat() / width.toFloat())
+            moriEngine.state.setFieldValue(me.ashishekka.mori.engine.core.MoriEngineStateIndices.FACT_FIELD_RATIO, width.toFloat() / height.toFloat())
+        }
+
+        fun onConfigurationChanged(newConfig: android.content.res.Configuration?) {
+            // CRITICAL: Immediately update metrics on orientation change to prevent "stale" framing
+            if (isVisible) {
+                val width = surfaceHolder.surfaceFrame.width()
+                val height = surfaceHolder.surfaceFrame.height()
+                if (width > 0 && height > 0) {
+                    updateEngineMetrics(width, height)
+                    moriEngine.onDrawFrame()
+                }
+            }
         }
 
         override fun onSurfaceDestroyed(holder: SurfaceHolder) {
             super.onSurfaceDestroyed(holder)
+            if (activeEngine == this) {
+                activeEngine = null
+            }
             
             loadJob?.cancel()
             loadJob = null
