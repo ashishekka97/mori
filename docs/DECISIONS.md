@@ -38,4 +38,12 @@ This document tracks the evolution of the Mori platform, capturing key decisions
 *   **Phase 7 Retrospective**:
     *   **The Win**: Successfully delivered a high-fidelity "Childhood Canvas" demo that utilizes the full pipeline (Rules -> Shaders -> Paths -> Masks) while maintaining **zero allocations** in the hot path. 
     *   **The Lesson**: Orientation-aware composition (Portrait vs. Landscape) revealed that strict 1:1 artboards require careful "Safe Zone" planning. This led to the formalization of the **Aspect Ratio Fact (`fact[24]`)** for responsive anchoring.
-    *   **The State of the Machine**: Mori is no longer just a "Rule Engine"—it is now a **High-Performance Graphics Platform**. The connection from real-world sensors to GPU-accelerated vector art is complete, verified, and documented for artists.
+    *   **The State of the Machine**: Mori is no longer just a \"Rule Engine\"—it is now a **High-Performance Graphics Platform**. The connection from real-world sensors to GPU-accelerated vector art is complete, verified, and documented for artists.
+
+    ---
+
+    ## Strategic Realignment: The Tooling Pivot (Phase 8)
+    *   **Decisions**: Shifted priority from \"Phase 8: Island Biome\" to \"Phase 8: Mori Workbench.\" 
+    *   **Rational**: Identified \"Authoring Friction\" as the primary bottleneck for production-grade biomes. While the DSL is technically complete, the lack of a real-time visual feedback loop for non-technical artists creates a dependency on developers for all creative iteration.
+    *   **Strategy**: Leverage the platform-agnostic nature of the `:engine` and `:biome` modules to build a **Compose Multiplatform Desktop** workbench. This tool will provide a live simulator (Environment Sliders) and a no-code rule editor (Artistic Templates) to decouple biome creation from manual JSON editing.
+

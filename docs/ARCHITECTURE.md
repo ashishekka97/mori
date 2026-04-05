@@ -38,11 +38,17 @@ graph TD
         Buffer -->|Read Constants| Instruments(DslEffectRenderer)
         Instruments -->|Draw| Canvas[Agnostic Canvas]
     end
+
+    subgraph Studio [Studio Layer - The Workbench]
+        G -->|Simulated State| VW{MoriWorkbench}
+        Bytecode -->|Authoring| VW
+        VW -->|Preview| Canvas
+    end
 ```
 
 ---
 
-## 2. The 6 Modules
+## 2. The 7 Modules
 
 1.  **App Layer (`:app`)**
     *   **Role:** The Orchestrator & UI Bridge.
@@ -67,6 +73,10 @@ graph TD
 6.  **Engine Layer (`:engine`)**
     *   **Role:** The "Dumb" Muscle (Rendering VM).
     *   **Responsibilities:** A platform-agnostic rendering core. Orchestrates the loop but delegates all visual and theme decisions to the active `MoriWallpaper`.
+
+7.  **Studio Layer (`:studio`)**
+    *   **Role:** The Workbench & Artist Interface.
+    *   **Responsibilities:** A Compose Multiplatform Desktop environment. Provides real-time biome authoring, rule simulation, and asset packaging for artists.
 
 ---
 
