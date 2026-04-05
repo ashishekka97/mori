@@ -155,26 +155,52 @@ Mori is a zero-allocation, privacy-first Live Wallpaper engine. This roadmap foc
 
 ---
 
-## Phase 8: The Island Biome (Art Implementation)
+## Phase 8: The Mori Workbench (The Tooling Phase)
+*Goal: Build the Compose Multiplatform Desktop environment to empower non-technical artists.*
+
+### 8.1 The \"Viewer\" (Foundation)
+- [ ] **8.1.1 Desktop Harness:** Set up the `:studio` module with Compose Multiplatform.
+- [ ] **8.1.2 Engine Bridge:** Integrate `:engine` and `:biome` into the Desktop app.
+- [ ] **8.1.3 Live Canvas:** Implement the 60FPS rendering loop on a Desktop window.
+
+### 8.2 The \"Simulator\" (Feedback Loop)
+- [ ] **8.2.1 Fact Sliders:** Build the UI panel for manual `MoriEngineState` manipulation (Time, Battery, Steps).
+- [ ] **8.2.2 State Mirroring:** Ensure the Live Canvas reacts instantly to slider changes.
+
+### 8.3 The \"Editor\" (Rule Factory)
+- [ ] **8.3.1 Layer Navigator:** A UI list to add, remove, and re-order rendering layers.
+- [ ] **8.3.2 Rule Templates:** Implement the \"Dynamic Form\" UI for our 5 Core Templates (Range Mapper, Oscillator, etc.).
+- [ ] **8.3.3 Live Sync:** Changes in the UI immediately update the bytecode in the active engine.
+
+### 8.4 The \"Compiler\" (Handover)
+- [ ] **8.4.1 DSL Serializer:** Save the current configuration back into the `.json` format.
+- [ ] **8.4.2 Asset Ingress:** A simple drag-and-drop UI for importing PNG/SVG assets into the project.
+
+### 8.5 Phase 8 Finalization
+- [ ] **8.5.1 Phase 8 Finalization:** Documentation, Retrospective, and Tagging.
+
+---
+
+## Phase 9: The Island Biome (Art Implementation)
 *Goal: The first production-ready biome (Zelda-inspired).*
 
-- [ ] **8.1 Atmosphere:** Dynamic Skybox and multi-stop Gradient layers.
-- [ ] **8.2 Landscape:** Procedural swaying grass and growth-aware trees.
-- [ ] **8.3 Details:** Water reflections and night-time fireflies.
-- [ ] **8.4 Phase 8 Finalization:** Documentation, Retrospective, and Tagging.
+- [ ] **9.1 Atmosphere:** Dynamic Skybox and multi-stop Gradient layers.
+- [ ] **9.2 Landscape:** Procedural swaying grass and growth-aware trees.
+- [ ] **9.3 Details:** Water reflections and night-time fireflies.
+- [ ] **9.4 Phase 9 Finalization:** Documentation, Retrospective, and Tagging.
 
 ---
 
-## Phase 9: Dashboard & UX
+## Phase 10: Dashboard & UX
 *Goal: User-facing features and onboarding.*
 
-- [ ] **9.1 Onboarding Flow:** Multi-step atmospheric intro and permission gateway.
-- [ ] **9.2 Status Dashboard:** The summary screen decoding visuals into data.
-- [ ] **9.3 Phase 9 Finalization:** Documentation, Retrospective, and Tagging.
+- [ ] **10.1 Onboarding Flow:** Multi-step atmospheric intro and permission gateway.
+- [ ] **10.2 Status Dashboard:** The summary screen decoding visuals into data.
+- [ ] **10.3 Phase 10 Finalization:** Documentation, Retrospective, and Tagging.
 
 ---
 
-## Phase 10: Engineering Excellence (Finalization)
-- [ ] **10.1 Custom Linting:** Detekt rule for zero-allocation enforcement.
-- [ ] **10.2 Performance Audit:** Frame-time and battery profiling.
-- [ ] **10.3 Phase 10 Finalization:** Documentation, Retrospective, and Tagging.
+## Phase 11: Engineering Excellence (Finalization)
+- [ ] **11.1 Custom Linting:** Detekt rule for zero-allocation enforcement.
+- [ ] **11.2 Performance Audit:** Frame-time and battery profiling.
+- [ ] **11.3 Phase 11 Finalization:** Documentation, Retrospective, and Tagging.

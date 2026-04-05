@@ -10,8 +10,10 @@ Before starting any task, ensure your local environment is perfectly aligned wit
 ## 2. Issue-First Development (The Technical Spec)
 No work begins without a GitHub Issue.
 *   **The Blueprint:** Pick a task from `ROADMAP.md`.
-*   **The Spec:** Create a GitHub Issue describing the **Technical Requirements**. This issue serves as the "How" for the Roadmap's "What."
+*   **The Spec:** Create a GitHub Issue describing the **Technical Requirements**. This issue serves as the \"How\" for the Roadmap's \"What.\"
+*   **Biome Authoring:** For artistic tasks, use the **Mori Workbench (`:studio`)** to prototype rules and layers. Proposing an artistic biome now requires a screenshot or video from the Workbench as part of the technical spec.
 *   **The Approval:** For major tasks, wait for the Senior Engineer to approve the Issue's technical spec before coding.
+
 
 ## 3. Commit & Pull Request Standards
 We follow [Conventional Commits](https://www.conventionalcommits.org/).

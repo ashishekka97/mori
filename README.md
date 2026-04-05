@@ -22,7 +22,7 @@ Mori turns the device's home screen into a "living dashboard." Instead of static
 
 ---
 
-## The 6-Module Architecture
+## The 7-Module Architecture
 Mori uses a strict multi-module architecture to enforce separation of concerns and optimize build speeds:
 
 *   **`:app`** - **The Entry Point.** Manages the `WallpaperService` and hardware bindings.
@@ -31,6 +31,7 @@ Mori uses a strict multi-module architecture to enforce separation of concerns a
 *   **`:engine`** - **The Muscle.** A platform-agnostic rendering VM. Zero-allocation Canvas loop.
 *   **`:biome`** - **The Logic.** Interprets declarative configurations and compiles them to bytecode.
 *   **`:ui`** - **The Face.** Built with the **Pulse Design System**. Handles dashboard and UX.
+*   **`:studio`** - **The Workbench.** A Compose Multiplatform Desktop environment for real-time biome authoring and rule simulation.
 
 For a deeper dive, see the **[Architecture Guide](docs/ARCHITECTURE.md)** and the **[ISA Specification](docs/SPEC_ISA.md)**.
 
